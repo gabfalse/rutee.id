@@ -1,0 +1,143 @@
+import {
+  Box,
+  Typography,
+  Card,
+  CardMedia,
+  Button,
+  useTheme,
+} from "@mui/material";
+import Slider from "react-slick";
+import { useNavigate } from "react-router-dom";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+const personalityData = [
+  {
+    type: "SOLARIETH",
+    nickname: "The fallen hero who believes “might makes right.”",
+  },
+  { type: "VARNETH", nickname: "The strategist who plans 10 steps ahead." },
+  {
+    type: "NIVARETH",
+    nickname: "The diplomat who drowns enemies in sweet words.",
+  },
+  { type: "ZERYTH", nickname: "The berserker who fights like a wildfire." },
+  {
+    type: "AERYTH",
+    nickname: "The wanderer who knows every secret but shares none",
+  },
+  { type: "THARITH", nickname: "The unbreakable wall between allies and doom" },
+  { type: "ELARITH", nickname: "The guardian who protect the nature" },
+  { type: "LUNARETH", nickname: "The eye of the dark in every corner" },
+];
+
+const PersonalityCarousel = () => {
+  const navigate = useNavigate();
+  const theme = useTheme();
+
+  const settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3500,
+    arrows: false,
+    swipeToSlide: true,
+  };
+
+  const handleClick = () => {
+    navigate("/quiz");
+  };
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "100vw",
+        overflow: "hidden",
+        pt: 4,
+        pb: 6,
+        px: { xs: 2, sm: 4 },
+        textAlign: "center",
+      }}
+    >
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+        Periksa Kepribadianmu Sekarang!
+      </Typography>
+
+      <Slider {...settings}>
+        {personalityData.map(({ type, nickname }) => (
+          <Box key={type} sx={{ px: 1 }}>
+            <Card
+              sx={{
+                border: "2px solid",
+                borderColor: "primary.main",
+                borderRadius: 3,
+                mx: "auto",
+                maxWidth: "90vh",
+                px: 3,
+                py: 4,
+                textAlign: "center",
+                transition: "transform 0.3s ease",
+                "&:hover": {
+                  transform: "scale(1.03)",
+                  boxShadow: theme.shadows[6],
+                },
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
+              >
+                Apakah Jenis Kepribadianmu {type} ?
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{ color: "text.secondary", mb: 3, px: { xs: 1, sm: 6 } }}
+              >
+                {nickname}
+              </Typography>
+
+              <CardMedia
+                component="img"
+                image={`https://rutee.id/images/personality/${type}.png?${new Date().getTime()}`}
+                alt={type}
+                sx={{
+                  width: "100%",
+                  height: { xs: "50vh", sm: 320 },
+                  objectFit: "contain",
+                  mb: 3,
+                }}
+              />
+              <Button
+                onClick={handleClick}
+                variant="contained"
+                sx={{
+                  bgcolor: "primary.main",
+                  color: "#fff",
+                  textTransform: "none",
+                  borderRadius: 3,
+                  px: 6,
+                  py: 1.5,
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                  transition: "background-color 0.3s ease",
+                  "&:hover": {
+                    bgcolor: "primary.dark",
+                  },
+                }}
+              >
+                Ikuti Tes
+              </Button>
+            </Card>
+          </Box>
+        ))}
+      </Slider>
+    </Box>
+  );
+};
+
+export default PersonalityCarousel;
