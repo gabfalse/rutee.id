@@ -8,60 +8,23 @@ export function AuthProvider({ children }) {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
+
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Ambil profil user saat pertama kali mount
+  // ===== Restore session on mount =====
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadUser() {
-      const token = localStorage.getItem("token");
-
-      if (token && !user) {
-        try {
-          const res = await axios.get(
-            "https://rutee.id/dapur/profile/get/get-profile.php",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (res.data?.profile) {
-            if (isMounted) {
-              // Pastikan profile_image_url selalu ada
-              const profile = {
-                ...res.data.profile,
-                profile_image_url: res.data.profile.profile_image_url || null,
-              };
-              setUser(profile);
-              setError(null);
-            }
-          } else {
-            throw new Error("Invalid profile response");
-          }
-        } catch (err) {
-          if (isMounted) {
-            logout();
-            setError("Session expired, please login again.");
-          }
-        }
-      }
-
-      if (isMounted) setLoading(false);
+    if (token && user) {
+      setLoading(false);
+    } else {
+      setLoading(false);
     }
+  }, [token, user]);
 
-    loadUser();
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Simpan user ke localStorage setiap kali user berubah
+  // ===== Simpan user + token ke localStorage =====
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
@@ -70,7 +33,15 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  // Fungsi login
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
+
+  // ===== Login =====
   async function login({ usernameOrEmail, password }) {
     setLoading(true);
     setError(null);
@@ -81,61 +52,58 @@ export function AuthProvider({ children }) {
       );
 
       if (res.data?.token && res.data?.user) {
-        localStorage.setItem("token", res.data.token);
-
-        const profileUser = {
-          ...res.data.user,
-          profile_image_url: res.data.user.profile_image_url || null,
-        };
-
-        setUser(profileUser);
+        setToken(res.data.token);
+        setUser(res.data.user); // langsung simpan user dari backend
         setError(null);
-        return profileUser;
+        return true;
       } else {
         throw new Error("Invalid login response");
       }
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }
   }
 
-  // Fungsi logout
+  // ===== Logout =====
   function logout() {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   }
 
-  // Fungsi refresh profil (misalnya setelah update avatar/nama)
-  async function refreshProfile() {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+  // ===== Refresh profil (misalnya setelah update profil) =====
+  async function refreshProfile(customToken) {
+    const activeToken = customToken || token;
+    if (!activeToken) return;
+
     try {
       const res = await axios.get(
         "https://rutee.id/dapur/profile/get/get-profile.php",
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${activeToken}`,
             "Content-Type": "application/json",
           },
         }
       );
+
       if (res.data?.profile) {
-        const profileUser = {
+        setUser({
+          ...user,
           ...res.data.profile,
           profile_image_url: res.data.profile.profile_image_url || null,
-        };
-        setUser(profileUser);
+        });
       }
     } catch (err) {
-      console.error("Gagal refresh profile:", err);
+      console.error("❌ Gagal refresh profile:", err);
     }
   }
 
-  const isAuthenticated = Boolean(user);
+  const isAuthenticated = Boolean(user && token);
   const user_id = user?.id ?? null;
   const username = user?.username ?? null;
   const profile_image_url = user?.profile_image_url ?? null;
@@ -144,13 +112,14 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        token,
         user_id,
-        profile_image_url,
         username,
-        setUser,
+        profile_image_url,
         login,
         logout,
         refreshProfile,
+        setUser,
         isAuthenticated,
         loading,
         error,

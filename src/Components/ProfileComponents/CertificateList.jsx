@@ -1,109 +1,280 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
+  Box,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Link,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Paper,
+  Tooltip,
 } from "@mui/material";
+import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
+import { useAuth } from "../../Context/AuthContext";
+import { useParams } from "react-router-dom";
 
-export default function CertificateList({ limit, user_id }) {
+const defaultCertificate = {
+  id: "",
+  name: "",
+  issued_by: "",
+  issue_date: "",
+  description: "",
+  certificate_url: "",
+  image_url: "",
+};
+
+const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
+  const { token, user_id: loggedInUserId } = useAuth();
+  const { user_id: paramUserId } = useParams();
+  const userId = propUserId || paramUserId || loggedInUserId;
+
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [form, setForm] = useState(defaultCertificate);
+
+  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+
+  const fetchCertificates = async () => {
+    if (!userId || !token) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `https://rutee.id/dapur/profile/edit-certificate.php?user_id=${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      let data = res.data.certificates || [];
+      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      setCertificates(data);
+    } catch (err) {
+      console.error(
+        "❌ Error fetch certificates:",
+        err.response || err.message || err
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (userId && token) fetchCertificates();
+  }, [userId, token, limit]);
 
-    if (!token || !user_id) {
-      console.warn("⚠ Token atau user_id belum tersedia, hentikan request.");
-      setLoading(false);
-      setCertificates([]);
-      return;
+  const handleSave = async () => {
+    if (!userId || !token) return;
+    try {
+      const method = form.id ? "put" : "post";
+      await axios[method](
+        `https://rutee.id/dapur/profile/edit-certificate.php`,
+        { ...form, user_id: userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setOpenDialog(false);
+      setForm(defaultCertificate);
+      fetchCertificates();
+    } catch (err) {
+      console.error(
+        "❌ Error save certificate:",
+        err.response || err.message || err
+      );
     }
+  };
 
-    axios
-      .get(
-        `https://rutee.id/dapur/profile/get-profile.php?user_id=${user_id}`,
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin hapus sertifikat ini?")) return;
+    if (!userId || !token) return;
+
+    try {
+      await axios.delete(
+        `https://rutee.id/dapur/profile/edit-certificate.php`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          data: { id, user_id: userId },
         }
-      )
-      .then((res) => {
-        if (Array.isArray(res.data.certificates)) {
-          setCertificates(res.data.certificates);
-        } else {
-          setCertificates([]);
-        }
-      })
-      .catch((err) => {
-        console.error("❌ Gagal memuat sertifikat:", err);
-        if (err.response) {
-          setErrorMsg(
-            err.response.data?.error || `Server error (${err.response.status})`
-          );
-        } else {
-          setErrorMsg(err.message);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [user_id]);
+      );
+      fetchCertificates();
+    } catch (err) {
+      console.error(
+        "❌ Error delete certificate:",
+        err.response || err.message || err
+      );
+    }
+  };
 
-  const displayedCertificates = limit
-    ? certificates.slice(0, limit)
-    : certificates;
+  if (loading) return <CircularProgress />;
 
   return (
-    <Card sx={{ mb: 3, maxWidth: 600, mx: "auto" }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          ({certificates.length}) Sertifikat
+    <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h6" fontWeight="bold">
+          Certificates
         </Typography>
-
-        {loading ? (
-          <Typography color="text.secondary">Memuat...</Typography>
-        ) : errorMsg ? (
-          <Typography color="error">Error: {errorMsg}</Typography>
-        ) : certificates.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            Belum ada data sertifikat.
-          </Typography>
-        ) : (
-          <List dense>
-            {displayedCertificates.map((cert, index) => (
-              <ListItem
-                key={cert.id || index}
-                sx={{ border: "1px solid", borderColor: "divider", mb: 2 }}
-              >
-                <ListItemText
-                  primary={`${cert.name} (${cert.issued_by})`}
-                  secondary={
-                    <>
-                      Terbit: {cert.issue_date}
-                      <br />
-                      {cert.certificate_url && (
-                        <Link
-                          href={cert.certificate_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          sx={{ ml: 1 }}
-                        >
-                          Lihat Sertifikat
-                        </Link>
-                      )}
-                    </>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+        {isOwner && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setForm(defaultCertificate);
+              setOpenDialog(true);
+            }}
+          >
+            Tambah
+          </Button>
         )}
-      </CardContent>
-    </Card>
+      </Box>
+
+      {certificates.length === 0 ? (
+        <Typography color="text.secondary" fontStyle="italic">
+          Belum ada sertifikat
+        </Typography>
+      ) : (
+        <Box display="flex" flexDirection="column" gap={2}>
+          {certificates.map((cert) => (
+            <Paper
+              key={cert.id}
+              sx={{
+                p: 2,
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                justifyContent: "space-between",
+                alignItems: { xs: "flex-start", sm: "center" },
+                gap: 1,
+              }}
+            >
+              <Box flex={1}>
+                <Typography fontWeight="bold">{cert.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Diterbitkan oleh {cert.issued_by} - {cert.issue_date}
+                </Typography>
+                {cert.description && (
+                  <Typography variant="body2">{cert.description}</Typography>
+                )}
+                {cert.certificate_url && (
+                  <Typography variant="body2">
+                    <a
+                      href={cert.certificate_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link Sertifikat
+                    </a>
+                  </Typography>
+                )}
+                {cert.image_url && (
+                  <Box mt={0.5}>
+                    <img
+                      src={cert.image_url}
+                      alt={cert.name}
+                      style={{ maxHeight: 80, width: "auto" }}
+                    />
+                  </Box>
+                )}
+              </Box>
+
+              {isOwner && (
+                <Box display="flex" gap={1} mt={{ xs: 1, sm: 0 }}>
+                  <Tooltip title="Edit">
+                    <Edit
+                      fontSize="small"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setForm(cert);
+                        setOpenDialog(true);
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Hapus">
+                    <Delete
+                      fontSize="small"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => handleDelete(cert.id)}
+                    />
+                  </Tooltip>
+                </Box>
+              )}
+            </Paper>
+          ))}
+        </Box>
+      )}
+
+      {/* Modal tambah/edit */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          {form.id ? "Edit Certificate" : "Tambah Certificate"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Nama Sertifikat"
+            fullWidth
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Diterbitkan Oleh"
+            fullWidth
+            value={form.issued_by}
+            onChange={(e) => setForm({ ...form, issued_by: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Tanggal Terbit"
+            type="date"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={form.issue_date}
+            onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Deskripsi"
+            fullWidth
+            multiline
+            rows={3}
+            value={form.description || ""}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="URL Sertifikat"
+            fullWidth
+            value={form.certificate_url || ""}
+            onChange={(e) =>
+              setForm({ ...form, certificate_url: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="URL Gambar"
+            fullWidth
+            value={form.image_url || ""}
+            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={handleSave} variant="contained">
+            Simpan
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
   );
-}
+};
+
+export default CertificateList;

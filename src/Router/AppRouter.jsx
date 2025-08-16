@@ -22,18 +22,8 @@ import SkillList from "../Components/ProfileComponents/SkillList";
 import CertificateList from "../Components/ProfileComponents/CertificateList";
 import ProjectList from "../Components/ProfileComponents/ProjectList";
 import ExperienceList from "../Components/ProfileComponents/ExperienceList";
-
-// Edit Pages
-import EditProfilePage from "../Components/EditComponents/EditProfile";
-import EditSkillPage from "../Components/EditComponents/EditSkillPage";
-import EditCertificatePage from "../Components/EditComponents/EditCertificatePage";
-import EditProjectPage from "../Components/EditComponents/EditProjectPage";
-import EditExperiencePage from "../Components/EditComponents/EditExperiencePage";
-import EditCompanyPage from "../Components/EditComponents/EditCompanyPage";
 import UserPostPage from "../Components/ProfileComponents/UserPostPage";
 import LanguageList from "../Components/ProfileComponents/LanguageList";
-import EditLanguagePage from "../Components/EditComponents/EditLanguagePage";
-import EditContactPage from "../Components/EditComponents/EditContactPage";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -69,7 +59,6 @@ export default function AppRouter() {
             </AuthRedirect>
           }
         />
-
         {/* Private Routes */}
         <Route
           path="/search"
@@ -103,74 +92,88 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
-        {/* Edit Pages */}
+        // Untuk lihat semua skill user lain
         <Route
-          path="/profile/edit"
+          path="/skills/:user_id"
           element={
             <PrivateRoute>
-              <EditProfilePage />
+              <SkillList readOnly />
             </PrivateRoute>
           }
         />
         <Route
-          path="/languages/edit"
+          path="/experiences/:user_id"
           element={
             <PrivateRoute>
-              <EditLanguagePage />
+              <ExperienceList readOnly />
             </PrivateRoute>
           }
         />
         <Route
-          path="/contacts/edit"
+          path="/projects/:user_id"
           element={
             <PrivateRoute>
-              <EditContactPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/Experiences/edit"
-          element={
-            <PrivateRoute>
-              <EditExperiencePage />
+              <ProjectList readOnly />
             </PrivateRoute>
           }
         />
         <Route
-          path="/skills/edit"
+          path="/languages/:user_id"
           element={
             <PrivateRoute>
-              <EditSkillPage />
+              <LanguageList readOnly />
             </PrivateRoute>
           }
         />
         <Route
-          path="/projects/edit"
+          path="/certificates/:user_id"
           element={
             <PrivateRoute>
-              <EditProjectPage />
+              <CertificateList readOnly />
+            </PrivateRoute>
+          }
+        />
+        // Untuk edit skill (owner)
+        <Route
+          path="/edit-skills"
+          element={
+            <PrivateRoute>
+              <SkillList /> {/* tanpa readOnly, jadi owner bisa edit */}
             </PrivateRoute>
           }
         />
         <Route
-          path="/company/edit"
+          path="/edit-projects"
           element={
             <PrivateRoute>
-              <EditCompanyPage />
+              <ProjectList /> {/* tanpa readOnly, jadi owner bisa edit */}
             </PrivateRoute>
           }
         />
         <Route
-          path="/certificates/edit"
+          path="/edit-experiences"
           element={
             <PrivateRoute>
-              <EditCertificatePage />
+              <ExperienceList /> {/* tanpa readOnly, jadi owner bisa edit */}
             </PrivateRoute>
           }
         />
-
+        <Route
+          path="/edit-languages"
+          element={
+            <PrivateRoute>
+              <LanguageList /> {/* tanpa readOnly, jadi owner bisa edit */}
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-certificates"
+          element={
+            <PrivateRoute>
+              <CertificateList /> {/* tanpa readOnly, jadi owner bisa edit */}
+            </PrivateRoute>
+          }
+        />
         {/* Catch-all 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

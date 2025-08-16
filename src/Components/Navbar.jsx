@@ -1,5 +1,5 @@
 import React from "react";
-import { AppBar, Toolbar, Box, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Box, IconButton, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import NavigationButton from "./NavigationButton";
@@ -16,6 +16,14 @@ const Navbar = () => {
 
   const handleSearchClick = () => {
     navigate("/search");
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login"); // ganti sesuai route login
+  };
+
+  const handleRegisterClick = () => {
+    navigate("/register"); // ganti sesuai route daftar
   };
 
   return (
@@ -37,7 +45,7 @@ const Navbar = () => {
           px: { xs: 1, sm: 3 },
         }}
       >
-        {/* Kiri: Logo */}
+        {/* Logo */}
         <Box
           onClick={handleLogoClick}
           sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
@@ -50,10 +58,10 @@ const Navbar = () => {
           />
         </Box>
 
-        {/* Tengah: Kosong / Placeholder */}
+        {/* Spacer */}
         <Box sx={{ flex: 1 }} />
 
-        {/* Kanan: Search + Navigation */}
+        {/* Search + Navigation / Login/Register */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton
             onClick={handleSearchClick}
@@ -62,8 +70,22 @@ const Navbar = () => {
             <SearchIcon />
           </IconButton>
 
-          {/* Tampilkan NavigationButton hanya jika user login */}
-          {user && <NavigationButton />}
+          {user ? (
+            <NavigationButton />
+          ) : (
+            <>
+              <Button variant="text" color="primary" onClick={handleLoginClick}>
+                Masuk
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRegisterClick}
+              >
+                Daftar
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

@@ -7,52 +7,35 @@ import {
   Card,
   CircularProgress,
 } from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { useAuth } from "../../Context/AuthContext"; // ✅ pakai AuthContext
 import LanguageList from "./LanguageList";
 import SkillList from "./SkillList";
 import ExperienceList from "./ExperienceList";
 import CertificateList from "./CertificateList";
 import ProjectList from "./ProjectList";
 import UserPostPage from "./UserPostPage";
-import ModalProfileCard from "./ModalProfileCard";
 
-export default function ProfileCard({
-  user_id,
-  isOwner,
-  onEditClickSection,
-  onEditProfileClick,
-}) {
+export default function ProfileCard({ user_id }) {
+  const { user_id: authUserId } = useAuth(); // ✅ id user yang login
   const [profileData, setProfileData] = useState(null);
-  const [contactData, setContactData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalSection, setModalSection] = useState(null);
 
   const navigate = useNavigate();
 
-  const handleViewAllClickSection = (section) => {
-    setModalSection(section);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setModalSection(null);
-  };
-
-  // Fetch profile + contact
+  // Fetch profile
   useEffect(() => {
     async function fetchProfile() {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem("token");
 
       try {
+        const token = localStorage.getItem("token");
         if (!token) throw new Error("Token tidak ditemukan.");
+
         const url = `https://rutee.id/dapur/profile/get-profile.php?user_id=${encodeURIComponent(
           user_id
         )}`;
@@ -62,10 +45,9 @@ export default function ProfileCard({
 
         if (response.data?.profile) {
           setProfileData(response.data.profile);
-          if (response.data.profile.contact) {
-            setContactData(response.data.profile.contact);
-          }
-        } else throw new Error("Data profil tidak ditemukan.");
+        } else {
+          throw new Error("Data profil tidak ditemukan.");
+        }
       } catch (err) {
         console.error(err);
         setError(err.message || "Terjadi kesalahan.");
@@ -100,36 +82,45 @@ export default function ProfileCard({
 
   if (!profileData) return null;
 
-  const renderSectionHeader = (title, section) => (
-    <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      mb={1.5}
-      pt={1}
-    >
-      <Typography variant="h6" fontWeight={600}>
-        {title}
-      </Typography>
-      {isOwner ? (
-        <Button
-          size="small"
-          variant="text"
-          onClick={() => onEditClickSection && onEditClickSection(section)}
-        >
-          <EditOutlinedIcon fontSize="small" />
-        </Button>
-      ) : (
+  // ✅ render header dengan cek owner via AuthContext
+  // ...import dan state tetap sama
+
+  // ✅ render header dengan cek owner via AuthContext
+  const renderSectionHeader = (title, section) => {
+    const isOwner = authUserId === user_id;
+
+    // Owner langsung ke halaman edit, bukan lihat semua
+    const navigateTo = isOwner ? `/edit-${section}` : `/${section}/${user_id}`;
+
+    return (
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={1.5}
+        pt={1}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          {title}
+        </Typography>
+
         <Button
           size="small"
           variant="outlined"
-          onClick={() => handleViewAllClickSection(section)}
+          onClick={() => navigate(navigateTo)}
+          sx={{ textTransform: "none" }}
         >
-          Lihat Semua
+          {isOwner ? (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <span className="material-icons">Edit</span>
+            </Box>
+          ) : (
+            "Lihat Semua"
+          )}
         </Button>
-      )}
-    </Box>
-  );
+      </Box>
+    );
+  };
 
   return (
     <Box>
@@ -161,23 +152,23 @@ export default function ProfileCard({
           >
             <Box mb={2}>
               {renderSectionHeader("Bahasa", "languages")}
-              <LanguageList limit={2} user_id={user_id} />
+              <LanguageList limit={2} user_id={user_id} readOnly />
             </Box>
             <Box mb={2}>
               {renderSectionHeader("Keahlian", "skills")}
-              <SkillList limit={2} user_id={user_id} />
+              <SkillList limit={2} user_id={user_id} readOnly />
             </Box>
             <Box mb={2}>
               {renderSectionHeader("Pengalaman", "experiences")}
-              <ExperienceList limit={2} user_id={user_id} />
+              <ExperienceList limit={1} user_id={user_id} readOnly />
             </Box>
             <Box mb={2}>
               {renderSectionHeader("Sertifikat", "certificates")}
-              <CertificateList limit={2} user_id={user_id} />
+              <CertificateList limit={1} user_id={user_id} readOnly />
             </Box>
             <Box mb={2}>
               {renderSectionHeader("Proyek", "projects")}
-              <ProjectList limit={2} user_id={user_id} />
+              <ProjectList limit={1} user_id={user_id} readOnly />
             </Box>
           </Box>
 
@@ -265,55 +256,15 @@ export default function ProfileCard({
                   {profileData.country}
                 </Typography>
               )}
-              {/* Bagian tombol Contact Info */}
-              <Box mb={2}>
-                {isOwner ? (
-                  <Button
-                    variant="contained"
-                    size="medium"
-                    onClick={() =>
-                      onEditClickSection && onEditClickSection("contacts")
-                    }
-                    sx={{ textTransform: "none" }}
-                  >
-                    Edit Contact Info
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleViewAllClickSection("contact")}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Lihat Contact Info
-                  </Button>
-                )}
-              </Box>
-
-              {isOwner && onEditProfileClick && (
-                <Button
-                  variant="contained"
-                  size="medium"
-                  onClick={onEditProfileClick}
-                  sx={{
-                    textTransform: "none",
-                    px: 5,
-                    mb: { xs: 2, md: 0 },
-                    fontSize: { xs: "0.9rem", md: "1rem" },
-                  }}
-                >
-                  Edit Profil
-                </Button>
-              )}
             </Box>
 
             <Box>
-              <UserPostPage limit={2} user_id={user_id} />
+              <UserPostPage limit={1} user_id={user_id} />
               <Box textAlign="center" mt={2}>
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => navigate("/user-post")}
+                  onClick={() => navigate(`/user-post/${user_id}`)}
                   sx={{ textTransform: "none" }}
                 >
                   Lihat Semua Post
@@ -323,15 +274,6 @@ export default function ProfileCard({
           </Box>
         </Box>
       </Card>
-
-      {/* Modal */}
-      <ModalProfileCard
-        open={modalOpen}
-        onClose={handleCloseModal}
-        section={modalSection}
-        user_id={user_id}
-        contactData={contactData}
-      />
     </Box>
   );
 }

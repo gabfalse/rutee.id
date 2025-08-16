@@ -12,12 +12,19 @@ export default function ProfilePage() {
     return <p>Anda harus login untuk melihat profil.</p>;
   }
 
+  // jika tidak ada param, berarti user buka profilnya sendiri
   const targetUserId = paramUserId || authUserId;
-  const isOwner = targetUserId === authUserId;
 
+  // true kalau profil yang dilihat adalah profil sendiri
+  const isOwner = String(targetUserId) === String(authUserId);
+
+  // handler untuk owner
   const handleEditProfile = () => navigate("/profile/edit");
-  const handleEditSection = (section) => navigate(`/${section}/edit`);
-  const handleViewAllSection = (section) => navigate(`/${section}`);
+  const handleEditSection = (section) => navigate(`/profile/${section}/edit`);
+
+  // handler untuk visitor
+  const handleViewAllSection = (section) =>
+    navigate(`/profile/${targetUserId}/${section}`);
 
   return (
     <ProfileCard

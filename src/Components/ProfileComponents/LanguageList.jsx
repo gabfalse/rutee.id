@@ -1,127 +1,198 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
-  Typography,
   Box,
-  Chip,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   CircularProgress,
+  Chip,
+  Paper,
+  Tooltip,
 } from "@mui/material";
+import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
+import { useAuth } from "../../Context/AuthContext";
+import { useParams } from "react-router-dom";
 
-function levelToSymbol(level) {
-  switch ((level || "").toLowerCase()) {
-    case "beginner":
-      return "Beginner";
-    case "intermediate":
-      return "Intermediate";
-    case "fluent":
-      return "Fluent";
-    case "native":
-      return "Native";
-    default:
-      return level || "-";
-  }
-}
+const defaultLanguage = {
+  id: "",
+  language: "",
+  level: "",
+};
 
-export default function LanguageList({ limit, user_id }) {
+const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
+  const { token, user_id: loggedInUserId } = useAuth();
+  const { user_id: paramUserId } = useParams();
+  const userId = propUserId || paramUserId || loggedInUserId;
+
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [form, setForm] = useState(defaultLanguage);
+
+  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+
+  const fetchLanguages = async () => {
+    if (!userId || !token) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `https://rutee.id/dapur/profile/edit-language.php?user_id=${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      let data = res.data.languages || [];
+      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      setLanguages(data);
+    } catch (err) {
+      console.error(
+        "❌ Error fetch languages:",
+        err.response || err.message || err
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true; // flag untuk cleanup
+    if (userId && token) fetchLanguages();
+  }, [userId, token, limit]);
 
-    if (!user_id) {
-      setLanguages([]);
-      setLoading(false);
-      setError("User ID tidak tersedia.");
-      return;
+  const handleSave = async () => {
+    if (!userId || !token) return;
+    try {
+      const method = form.id ? "put" : "post";
+      await axios[method](
+        `https://rutee.id/dapur/profile/edit-language.php`,
+        { ...form, user_id: userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setOpenDialog(false);
+      setForm(defaultLanguage);
+      fetchLanguages();
+    } catch (err) {
+      console.error(
+        "❌ Error save language:",
+        err.response || err.message || err
+      );
     }
+  };
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Token tidak tersedia. Silakan login ulang.");
-      setLoading(false);
-      return;
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin hapus bahasa ini?")) return;
+    if (!userId || !token) return;
+
+    try {
+      await axios.delete(`https://rutee.id/dapur/profile/edit-language.php`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { id, user_id: userId },
+      });
+      fetchLanguages();
+    } catch (err) {
+      console.error(
+        "❌ Error delete language:",
+        err.response || err.message || err
+      );
     }
+  };
 
-    const fetchLanguages = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const res = await axios.get(
-          `https://rutee.id/dapur/profile/get-profile.php?user_id=${encodeURIComponent(
-            user_id
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (isMounted) {
-          if (res.data && Array.isArray(res.data.languages)) {
-            setLanguages(res.data.languages);
-            setError("");
-          } else {
-            setLanguages([]);
-            setError("");
-            console.warn(
-              "Properti languages tidak ditemukan atau bukan array."
-            );
-          }
-        }
-      } catch (err) {
-        console.error("Gagal mengambil data bahasa:", err);
-        if (isMounted) {
-          setError("Gagal memuat data bahasa.");
-          setLanguages([]);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchLanguages();
-
-    return () => {
-      isMounted = false; // cleanup untuk hindari setState setelah unmount
-    };
-  }, [user_id]);
-
-  const displayedLanguages = limit ? languages.slice(0, limit) : languages;
+  if (loading) return <CircularProgress />;
 
   return (
-    <Card sx={{ mb: 3, maxWidth: 600, mx: "auto" }}>
-      <CardContent variant="outlined">
-        <Typography variant="h6" gutterBottom>
-          ({languages.length}) Bahasa
+    <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h6" fontWeight="bold">
+          Languages
         </Typography>
-
-        {loading ? (
-          <CircularProgress size={24} />
-        ) : error ? (
-          <Typography color="error" variant="body2">
-            {error}
-          </Typography>
-        ) : languages.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            Belum ada data bahasa.
-          </Typography>
-        ) : (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {displayedLanguages.map((lang, idx) => (
-              <Chip
-                key={idx}
-                label={`${lang.language || "-"} (${levelToSymbol(lang.level)})`}
-                sx={{ color: "secondary", backgroundColor: "primary.dark" }}
-              />
-            ))}
-          </Box>
+        {isOwner && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setForm(defaultLanguage);
+              setOpenDialog(true);
+            }}
+          >
+            Tambah
+          </Button>
         )}
-      </CardContent>
-    </Card>
+      </Box>
+
+      {languages.length === 0 ? (
+        <Typography color="text.secondary" fontStyle="italic">
+          Belum ada bahasa
+        </Typography>
+      ) : (
+        <Box display="flex" flexWrap="wrap" gap={1}>
+          {languages.map((lang) => (
+            <Chip
+              key={lang.id}
+              label={`${lang.language} (${lang.level})`}
+              color="primary"
+              variant="outlined"
+              onDelete={isOwner ? () => handleDelete(lang.id) : undefined}
+              deleteIcon={isOwner ? <Delete /> : undefined}
+              icon={
+                isOwner ? (
+                  <Tooltip title="Edit">
+                    <Edit
+                      fontSize="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setForm(lang);
+                        setOpenDialog(true);
+                      }}
+                    />
+                  </Tooltip>
+                ) : undefined
+              }
+              sx={{ borderRadius: "16px", fontSize: "0.85rem" }}
+            />
+          ))}
+        </Box>
+      )}
+
+      {/* Modal tambah/edit */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{form.id ? "Edit Bahasa" : "Tambah Bahasa"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Nama Bahasa"
+            fullWidth
+            value={form.language}
+            onChange={(e) => setForm({ ...form, language: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Level"
+            fullWidth
+            value={form.level}
+            onChange={(e) => setForm({ ...form, level: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={handleSave} variant="contained">
+            Simpan
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
   );
-}
+};
+
+export default LanguageList;

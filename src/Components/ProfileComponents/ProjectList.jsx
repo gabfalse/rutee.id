@@ -1,116 +1,319 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
-  Typography,
   Box,
-  Link,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   CircularProgress,
+  Paper,
+  Tooltip,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
+import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
+import { useAuth } from "../../Context/AuthContext";
+import { useParams } from "react-router-dom";
 
-export default function ProjectList({ limit, user_id }) {
+const defaultProject = {
+  id: "",
+  title: "",
+  role: "",
+  company: "",
+  image_url: "",
+  start_date: "",
+  end_date: "",
+  still_on_project: false,
+  description: "",
+  skills: "",
+  proof_url: "",
+};
+
+const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
+  const { token, user_id: loggedInUserId } = useAuth();
+  const { user_id: paramUserId } = useParams();
+  const userId = propUserId || paramUserId || loggedInUserId;
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [form, setForm] = useState(defaultProject);
+
+  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+
+  const fetchProjects = async () => {
+    if (!userId || !token) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `https://rutee.id/dapur/profile/edit-project.php?user_id=${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      let data = res.data.projects || [];
+      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      setProjects(data);
+    } catch (err) {
+      console.error(
+        "❌ Error fetch projects:",
+        err.response || err.message || err
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (userId && token) fetchProjects();
+  }, [userId, token, limit]);
 
-    if (!token || !user_id) {
-      console.warn("⚠ Token atau user_id belum tersedia, hentikan request.");
-      setLoading(false);
-      setErrorMsg("Token atau user_id tidak tersedia");
-      setProjects([]);
-      return;
+  const handleSave = async () => {
+    if (!userId || !token) return;
+    try {
+      const method = form.id ? "put" : "post";
+      await axios[method](
+        `https://rutee.id/dapur/profile/edit-project.php`,
+        { ...form, user_id: userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setOpenDialog(false);
+      setForm(defaultProject);
+      fetchProjects();
+    } catch (err) {
+      console.error(
+        "❌ Error save project:",
+        err.response || err.message || err
+      );
     }
+  };
 
-    axios
-      .get(
-        `https://rutee.id/dapur/profile/get-profile.php?user_id=${encodeURIComponent(
-          user_id
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((res) => {
-        if (Array.isArray(res.data.projects)) {
-          setProjects(res.data.projects);
-          setErrorMsg(null);
-        } else {
-          setProjects([]);
-          setErrorMsg(null);
-        }
-      })
-      .catch((err) => {
-        console.error("Gagal memuat project:", err);
-        setErrorMsg(
-          err.response?.data?.error || err.message || "Gagal memuat project"
-        );
-        setProjects([]);
-      })
-      .finally(() => setLoading(false));
-  }, [user_id]);
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin hapus project ini?")) return;
+    if (!userId || !token) return;
 
-  const displayedProjects = limit ? projects.slice(0, limit) : projects;
+    try {
+      await axios.delete(`https://rutee.id/dapur/profile/edit-project.php`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { id, user_id: userId },
+      });
+      fetchProjects();
+    } catch (err) {
+      console.error(
+        "❌ Error delete project:",
+        err.response || err.message || err
+      );
+    }
+  };
+
+  if (loading) return <CircularProgress />;
 
   return (
-    <Card sx={{ mb: 3, maxWidth: 600, mx: "auto" }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          ({projects.length}) Projects
+    <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h6" fontWeight="bold">
+          Projects
         </Typography>
+        {isOwner && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setForm(defaultProject);
+              setOpenDialog(true);
+            }}
+          >
+            Tambah
+          </Button>
+        )}
+      </Box>
 
-        {loading ? (
-          <CircularProgress size={24} />
-        ) : errorMsg ? (
-          <Typography color="error">{errorMsg}</Typography>
-        ) : projects.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            Belum ada data project.
-          </Typography>
-        ) : (
-          displayedProjects.map((proj, idx) => {
-            const title = proj.role || "-";
-            const description = proj.description || "-";
-            const imageUrl = proj.proof_url || "";
-            // Jika API nanti punya link_url dan collaborators, bisa ditambah di sini
-
-            return (
-              <Box
-                key={proj.id || idx}
-                mb={2}
-                p={2}
-                border="1px solid"
-                borderColor="divider"
-                boxShadow={1}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  {title}
+      {projects.length === 0 ? (
+        <Typography color="text.secondary" fontStyle="italic">
+          Belum ada project
+        </Typography>
+      ) : (
+        <Box display="flex" flexDirection="column" gap={1}>
+          {projects.map((proj) => (
+            <Paper
+              key={proj.id}
+              sx={{
+                p: 1.5,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Box sx={{ flex: 1, minWidth: 200 }}>
+                <Typography fontWeight="bold">{proj.title}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {proj.role} {proj.company && `@ ${proj.company}`}
                 </Typography>
-                <Typography variant="body2" mb={1}>
-                  {description}
+                <Typography variant="body2" color="text.secondary">
+                  {proj.start_date} -{" "}
+                  {proj.still_on_project ? "Sekarang" : proj.end_date}
                 </Typography>
-                {imageUrl && (
-                  <Box
-                    component="img"
-                    src={imageUrl}
-                    alt={title + " image"}
-                    sx={{
-                      maxWidth: "100%",
-                      maxHeight: 150,
-                      objectFit: "contain",
-                      mb: 1,
-                      borderRadius: 1,
-                    }}
-                  />
+                {proj.description && (
+                  <Typography variant="body2">{proj.description}</Typography>
+                )}
+                {proj.skills && (
+                  <Typography variant="body2">Skills: {proj.skills}</Typography>
+                )}
+                {proj.proof_url && (
+                  <Typography variant="body2">
+                    <a href={proj.proof_url} target="_blank" rel="noreferrer">
+                      Bukti Project
+                    </a>
+                  </Typography>
+                )}
+                {proj.image_url && (
+                  <Box mt={0.5}>
+                    <img
+                      src={proj.image_url}
+                      alt={proj.title}
+                      style={{ maxHeight: 80, borderRadius: 4 }}
+                    />
+                  </Box>
                 )}
               </Box>
-            );
-          })
-        )}
-      </CardContent>
-    </Card>
+              {isOwner && (
+                <Box display="flex" gap={1} mt={{ xs: 1, sm: 0 }}>
+                  <Tooltip title="Edit">
+                    <Edit
+                      fontSize="small"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setForm({
+                          ...proj,
+                          still_on_project: !!proj.still_on_project,
+                        });
+                        setOpenDialog(true);
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Hapus">
+                    <Delete
+                      fontSize="small"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => handleDelete(proj.id)}
+                    />
+                  </Tooltip>
+                </Box>
+              )}
+            </Paper>
+          ))}
+        </Box>
+      )}
+
+      {/* Modal tambah/edit */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{form.id ? "Edit Project" : "Tambah Project"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Judul Project"
+            fullWidth
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Peran"
+            fullWidth
+            value={form.role}
+            onChange={(e) => setForm({ ...form, role: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Perusahaan / Klien"
+            fullWidth
+            value={form.company || ""}
+            onChange={(e) => setForm({ ...form, company: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Tanggal Mulai"
+            type="date"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={form.start_date}
+            onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+          />
+          {!form.still_on_project && (
+            <TextField
+              margin="dense"
+              label="Tanggal Selesai"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={form.end_date || ""}
+              onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+            />
+          )}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={form.still_on_project}
+                onChange={(e) =>
+                  setForm({ ...form, still_on_project: e.target.checked })
+                }
+              />
+            }
+            label="Masih Berjalan"
+          />
+          <TextField
+            margin="dense"
+            label="Deskripsi"
+            fullWidth
+            multiline
+            rows={3}
+            value={form.description || ""}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Skills (pisahkan koma)"
+            fullWidth
+            value={form.skills || ""}
+            onChange={(e) => setForm({ ...form, skills: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="URL Bukti / Proof"
+            fullWidth
+            value={form.proof_url || ""}
+            onChange={(e) => setForm({ ...form, proof_url: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="URL Gambar"
+            fullWidth
+            value={form.image_url || ""}
+            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={handleSave} variant="contained">
+            Simpan
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
   );
-}
+};
+
+export default ProjectList;
