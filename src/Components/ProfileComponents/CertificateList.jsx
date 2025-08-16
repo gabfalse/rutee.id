@@ -151,6 +151,15 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
               }}
             >
               <Box flex={1}>
+                {cert.image_url && (
+                  <Box mt={0.5}>
+                    <img
+                      src={cert.image_url}
+                      alt={cert.name}
+                      style={{ maxHeight: 80, width: "auto" }}
+                    />
+                  </Box>
+                )}
                 <Typography fontWeight="bold">{cert.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Diterbitkan oleh {cert.issued_by} - {cert.issue_date}
@@ -160,23 +169,17 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
                 )}
                 {cert.certificate_url && (
                   <Typography variant="body2">
-                    <a
+                    <Button
                       href={cert.certificate_url}
+                      sx={{ mt: 1 }}
                       target="_blank"
+                      variant="outlined"
                       rel="noreferrer"
+                      size="small"
                     >
-                      Link Sertifikat
-                    </a>
+                      Lihat
+                    </Button>
                   </Typography>
-                )}
-                {cert.image_url && (
-                  <Box mt={0.5}>
-                    <img
-                      src={cert.image_url}
-                      alt={cert.name}
-                      style={{ maxHeight: 80, width: "auto" }}
-                    />
-                  </Box>
                 )}
               </Box>
 

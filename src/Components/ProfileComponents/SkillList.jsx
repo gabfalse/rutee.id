@@ -129,12 +129,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
           Belum ada skill
         </Typography>
       ) : (
-        <Box
-          display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}
-          flexWrap="wrap"
-          gap={1}
-        >
+        <Box display="flex" flexWrap="wrap" gap={1} justifyContent="center">
           {skills.map((skill) => (
             <Chip
               key={skill.id}

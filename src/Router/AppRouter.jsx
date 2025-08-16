@@ -24,6 +24,7 @@ import ProjectList from "../Components/ProfileComponents/ProjectList";
 import ExperienceList from "../Components/ProfileComponents/ExperienceList";
 import UserPostPage from "../Components/ProfileComponents/UserPostPage";
 import LanguageList from "../Components/ProfileComponents/LanguageList";
+import EditProfile from "../Components/ProfileComponents/EditProfile";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -171,6 +172,14 @@ export default function AppRouter() {
           element={
             <PrivateRoute>
               <CertificateList /> {/* tanpa readOnly, jadi owner bisa edit */}
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile/edit"
+          element={
+            <PrivateRoute>
+              <EditProfile /> {/* tanpa readOnly, jadi owner bisa edit */}
             </PrivateRoute>
           }
         />

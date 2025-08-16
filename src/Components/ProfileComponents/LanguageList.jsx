@@ -12,6 +12,7 @@ import {
   Chip,
   Paper,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
@@ -107,6 +108,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
+        textAlign={"center"}
         mb={2}
       >
         <Typography variant="h6" fontWeight="bold">
@@ -131,7 +133,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
           Belum ada bahasa
         </Typography>
       ) : (
-        <Box display="flex" flexWrap="wrap" gap={1}>
+        <Box display="flex" flexWrap="wrap" gap={1} justifyContent="center">
           {languages.map((lang) => (
             <Chip
               key={lang.id}
@@ -180,9 +182,15 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
             margin="dense"
             label="Level"
             fullWidth
+            select
             value={form.level}
             onChange={(e) => setForm({ ...form, level: e.target.value })}
-          />
+          >
+            <MenuItem value="beginner">Beginner</MenuItem>
+            <MenuItem value="intermediate">Intermediate</MenuItem>
+            <MenuItem value="fluent">Fluent</MenuItem>
+            <MenuItem value="native">Native</MenuItem>
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Batal</Button>

@@ -168,12 +168,18 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                   <Typography variant="body2">Skills: {proj.skills}</Typography>
                 )}
                 {proj.proof_url && (
-                  <Typography variant="body2">
-                    <a href={proj.proof_url} target="_blank" rel="noreferrer">
-                      Bukti Project
-                    </a>
-                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    href={proj.proof_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={{ mt: 1 }}
+                  >
+                    Lihat
+                  </Button>
                 )}
+
                 {proj.image_url && (
                   <Box mt={0.5}>
                     <img

@@ -1,32 +1,37 @@
+// src/components/Profile/ProfileCard.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Button,
   Avatar,
   Card,
   CircularProgress,
+  Button,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { useAuth } from "../../Context/AuthContext"; // ✅ pakai AuthContext
+import { useAuth } from "../../Context/AuthContext";
 import LanguageList from "./LanguageList";
 import SkillList from "./SkillList";
 import ExperienceList from "./ExperienceList";
 import CertificateList from "./CertificateList";
 import ProjectList from "./ProjectList";
-import UserPostPage from "./UserPostPage";
+
+import FollowTogglePage from "../ButtonComponents/FollowTogglePage";
+import BlockTogglePage from "../ButtonComponents/BlockTogglePage";
+import FollowerCount from "./FollowerCount";
 
 export default function ProfileCard({ user_id }) {
-  const { user_id: authUserId } = useAuth(); // ✅ id user yang login
+  const { user_id: authUserId } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const isOwner = authUserId === user_id;
 
-  // Fetch profile
   useEffect(() => {
     async function fetchProfile() {
       setLoading(true);
@@ -82,14 +87,7 @@ export default function ProfileCard({ user_id }) {
 
   if (!profileData) return null;
 
-  // ✅ render header dengan cek owner via AuthContext
-  // ...import dan state tetap sama
-
-  // ✅ render header dengan cek owner via AuthContext
   const renderSectionHeader = (title, section) => {
-    const isOwner = authUserId === user_id;
-
-    // Owner langsung ke halaman edit, bukan lihat semua
     const navigateTo = isOwner ? `/edit-${section}` : `/${section}/${user_id}`;
 
     return (
@@ -106,13 +104,12 @@ export default function ProfileCard({ user_id }) {
 
         <Button
           size="small"
-          variant="outlined"
           onClick={() => navigate(navigateTo)}
           sx={{ textTransform: "none" }}
         >
           {isOwner ? (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <span className="material-icons">Edit</span>
+              <EditIcon fontSize="small" />
             </Box>
           ) : (
             "Lihat Semua"
@@ -126,151 +123,139 @@ export default function ProfileCard({ user_id }) {
     <Box>
       <Card
         sx={{
-          maxWidth: 1100,
+          maxWidth: 900,
           mx: "auto",
           mt: 5,
           p: { xs: 2, sm: 3, md: 4 },
           borderRadius: 3,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 4,
-            alignItems: "flex-start",
-          }}
-        >
-          {/* Kolom kiri: Data Diri */}
-          <Box
-            sx={{
-              flexBasis: 320,
-              flexShrink: 0,
-              pr: { md: 4 },
-              order: { xs: 2, md: 1 },
-            }}
-          >
-            <Box mb={2}>
-              {renderSectionHeader("Bahasa", "languages")}
-              <LanguageList limit={2} user_id={user_id} readOnly />
-            </Box>
-            <Box mb={2}>
-              {renderSectionHeader("Keahlian", "skills")}
-              <SkillList limit={2} user_id={user_id} readOnly />
-            </Box>
-            <Box mb={2}>
-              {renderSectionHeader("Pengalaman", "experiences")}
-              <ExperienceList limit={1} user_id={user_id} readOnly />
-            </Box>
-            <Box mb={2}>
-              {renderSectionHeader("Sertifikat", "certificates")}
-              <CertificateList limit={1} user_id={user_id} readOnly />
-            </Box>
-            <Box mb={2}>
-              {renderSectionHeader("Proyek", "projects")}
-              <ProjectList limit={1} user_id={user_id} readOnly />
-            </Box>
-          </Box>
-
-          {/* Kolom kanan: Cover + Profil + Postingan */}
-          <Box sx={{ flex: 1, order: { xs: 1, md: 2 } }}>
-            <Box sx={{ position: "relative", mb: 10 }}>
-              {profileData.cover_image_url ? (
-                <Box
-                  component="img"
-                  src={profileData.cover_image_url}
-                  alt="Cover"
-                  sx={{
-                    width: "100%",
-                    height: { xs: 180, sm: 220, md: 280 },
-                    objectFit: "cover",
-                    borderRadius: 3,
-                    boxShadow: "inset 0 0 20px rgba(0,0,0,0.1)",
-                  }}
-                />
-              ) : (
-                <Box
-                  height={{ xs: 180, sm: 220, md: 280 }}
-                  bgcolor="grey.300"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  borderRadius={3}
-                >
-                  <Typography
-                    variant="h6"
-                    color="text.secondary"
-                    textAlign="center"
-                  >
-                    Tidak ada gambar cover
-                  </Typography>
-                </Box>
-              )}
-
-              <Avatar
-                src={profileData.profile_image_url}
-                alt={profileData.name || profileData.username}
+        <Box>
+          {/* Cover + Avatar */}
+          <Box sx={{ position: "relative", mb: 10 }}>
+            {profileData.cover_image_url ? (
+              <Box
+                component="img"
+                src={profileData.cover_image_url}
+                alt="Cover"
                 sx={{
-                  width: { xs: 120, sm: 140, md: 160 },
-                  height: { xs: 120, sm: 140, md: 160 },
-                  border: "5px solid white",
-                  bgcolor: "grey.400",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                  position: "absolute",
-                  bottom: -60,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  zIndex: 10,
+                  width: "100%",
+                  height: { xs: 180, sm: 220, md: 280 },
+                  objectFit: "cover",
+                  borderRadius: 3,
+                  boxShadow: "inset 0 0 20px rgba(0,0,0,0.1)",
                 }}
               />
-            </Box>
-
-            <Box sx={{ textAlign: "center", mb: 4, px: { xs: 1, md: 0 } }}>
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                color="text.primary"
-                noWrap
-                mb={2}
+            ) : (
+              <Box
+                height={{ xs: 180, sm: 220, md: 280 }}
+                bgcolor="grey.300"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                borderRadius={3}
               >
-                {profileData.name || profileData.username}
-              </Typography>
-
-              {profileData.bio && (
                 <Typography
-                  variant="body1"
-                  color="text.primary"
-                  sx={{ whiteSpace: "pre-line", mb: 1, px: { xs: 1, md: 0 } }}
+                  variant="h6"
+                  color="text.secondary"
+                  textAlign="center"
                 >
-                  {profileData.bio}
+                  Tidak ada gambar cover
                 </Typography>
-              )}
-              {profileData.country && (
-                <Typography
-                  variant="body2"
-                  color="text.secondary.dark"
-                  mb={2}
-                  sx={{ px: { xs: 1, md: 0 } }}
-                >
-                  {profileData.city} {profileData.province},{" "}
-                  {profileData.country}
-                </Typography>
-              )}
-            </Box>
-
-            <Box>
-              <UserPostPage limit={1} user_id={user_id} />
-              <Box textAlign="center" mt={2}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => navigate(`/user-post/${user_id}`)}
-                  sx={{ textTransform: "none" }}
-                >
-                  Lihat Semua Post
-                </Button>
               </Box>
-            </Box>
+            )}
+
+            <Avatar
+              src={profileData.profile_image_url}
+              alt={profileData.name || profileData.username}
+              sx={{
+                width: { xs: 120, sm: 140, md: 160 },
+                height: { xs: 120, sm: 140, md: 160 },
+                border: "5px solid white",
+                bgcolor: "grey.400",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                position: "absolute",
+                bottom: -60,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10,
+              }}
+            />
+          </Box>
+
+          {/* Nama + Bio */}
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              color="text.primary"
+              mb={1}
+            >
+              {profileData.name || profileData.username}
+            </Typography>
+
+            {profileData.bio && (
+              <Typography
+                variant="body1"
+                color="text.primary"
+                sx={{ whiteSpace: "pre-line", mb: 1 }}
+              >
+                {profileData.bio}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Tombol Aksi di bawah profil */}
+          <Box
+            mt={2} // jarak dari nama/bio
+            display="flex"
+            flexDirection="column" // vertikal
+            alignItems="center" // center secara horizontal
+            gap={1.5} // jarak antar tombol
+          >
+            <FollowerCount targetUserId={user_id} />
+
+            {isOwner ? (
+              <Button
+                variant="contained"
+                onClick={() => navigate("/profile/edit")}
+              >
+                Edit Profil
+              </Button>
+            ) : (
+              <>
+                <FollowTogglePage
+                  currentUserId={authUserId}
+                  targetUserId={user_id}
+                />
+                <BlockTogglePage
+                  currentUserId={authUserId}
+                  blockedId={user_id}
+                />
+              </>
+            )}
+          </Box>
+
+          {/* Info Lain */}
+          <Box mb={2}>
+            {renderSectionHeader("Bahasa", "languages")}
+            <LanguageList limit={2} user_id={user_id} readOnly />
+          </Box>
+          <Box mb={2}>
+            {renderSectionHeader("Keahlian", "skills")}
+            <SkillList limit={2} user_id={user_id} readOnly />
+          </Box>
+          <Box mb={2}>
+            {renderSectionHeader("Pengalaman", "experiences")}
+            <ExperienceList limit={1} user_id={user_id} readOnly />
+          </Box>
+          <Box mb={2}>
+            {renderSectionHeader("Sertifikat", "certificates")}
+            <CertificateList limit={1} user_id={user_id} readOnly />
+          </Box>
+          <Box mb={2}>
+            {renderSectionHeader("Proyek", "projects")}
+            <ProjectList limit={1} user_id={user_id} readOnly />
           </Box>
         </Box>
       </Card>

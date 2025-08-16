@@ -162,10 +162,17 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
                   <Typography variant="body2">{exp.description}</Typography>
                 )}
                 {exp.proof_url && (
-                  <Typography variant="body2">
-                    <a href={exp.proof_url} target="_blank" rel="noreferrer">
-                      Bukti
-                    </a>
+                  <Typography variant="body2" color="text.primary">
+                    <Button
+                      href={exp.proof_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      size="small"
+                      sx={{ mt: 1 }}
+                      variant="outlined"
+                    >
+                      Lihat
+                    </Button>
                   </Typography>
                 )}
               </Box>
