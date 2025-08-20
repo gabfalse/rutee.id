@@ -1,4 +1,3 @@
-// src/pages/ChatsPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -7,7 +6,6 @@ import {
   useMediaQuery,
   useTheme,
   IconButton,
-  Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -15,6 +13,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import ChatSidebar from "../Components/ChatComponents/ChatSidebar";
 import ChatRoom from "../Components/ChatComponents/ChatRoom";
+import Avatar from "@mui/material/Avatar";
 
 const ChatsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -98,10 +97,15 @@ const ChatsPage = () => {
 
   const handleRoomClick = (roomId) => setSelectedRoomId(roomId);
 
+  // Tombol back di mobile: kalau room terbuka, close room; kalau di sidebar, ke "/"
   const handleBack = () => {
-    setSelectedRoomId(null);
-    setMessages([]);
-    setOtherUser(null);
+    if (selectedRoomId) {
+      setSelectedRoomId(null);
+      setMessages([]);
+      setOtherUser(null);
+    } else {
+      navigate("/"); // mobile: kembali ke homepage
+    }
   };
 
   const handleSend = (newMessage) => {
@@ -155,12 +159,12 @@ const ChatsPage = () => {
         >
           <ChatSidebar
             rooms={rooms}
-            onRoomClick={(roomId) => setSelectedRoomId(roomId)}
+            onRoomClick={handleRoomClick}
             onRoomDeleted={(deletedRoomId) => {
               setRooms((prev) => prev.filter((r) => r.id !== deletedRoomId));
               if (selectedRoomId === deletedRoomId) handleBack();
             }}
-            onBack={isMobile ? handleBack : null}
+            onBack={handleBack}
           />
         </Box>
       )}

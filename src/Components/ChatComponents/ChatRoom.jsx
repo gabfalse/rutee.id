@@ -13,12 +13,14 @@ import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 
-// Fungsi helper time ago
-const timeAgo = (timestamp) => {
-  if (!timestamp) return "";
-  const messageTime = new Date(timestamp);
+// Fungsi helper time ago dari timestamp MySQL (UTC safe)
+const timeAgo = (mysqlTimestamp) => {
+  if (!mysqlTimestamp) return "";
+
+  // Tambahkan 'Z' agar JS menganggap timestamp MySQL sebagai UTC
+  const messageTime = new Date(mysqlTimestamp + "Z");
   const now = new Date();
-  const diff = Math.floor((now - messageTime) / 1000);
+  const diff = Math.floor((now - messageTime) / 1000); // selisih detik
 
   if (diff < 60) return `${diff} second${diff !== 1 ? "s" : ""} ago`;
   const minutes = Math.floor(diff / 60);
@@ -36,7 +38,7 @@ const timeAgo = (timestamp) => {
 };
 
 const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
-  const { user_id, avatar: userAvatar } = useAuth(); // ambil avatar user
+  const { user_id, avatar: userAvatar } = useAuth();
   const theme = useTheme();
   const navigate = useNavigate();
   const scrollRef = useRef();
@@ -48,7 +50,7 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
     setMessages(initialMessages);
   }, [initialMessages]);
 
-  // Scroll otomatis
+  // Scroll otomatis ke bawah
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -79,14 +81,14 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
           id: data.message_id,
           sender_id: data.sender_id,
           message: data.content,
-          created_at: data.created_at,
+          created_at: data.created_at, // timestamp MySQL
           sender_name: "You",
-          sender_avatar: userAvatar || "/default-avatar.png", // avatar user dinamis
+          sender_avatar: userAvatar || "/default-avatar.png",
         };
 
-        // Kirim ke parent untuk update state global
+        // Update parent state
         if (onSendExternal) onSendExternal(newMessage);
-        setText(""); // Clear input
+        setText("");
       } else {
         console.error("Gagal mengirim pesan:", data.message);
       }
@@ -121,7 +123,7 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
             const senderName = msg.sender_name || "Unknown";
             const senderAvatar = msg.sender_avatar || "/default-avatar.png";
             const textMsg = msg.message || "";
-            const time = timeAgo(msg.created_at);
+            const time = timeAgo(msg.created_at); // gunakan timestamp MySQL
 
             return (
               <Stack

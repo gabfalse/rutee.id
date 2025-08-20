@@ -139,7 +139,7 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
         <Box display="flex" alignItems="center">
           {onBack && (
             <IconButton
-              onClick={onBack}
+              onClick={onBack} // akan memanggil handleSidebarBack di ChatsPage
               size="small"
               sx={{ mr: 1 }}
               aria-label="Kembali"
@@ -162,55 +162,67 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
 
       {/* List Chat */}
       <Box sx={{ flex: 1, overflowY: "auto" }}>
-        <List>
-          {roomsWithLastMsg.length > 0 ? (
-            roomsWithLastMsg.map((room) => {
-              const displayName =
-                room.name || room.other_user?.name || "Unknown";
-              const avatarSrc =
-                room.avatar || room.other_user?.avatar || "/default-avatar.png";
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          <List>
+            {roomsWithLastMsg.length > 0 ? (
+              roomsWithLastMsg.map((room) => {
+                const displayName =
+                  room.name || room.other_user?.name || "Unknown";
+                const avatarSrc =
+                  room.avatar ||
+                  room.other_user?.avatar ||
+                  "/default-avatar.png";
 
-              return (
-                <ListItemButton
-                  key={room.id}
-                  sx={{ py: 1.5 }}
-                  onClick={() => onRoomClick(room.id)} // klik chat room
-                >
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    sx={{ flex: 1 }}
+                return (
+                  <ListItemButton
+                    key={room.id}
+                    sx={{ py: 1.5 }}
+                    onClick={() => onRoomClick(room.id)} // klik chat room
                   >
-                    <Avatar src={avatarSrc} alt={displayName} />
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="subtitle1" noWrap>
-                        {displayName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {room.lastMessageText || "No messages yet"}
-                      </Typography>
-                    </Box>
-                  </Stack>
+                    <Stack
+                      direction="row"
+                      spacing={2}
+                      alignItems="center"
+                      sx={{ flex: 1 }}
+                    >
+                      <Avatar src={avatarSrc} alt={displayName} />
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography variant="subtitle1" noWrap>
+                          {displayName}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {room.lastMessageText || "No messages yet"}
+                        </Typography>
+                      </Box>
+                    </Stack>
 
-                  {/* Menu Hapus */}
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation(); // ⬅️ penting, cegah klik chat
-                      handleMenuClick(e, room);
-                    }}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </ListItemButton>
-              );
-            })
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-              No chats yet
-            </Typography>
-          )}
-        </List>
+                    {/* Menu Hapus */}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation(); // ⬅️ cegah klik chat
+                        handleMenuClick(e, room);
+                      }}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  </ListItemButton>
+                );
+              })
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                No chats yet
+              </Typography>
+            )}
+          </List>
+        )}
       </Box>
 
       {/* Menu */}
