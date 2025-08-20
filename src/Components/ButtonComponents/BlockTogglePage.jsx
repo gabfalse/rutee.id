@@ -66,13 +66,13 @@ export default function BlockTogglePage({ blockedId }) {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 2 }}>
       {loading ? (
         <CircularProgress size={24} />
       ) : (
         <Button
           variant={isBlocked ? "outlined" : "contained"}
-          color={isBlocked ? "error" : "primary"}
+          color={isBlocked ? "error" : "error"}
           onClick={toggleBlock}
         >
           {isBlocked ? "Unblock" : "Block"}

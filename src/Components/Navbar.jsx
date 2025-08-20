@@ -32,7 +32,7 @@ const Navbar = () => {
       color="background"
       elevation={1}
       sx={{
-        bgcolor: "background.default",
+        bgcolor: "secondary.main",
         borderBottom: "2px solid",
         borderColor: "divider",
       }}

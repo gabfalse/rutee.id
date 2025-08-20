@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button, CircularProgress, Tooltip, Typography } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import axios from "axios";
 
 export default function FollowTogglePage({ currentUserId, targetUserId }) {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
-  const [followers, setFollowers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -25,8 +23,6 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
 
         if (res.data && isMounted) {
           setIsFollowing(res.data.isFollowing ?? false);
-          setFollowerCount(res.data.followerCount ?? 0);
-          setFollowers(res.data.followers ?? []);
         }
       } catch (err) {
         console.error(
@@ -59,14 +55,8 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
       if (res.data) {
         if (res.data.status === "followed") {
           setIsFollowing(true);
-          setFollowerCount((prev) => prev + 1);
-          if (res.data.newFollower) {
-            setFollowers((prev) => [res.data.newFollower, ...prev]);
-          }
         } else if (res.data.status === "unfollowed") {
           setIsFollowing(false);
-          setFollowerCount((prev) => Math.max(prev - 1, 0));
-          setFollowers((prev) => prev.filter((f) => f.id !== currentUserId));
         }
       }
     } catch (err) {
@@ -80,42 +70,19 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
   };
 
   return (
-    <Tooltip
-      title={
-        <div>
-          <Typography variant="subtitle2">
-            Followers ({followerCount})
-          </Typography>
-          {followers.length > 0 ? (
-            followers.map((f) => (
-              <Typography key={f.id} variant="body2">
-                {f.name || f.username || "Unnamed"}
-              </Typography>
-            ))
-          ) : (
-            <Typography variant="body2">Belum ada follower</Typography>
-          )}
-        </div>
-      }
-      arrow
-      placement="top"
+    <Button
+      variant={isFollowing ? "outlined" : "contained"}
+      color="primary"
+      onClick={handleToggleFollow}
+      disabled={loading || !targetUserId}
     >
-      <span>
-        <Button
-          variant={isFollowing ? "outlined" : "contained"}
-          color="primary"
-          onClick={handleToggleFollow}
-          disabled={loading || !targetUserId}
-        >
-          {loading ? (
-            <CircularProgress size={20} />
-          ) : isFollowing ? (
-            "Unfollow"
-          ) : (
-            "Follow"
-          )}
-        </Button>
-      </span>
-    </Tooltip>
+      {loading ? (
+        <CircularProgress size={20} />
+      ) : isFollowing ? (
+        "Unfollow"
+      ) : (
+        "Follow"
+      )}
+    </Button>
   );
 }

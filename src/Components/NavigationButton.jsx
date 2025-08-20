@@ -18,19 +18,17 @@ import {
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import WorkIcon from "@mui/icons-material/Work";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
-import PaymentIcon from "@mui/icons-material/Payment";
 import BusinessIcon from "@mui/icons-material/Business";
 import GroupIcon from "@mui/icons-material/Group";
-import ChatIcon from "@mui/icons-material/Chat";
-import ForumIcon from "@mui/icons-material/Forum";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LogoutIcon from "@mui/icons-material/Logout";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 
-export default function NavigationButton() {
+export default function NavigationButton({ mode, setMode }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -42,34 +40,37 @@ export default function NavigationButton() {
       label: "Profile",
       path: `/profile/${user.id}`,
       icon: <AccountCircleIcon />,
-    },
-    {
-      label: "Rekomendasi Karir",
-      path: "/career-recommendations",
-      icon: <WorkIcon />,
+      active: true,
     },
     {
       label: "Hubungi Admin",
       path: "/contact-admin",
       icon: <ContactMailIcon />,
+      active: true,
     },
-    { label: "Konten Berbayar", path: "/paid-content", icon: <PaymentIcon /> },
-    { label: "Company", path: "/companies", icon: <BusinessIcon /> },
-    { label: "Group", path: "/groups", icon: <GroupIcon /> },
-    { label: "Chat", path: "/chat", icon: <ChatIcon /> },
-    { label: "Forum", path: "/forum", icon: <ForumIcon /> },
     {
-      label: "Notifikasi",
-      path: "/notifications",
-      icon: <NotificationsIcon />,
+      label: "Rekomendasi Karir",
+      path: "/career-recommendations",
+      icon: <WorkIcon />,
+      active: false,
     },
-    { label: "Leaderboard", path: "/leaderboard", icon: <LeaderboardIcon /> },
-    { label: "Logout", path: "/logout", icon: <LogoutIcon /> },
+    {
+      label: "Company",
+      path: "/companies",
+      icon: <BusinessIcon />,
+      active: false,
+    },
+    { label: "Group", path: "/groups", icon: <GroupIcon />, active: false },
+    {
+      label: "Leaderboard",
+      path: "/leaderboard",
+      icon: <LeaderboardIcon />,
+      active: false,
+    },
+    { label: "Logout", path: "/logout", icon: <LogoutIcon />, active: true },
   ];
 
-  const toggleDrawer = (state) => () => {
-    setOpen(state);
-  };
+  const toggleDrawer = (state) => () => setOpen(state);
 
   const handleNavigate = (path) => {
     setOpen(false);
@@ -81,7 +82,10 @@ export default function NavigationButton() {
     navigate(path);
   };
 
-  // Kalau belum login
+  const handleToggleMode = () => {
+    setMode(mode === "light" ? "dark" : "light");
+  };
+
   if (!user) {
     return (
       <Box display="flex" justifyContent="center" mt={2}>
@@ -97,7 +101,6 @@ export default function NavigationButton() {
     );
   }
 
-  // Kalau sudah login
   return (
     <>
       <Tooltip title="Open Navigation Menu" arrow>
@@ -105,14 +108,12 @@ export default function NavigationButton() {
           color="primary"
           onClick={toggleDrawer(true)}
           size="large"
-          aria-label="open navigation menu"
           sx={{
             ml: 1,
+            zIndex: 100,
             borderRadius: "50%",
             transition: "background-color 0.3s ease",
-            "&:hover": {
-              backgroundColor: theme.palette.action.hover,
-            },
+            "&:hover": { backgroundColor: theme.palette.action.hover },
           }}
         >
           <Avatar
@@ -146,7 +147,7 @@ export default function NavigationButton() {
           }}
           sx={{ height: "100%", display: "flex", flexDirection: "column" }}
         >
-          {/* Drawer Header */}
+          {/* Header */}
           <Box
             sx={{
               px: 3,
@@ -177,22 +178,65 @@ export default function NavigationButton() {
 
           {/* List Menu */}
           <List sx={{ flexGrow: 1 }}>
-            {menuItems.map(({ label, path, icon }, index) => (
-              <ListItemButton
-                key={index}
-                onClick={() => handleNavigate(path)}
-                sx={{
-                  "&:hover": {
-                    bgcolor: theme.palette.action.hover,
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ color: theme.palette.primary.main }}>
-                  {icon}
-                </ListItemIcon>
-                <ListItemText primary={label} />
-              </ListItemButton>
-            ))}
+            {menuItems.map(({ label, path, icon, active }, index) => {
+              // Tombol Logout ditempatkan paling bawah, jadi kita akan sisipkan tombol Dark/Light sebelum Logout
+              if (label === "Logout") {
+                return (
+                  <Box key={index}>
+                    {/* Tombol Dark / Light */}
+                    <ListItemButton onClick={handleToggleMode}>
+                      <ListItemIcon>
+                        {mode === "light" ? (
+                          <Brightness4Icon />
+                        ) : (
+                          <Brightness7Icon />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          mode === "light" ? "Mode Gelap" : "Mode Terang"
+                        }
+                      />
+                    </ListItemButton>
+
+                    {/* Tombol Logout */}
+                    <ListItemButton onClick={() => handleNavigate(path)}>
+                      <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                        {icon}
+                      </ListItemIcon>
+                      <ListItemText primary={label} />
+                    </ListItemButton>
+                  </Box>
+                );
+              }
+
+              const button = (
+                <ListItemButton
+                  key={index}
+                  onClick={() => active && handleNavigate(path)}
+                  disabled={!active}
+                  sx={{
+                    "&.Mui-disabled": { opacity: 0.5, cursor: "not-allowed" },
+                    "&:hover": active
+                      ? { bgcolor: theme.palette.action.hover }
+                      : {},
+                  }}
+                >
+                  <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                    {icon}
+                  </ListItemIcon>
+                  <ListItemText primary={label} />
+                </ListItemButton>
+              );
+
+              return active ? (
+                button
+              ) : (
+                <Tooltip key={index} title="Coming soon" arrow placement="left">
+                  <span>{button}</span>
+                </Tooltip>
+              );
+            })}
           </List>
 
           <Divider />

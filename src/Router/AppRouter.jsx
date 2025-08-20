@@ -16,8 +16,9 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import SearchUser from "../Pages/SearchUser";
 import CompanyPage from "../Pages/CompanyPage";
+import QuizPage from "../Pages/QuizPage";
 
-// List Pages
+// Profile Components
 import SkillList from "../Components/ProfileComponents/SkillList";
 import CertificateList from "../Components/ProfileComponents/CertificateList";
 import ProjectList from "../Components/ProfileComponents/ProjectList";
@@ -25,23 +26,44 @@ import ExperienceList from "../Components/ProfileComponents/ExperienceList";
 import UserPostPage from "../Components/ProfileComponents/UserPostPage";
 import LanguageList from "../Components/ProfileComponents/LanguageList";
 import EditProfile from "../Components/ProfileComponents/EditProfile";
+import Resume from "../Components/ProfileComponents/Resume";
+import EducationList from "../Components/ProfileComponents/EducationList";
+import ContactList from "../Components/ProfileComponents/ContactList";
+import UserArticleList from "../Components/ProfileComponents/UserArticleList";
+
+// Quiz Components
+import CalculationPage from "../Components/QuizComponents/CalculationPage";
+import ResultPage from "../Components/QuizComponents/ResultPage";
+
+// Article Components
+import ArticleFormPage from "../Components/ArticleComponents/ArticleFormPage";
+import ArticleListPage from "../Pages/ArticleListPage";
+import ArticleDetailPage from "../Components/ArticleComponents/ArticleDetailPage";
+import ContactAdmin from "../Pages/ContactAdmin";
+import Connections from "../Pages/Connections";
+import GetFollowing from "../Pages/GetFollowing";
+import ChatsPage from "../Pages/ChatPage";
+import NewChatPage from "../Components/ChatComponents/NewChatPage";
+import Notifications from "../Pages/Notifications";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
+function AuthRedirect({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
+}
+
 export default function AppRouter() {
   const { loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        {/* ==================== PUBLIC ROUTES ==================== */}
         <Route path="/" element={<HomePage />} />
         <Route path="/webinfo" element={<InfoWebPage />} />
         <Route
@@ -60,7 +82,60 @@ export default function AppRouter() {
             </AuthRedirect>
           }
         />
-        {/* Private Routes */}
+
+        {/* ==================== ARTICLE ROUTES ==================== */}
+        {/* Public Article Routes */}
+        <Route path="/articles/list" element={<ArticleListPage />} />
+        <Route
+          path="/articles/list/:article_id"
+          element={<ArticleDetailPage />}
+        />
+
+        {/* Private Article Routes */}
+        <Route
+          path="/articles/owned"
+          element={
+            <PrivateRoute>
+              <UserArticleList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/articles/new"
+          element={
+            <PrivateRoute>
+              <ArticleFormPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/articles/edit/:id"
+          element={
+            <PrivateRoute>
+              <ArticleFormPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <Notifications />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/articles/user/:user_id"
+          element={
+            <PrivateRoute>
+              <UserArticleList />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ==================== PRIVATE ROUTES ==================== */}
         <Route
           path="/search"
           element={
@@ -70,10 +145,50 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/profile/:user_id"
+          path="/connections/:userId"
           element={
             <PrivateRoute>
-              <ProfilePage />
+              <Connections />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tes"
+          element={
+            <PrivateRoute>
+              <GetFollowing />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <PrivateRoute>
+              <QuizPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/contact-admin"
+          element={
+            <PrivateRoute>
+              <ContactAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/calculate"
+          element={
+            <PrivateRoute>
+              <CalculationPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/result"
+          element={
+            <PrivateRoute>
+              <ResultPage />
             </PrivateRoute>
           }
         />
@@ -82,6 +197,14 @@ export default function AppRouter() {
           element={
             <PrivateRoute>
               <ProfilePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/resume/:user_id"
+          element={
+            <PrivateRoute>
+              <Resume />
             </PrivateRoute>
           }
         />
@@ -93,7 +216,27 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-        // Untuk lihat semua skill user lain
+        {/* ==================== CHAT ROUTES ==================== */}
+
+        <Route
+          path="/chats"
+          element={
+            <PrivateRoute>
+              <ChatsPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/chats/new"
+          element={
+            <PrivateRoute>
+              <NewChatPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ==================== READ-ONLY PROFILE ROUTES ==================== */}
         <Route
           path="/skills/:user_id"
           element={
@@ -102,11 +245,28 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/experiences/:user_id"
           element={
             <PrivateRoute>
               <ExperienceList readOnly />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/educations/:user_id"
+          element={
+            <PrivateRoute>
+              <EducationList readOnly />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/contacts/:user_id"
+          element={
+            <PrivateRoute>
+              <ContactList readOnly />
             </PrivateRoute>
           }
         />
@@ -134,12 +294,21 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-        // Untuk edit skill (owner)
+
+        {/* ==================== OWNER EDIT PROFILE ROUTES ==================== */}
         <Route
           path="/edit-skills"
           element={
             <PrivateRoute>
-              <SkillList /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <SkillList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-contacts"
+          element={
+            <PrivateRoute>
+              <ContactList />
             </PrivateRoute>
           }
         />
@@ -147,7 +316,7 @@ export default function AppRouter() {
           path="/edit-projects"
           element={
             <PrivateRoute>
-              <ProjectList /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <ProjectList />
             </PrivateRoute>
           }
         />
@@ -155,7 +324,7 @@ export default function AppRouter() {
           path="/edit-experiences"
           element={
             <PrivateRoute>
-              <ExperienceList /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <ExperienceList />
             </PrivateRoute>
           }
         />
@@ -163,7 +332,15 @@ export default function AppRouter() {
           path="/edit-languages"
           element={
             <PrivateRoute>
-              <LanguageList /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <LanguageList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-educations"
+          element={
+            <PrivateRoute>
+              <EducationList />
             </PrivateRoute>
           }
         />
@@ -171,7 +348,7 @@ export default function AppRouter() {
           path="/edit-certificates"
           element={
             <PrivateRoute>
-              <CertificateList /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <CertificateList />
             </PrivateRoute>
           }
         />
@@ -179,18 +356,14 @@ export default function AppRouter() {
           path="/profile/edit"
           element={
             <PrivateRoute>
-              <EditProfile /> {/* tanpa readOnly, jadi owner bisa edit */}
+              <EditProfile />
             </PrivateRoute>
           }
         />
-        {/* Catch-all 404 */}
+
+        {/* ==================== CATCH ALL ==================== */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
-}
-
-function AuthRedirect({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
 }

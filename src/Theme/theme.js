@@ -1,157 +1,87 @@
 import { createTheme } from "@mui/material/styles";
 
 // =====================
-// ✅ PALETTE LIGHT
+// PALETTE LIGHT
 // =====================
 const lightPalette = {
   mode: "light",
-  primary: {
-    main: "#2E8B8B",
-    contrastText: "#FFFFFF",
-  },
-  secondary: {
-    main: "#FFFFFF",
-    contrastText: "#2E8B8B",
-  },
-  background: {
-    default: "#F7FDFC",
-    paper: "#FFFFFF",
-  },
-  text: {
-    primary: "#2E8B8B",
-    secondary: "#4C7E7E",
-  },
+  primary: { main: "#2E8B8B", contrastText: "#FFFFFF" },
+  secondary: { main: "#FFFFFF", contrastText: "#2E8B8B" },
+  background: { default: "#F7FDFC", paper: "#FFFFFF" },
+  text: { primary: "#2E8B8B", secondary: "#4C7E7E" },
   divider: "#2E8B8B",
-  hover: {
-    main: "#247171",
-  },
-  border: {
-    main: "#2E8B8B",
-  },
+  hover: { main: "#247171" },
+  border: { main: "#2E8B8B" },
   action: {
     active: "#2E8B8B",
     hover: "rgba(46, 139, 139, 0.08)",
     selected: "rgba(46, 139, 139, 0.16)",
   },
-  tertiary: {
-    main: "#247171",
-    contrastText: "#FFFFFF",
-  },
+  tertiary: { main: "#247171", contrastText: "#FFFFFF" },
 };
 
 // =====================
-// ✅ PALETTE DARK
+// PALETTE DARK
 // =====================
 const darkPalette = {
   mode: "dark",
-  primary: {
-    main: "#2E8B8B",
-    contrastText: "#FFFFFF",
-  },
-  secondary: {
-    main: "#212121ff",
-    contrastText: "#E0F2F2",
-  },
-  background: {
-    default: "#141414ff",
-    paper: "#212121ff",
-  },
-  text: {
-    primary: "#E0F2F2",
-    secondary: "#C0DADA", // lebih kontras dari #B0CCCC
-  },
+  primary: { main: "#2E8B8B", contrastText: "#FFFFFF" },
+  secondary: { main: "#212121ff", contrastText: "#E0F2F2" },
+  background: { default: "#141414ff", paper: "#212121ff" },
+  text: { primary: "#E0F2F2", secondary: "#C0DADA" },
   divider: "#2E8B8B",
-  hover: {
-    main: "#3FAFAF",
-  },
-  border: {
-    main: "#2E8B8B",
-  },
+  hover: { main: "#3FAFAF" },
+  border: { main: "#2E8B8B" },
   action: {
     active: "#2E8B8B",
     hover: "rgba(46, 139, 139, 0.1)",
     selected: "rgba(46, 139, 139, 0.2)",
   },
-  tertiary: {
-    main: "#3FAFAF",
-    contrastText: "#2a2a2aff",
-  },
+  tertiary: { main: "#3FAFAF", contrastText: "#2a2a2aff" },
 };
 
 // =====================
-// ✅ FUNGSI BUAT THEME
+// FUNGSI BUAT THEME
 // =====================
 export const getAppTheme = (mode = "light") => {
   const palette = mode === "dark" ? darkPalette : lightPalette;
 
   return createTheme({
-    palette: {
-      ...palette,
-    },
+    palette: { ...palette },
     typography: {
       fontFamily: "Roboto, Arial, sans-serif",
-      h1: {
-        fontSize: "2.5rem",
-        fontWeight: 700,
-        color: palette.text.primary,
-      },
-      h2: {
-        fontSize: "2rem",
-        fontWeight: 600,
-        color: palette.text.primary,
-      },
-      body1: {
-        fontSize: "1rem",
-        color: palette.text.primary,
-      },
-      body2: {
-        fontSize: "0.875rem",
-        color: palette.text.secondary,
-      },
-      button: {
-        textTransform: "none",
-        fontWeight: 600,
-      },
+      h1: { fontSize: "2.5rem", fontWeight: 700, color: palette.text.primary },
+      h2: { fontSize: "2rem", fontWeight: 600, color: palette.text.primary },
+      body1: { fontSize: "1rem", color: palette.text.primary },
+      body2: { fontSize: "0.875rem", color: palette.text.secondary },
+      button: { textTransform: "none", fontWeight: 600 },
     },
-    shape: {
-      borderRadius: 12,
-    },
+    shape: { borderRadius: 12 },
     components: {
       MuiButton: {
         styleOverrides: {
           root: {
             borderRadius: 12,
             textTransform: "none",
-            "&:hover": {
-              backgroundColor: palette.action.hover, // adaptif
-            },
+            "&:hover": { backgroundColor: palette.action.hover },
           },
         },
       },
       MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundImage: "none",
-            borderRadius: 12, // konsisten
-          },
-        },
+        styleOverrides: { root: { backgroundImage: "none", borderRadius: 12 } },
       },
       MuiDivider: {
         styleOverrides: {
-          root: {
-            borderColor: palette.divider,
-            borderWidth: "0.3px", // <-- buat lebih tipis dari default 1px
-          },
+          root: { borderColor: palette.divider, borderWidth: "0.3px" },
         },
       },
-
       MuiCard: {
         styleOverrides: {
           root: {
             boxShadow:
               mode === "light"
                 ? "0 4px 12px rgba(0,0,0,0.1)"
-                : "0 4px 12px rgba(34, 34, 34, 0.3)", // lebih soft
+                : "0 4px 12px rgba(34, 34, 34, 0.3)",
           },
         },
       },
@@ -164,6 +94,35 @@ export const getAppTheme = (mode = "light") => {
           },
         },
       },
+    },
+
+    // =====================
+    // ✅ CUSTOM STYLE UNTUK RESUME
+    // =====================
+    resumeStyles: {
+      container: {
+        fontFamily: "Arial, sans-serif",
+        fontSize: "12px",
+        color: "#000",
+        lineHeight: 1.3,
+        backgroundColor: "#fff",
+        padding: "16px",
+        maxWidth: "595px",
+        margin: "0 auto",
+      },
+      header: { textAlign: "center", marginBottom: "8px" },
+      h1: { fontSize: "36px", fontWeight: "bold", margin: 0, color: "#000" },
+      h2: {
+        fontSize: "16px",
+        fontWeight: "bold",
+        marginBottom: "4px",
+        color: "#000",
+      },
+      p: { fontSize: "12px", margin: "2px 0", color: "#000" },
+      ul: { paddingLeft: "18px", margin: 0 },
+      li: { fontSize: "11px", marginBottom: "2px" },
+      divider: { borderTop: "0.3px solid #000", margin: "8px 0" },
+      link: { color: "#000", textDecoration: "none", fontSize: "11px" },
     },
   });
 };

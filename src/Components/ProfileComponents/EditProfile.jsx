@@ -13,10 +13,15 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import axios from "axios";
+import Autocomplete from "@mui/material/Autocomplete";
+
+// Import careerOptions dari file EditProfileCareer.jsx
+import { careerOptions as careerOptionsList } from "./EditProfileCareers";
 
 export default function EditProfile() {
   const token = localStorage.getItem("token");
   const [loading, setLoading] = useState(false);
+  const [careerOptions, setCareerOptions] = useState([]);
   const [profile, setProfile] = useState({
     name: "",
     bio: "",
@@ -27,11 +32,13 @@ export default function EditProfile() {
     city: "",
     profile_image_url: "",
     cover_image_url: "",
+    career: [], // array karir
   });
 
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [coverImageFile, setCoverImageFile] = useState(null);
 
+  // Ambil profile user
   useEffect(() => {
     axios
       .get("https://rutee.id/dapur/profile/get-profile.php", {
@@ -40,6 +47,7 @@ export default function EditProfile() {
       .then((res) => {
         const data = res.data.profile || {};
         setProfile({
+          ...profile,
           name: data.name || "",
           bio: data.bio || "",
           gender: data.gender || "",
@@ -52,18 +60,25 @@ export default function EditProfile() {
           city: data.city || "",
           profile_image_url: data.profile_image_url || "",
           cover_image_url: data.cover_image_url || "",
+          career: data.career
+            ? Array.isArray(data.career)
+              ? data.career
+              : [data.career]
+            : [],
         });
       })
       .catch((err) => console.error(err));
   }, [token]);
 
+  // Set career options dari EditProfileCareer.jsx
+  useEffect(() => {
+    setCareerOptions(careerOptionsList);
+  }, []);
+
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
-    if (type === "profile") {
-      setProfileImageFile(file);
-    } else {
-      setCoverImageFile(file);
-    }
+    if (type === "profile") setProfileImageFile(file);
+    else setCoverImageFile(file);
   };
 
   const uploadImage = async (file, type) => {
@@ -91,17 +106,16 @@ export default function EditProfile() {
       let profileImageUrl = profile.profile_image_url;
       let coverImageUrl = profile.cover_image_url;
 
-      if (profileImageFile) {
+      if (profileImageFile)
         profileImageUrl = await uploadImage(profileImageFile, "profile");
-      }
-      if (coverImageFile) {
+      if (coverImageFile)
         coverImageUrl = await uploadImage(coverImageFile, "cover");
-      }
 
       await axios.post(
         "https://rutee.id/dapur/profile/edit-profile.php",
         {
           ...profile,
+          career: profile.career.join(", "), // kirim sebagai string
           profile_image_url: profileImageUrl,
           cover_image_url: coverImageUrl,
           birthdate:
@@ -133,7 +147,7 @@ export default function EditProfile() {
           boxShadow: 4,
         }}
       >
-        {/* Cover Photo */}
+        {/* Cover & Avatar */}
         <Box
           sx={{
             height: 200,
@@ -168,7 +182,6 @@ export default function EditProfile() {
             />
           </IconButton>
 
-          {/* Profile Avatar */}
           <Avatar
             src={
               profileImageFile
@@ -244,38 +257,59 @@ export default function EditProfile() {
               })
             }
             format="DD/MM/YYYY"
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                error: false,
-              },
-            }}
+            slotProps={{ textField: { fullWidth: true, error: false } }}
           />
 
-          {/* Country */}
           <TextField
             label="Negara"
-            value={profile.country || ""}
+            value={profile.country}
             onChange={(e) =>
               setProfile({ ...profile, country: e.target.value })
             }
             fullWidth
           />
-          {/* Province */}
           <TextField
             label="Provinsi"
-            value={profile.province || ""}
+            value={profile.province}
             onChange={(e) =>
               setProfile({ ...profile, province: e.target.value })
             }
             fullWidth
           />
-          {/* City */}
           <TextField
             label="Kota"
-            value={profile.city || ""}
+            value={profile.city}
             onChange={(e) => setProfile({ ...profile, city: e.target.value })}
             fullWidth
+          />
+
+          {/* Career Autocomplete */}
+          <Autocomplete
+            multiple
+            freeSolo
+            filterSelectedOptions
+            options={careerOptions}
+            value={profile.career}
+            onChange={(event, newValue) => {
+              // Maksimal 2 karir
+              const filtered = newValue.slice(0, 2);
+              setProfile((prev) => ({ ...prev, career: filtered }));
+
+              // Tambahkan ke options jika user bikin karir baru
+              filtered.forEach((val) => {
+                if (!careerOptions.includes(val)) {
+                  setCareerOptions((prev) => [...prev, val]);
+                }
+              });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Karir (maks 2)"
+                placeholder="Ketik dan pilih karir"
+                fullWidth
+              />
+            )}
           />
 
           <Button

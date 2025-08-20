@@ -12,6 +12,10 @@ import {
   Chip,
   Paper,
   Tooltip,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
@@ -34,6 +38,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultSkill);
+  const [error, setError] = useState("");
 
   const isOwner = !readOnly && String(userId) === String(loggedInUserId);
 
@@ -46,7 +51,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.skills || [];
-      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      if (limit) data = data.slice(0, limit);
       setSkills(data);
     } catch (err) {
       console.error(
@@ -63,7 +68,16 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
   }, [userId, token, limit]);
 
   const handleSave = async () => {
+    setError("");
+
     if (!userId || !token) return;
+
+    // 🔒 Validasi: jika level Expert maka sertifikat wajib diisi
+    if (form.level === "Expert" && !form.certificate_url.trim()) {
+      setError("URL wajib diisi untuk level Expert!");
+      return;
+    }
+
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
@@ -116,6 +130,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
             startIcon={<Add />}
             onClick={() => {
               setForm(defaultSkill);
+              setError("");
               setOpenDialog(true);
             }}
           >
@@ -136,11 +151,11 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
               label={`${skill.skill_name} (${skill.level})`}
               color="primary"
               variant="outlined"
-              clickable={!!skill.certificate_url}
-              component={skill.certificate_url ? "a" : "div"}
-              href={skill.certificate_url || undefined}
-              target="_blank"
-              rel="noreferrer"
+              onClick={
+                skill.certificate_url
+                  ? () => window.open(skill.certificate_url, "_blank")
+                  : undefined
+              }
               onDelete={isOwner ? () => handleDelete(skill.id) : undefined}
               deleteIcon={isOwner ? <Delete /> : undefined}
               icon={
@@ -151,6 +166,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
                       onClick={(e) => {
                         e.stopPropagation();
                         setForm(skill);
+                        setError("");
                         setOpenDialog(true);
                       }}
                     />
@@ -179,22 +195,42 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
             value={form.skill_name}
             onChange={(e) => setForm({ ...form, skill_name: e.target.value })}
           />
+
+          <FormControl margin="dense" fullWidth>
+            <InputLabel id="level-label">Level</InputLabel>
+            <Select
+              labelId="level-label"
+              value={form.level}
+              onChange={(e) => setForm({ ...form, level: e.target.value })}
+            >
+              <MenuItem value="Beginner">Beginner</MenuItem>
+              <MenuItem value="Intermediate">Intermediate</MenuItem>
+              <MenuItem value="Expert">Expert</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
             margin="dense"
-            label="Level"
-            fullWidth
-            value={form.level}
-            onChange={(e) => setForm({ ...form, level: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="URL Sertifikat"
+            label="URL Web / Drive Sertifikat"
             fullWidth
             value={form.certificate_url || ""}
             onChange={(e) =>
               setForm({ ...form, certificate_url: e.target.value })
             }
+            required={form.level === "Expert"}
+            helperText={
+              form.level === "Expert"
+                ? "Wajib diisi jika level Expert"
+                : "Opsional"
+            }
+            error={form.level === "Expert" && !form.certificate_url}
           />
+
+          {error && (
+            <Typography color="error" variant="body2" mt={1}>
+              {error}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Batal</Button>

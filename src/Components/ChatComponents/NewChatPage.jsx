@@ -1,3 +1,4 @@
+// src/pages/NewChatPage.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -20,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 
 const RECENT_SEARCH_KEY = "recent_user_searches";
 
-export default function UserSearch() {
+export default function NewChatPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,13 +31,11 @@ export default function UserSearch() {
 
   const navigate = useNavigate();
 
-  // Ambil token dari localStorage
   useEffect(() => {
     const authToken = localStorage.getItem("token");
     setToken(authToken);
   }, []);
 
-  // Load recent searches
   useEffect(() => {
     const saved = localStorage.getItem(RECENT_SEARCH_KEY);
     if (saved) {
@@ -48,7 +47,6 @@ export default function UserSearch() {
     }
   }, []);
 
-  // Simpan recent searches setiap berubah
   useEffect(() => {
     localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(recentSearches));
   }, [recentSearches]);
@@ -70,6 +68,7 @@ export default function UserSearch() {
       );
       setResults(res.data.results || []);
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.error || "Gagal mengambil data user");
       setResults([]);
     }
@@ -87,15 +86,43 @@ export default function UserSearch() {
     }
   };
 
-  const handleSelectUser = (user) => {
-    if (!user) return;
+  // Mulai chat baru → navigasi ke ChatsPage dan kirim room baru lewat state
+  const handleStartChat = async (otherUser) => {
+    if (!otherUser) return;
 
-    setRecentSearches((prev) => {
-      const filtered = prev.filter((u) => u.id !== user.id);
-      return [user, ...filtered].slice(0, 5);
-    });
+    try {
+      const formData = new FormData();
+      formData.append("target_id", otherUser.id);
 
-    navigate(`/profile/${user.id}`);
+      const res = await axios.post(
+        "https://rutee.id/dapur/chat/create-room.php",
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        // simpan ke recent search (max 5)
+        setRecentSearches((prev) => {
+          const filtered = prev.filter((u) => u.id !== otherUser.id);
+          return [otherUser, ...filtered].slice(0, 5);
+        });
+
+        // Kirim room baru ke ChatsPage
+        const newRoom = {
+          id: res.data.room_id,
+          other_user: otherUser,
+          lastMessageObj: null,
+          lastMessageText: "",
+        };
+
+        navigate("/chats", { state: { newRoom } });
+      } else {
+        setError(res.data.message || "Gagal membuat chat");
+      }
+    } catch (err) {
+      console.error("Create room failed:", err);
+      setError("Gagal membuat chat baru");
+    }
   };
 
   const handleRemoveRecent = (e, id) => {
@@ -113,17 +140,9 @@ export default function UserSearch() {
         px: { xs: 2, sm: 3 },
       }}
     >
-      <Paper
-        elevation={6}
-        sx={{
-          p: { xs: 2, sm: 3 },
-          borderRadius: 3,
-          width: "100%",
-          overflowX: "hidden",
-        }}
-      >
+      <Paper elevation={6} sx={{ p: 3, borderRadius: 3 }}>
         <Typography variant="h5" fontWeight={700} mb={3} align="center">
-          Cari User
+          Mulai Chat Baru
         </Typography>
 
         <Autocomplete
@@ -135,7 +154,7 @@ export default function UserSearch() {
             if (reason === "input") setQuery(value);
           }}
           onChange={(e, value) => {
-            if (value) handleSelectUser(value);
+            if (value) handleStartChat(value);
           }}
           noOptionsText="Tidak ada user ditemukan"
           renderOption={(props, option) => (
@@ -178,21 +197,14 @@ export default function UserSearch() {
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Username atau Nama"
-              variant="outlined"
+              label="Cari username atau nama"
               fullWidth
               onKeyDown={handleKeyDown}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
                   <>
-                    {loading && (
-                      <CircularProgress
-                        color="inherit"
-                        size={20}
-                        sx={{ mr: 1 }}
-                      />
-                    )}
+                    {loading && <CircularProgress size={20} sx={{ mr: 1 }} />}
                     <Button
                       variant="contained"
                       size="small"
@@ -228,9 +240,9 @@ export default function UserSearch() {
               Tidak ada pencarian terakhir
             </Typography>
           ) : (
-            recentSearches.map((user, index) => (
+            recentSearches.map((u, index) => (
               <ListItem
-                key={`${user.id ?? "unknown"}-${index}`}
+                key={`${u.id ?? "unknown"}-${index}`}
                 sx={{
                   borderRadius: 1,
                   bgcolor: "background.paper",
@@ -238,18 +250,18 @@ export default function UserSearch() {
                   cursor: "pointer",
                   "&:hover": { bgcolor: "action.hover" },
                 }}
-                onClick={() => handleSelectUser(user)}
+                onClick={() => handleStartChat(u)}
                 disablePadding
               >
                 <ListItemText
                   sx={{ px: 2, py: 1 }}
-                  primary={user.username}
-                  secondary={user.name || "—"}
+                  primary={u.username}
+                  secondary={u.name || "—"}
                 />
                 <IconButton
                   edge="end"
                   aria-label="hapus"
-                  onClick={(e) => handleRemoveRecent(e, user.id)}
+                  onClick={(e) => handleRemoveRecent(e, u.id)}
                 >
                   <ClearIcon />
                 </IconButton>

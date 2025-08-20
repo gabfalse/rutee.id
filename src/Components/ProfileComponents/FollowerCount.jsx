@@ -58,7 +58,7 @@ export default function FollowerCount({ targetUserId }) {
         {loading ? (
           <CircularProgress size={20} />
         ) : (
-          `Followers (${followerCount})`
+          `${followerCount} Followers`
         )}
       </Button>
 
@@ -68,7 +68,7 @@ export default function FollowerCount({ targetUserId }) {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Followers ({followerCount})</DialogTitle>
+        <DialogTitle>{followerCount} Followers</DialogTitle>
         <DialogContent dividers>
           {loading ? (
             <CircularProgress />

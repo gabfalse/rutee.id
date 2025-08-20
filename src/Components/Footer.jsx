@@ -6,7 +6,7 @@ import {
   Link,
   Button,
 } from "@mui/material";
-import { Instagram, Facebook } from "@mui/icons-material";
+import { Instagram, Facebook, LinkedIn } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
@@ -21,6 +21,7 @@ const Footer = () => {
         py: 3,
         px: 4,
         mt: "auto",
+
         textAlign: "center",
         borderTop: "1px solid",
         borderColor: "divider",
@@ -29,7 +30,7 @@ const Footer = () => {
       <Stack direction="row" justifyContent="center" spacing={2} mb={1}>
         <IconButton
           component={Link}
-          href="https://www.instagram.com/rutee.id"
+          href="https://www.instagram.com/rutee.indonesia?igsh=cXgyYWdrbTBhdDZz"
           target="_blank"
           rel="noopener"
           sx={{ color: "primary.main" }}
@@ -39,7 +40,17 @@ const Footer = () => {
 
         <IconButton
           component={Link}
-          href="https://www.facebook.com/profile.php?id=61577790705345"
+          href="https://www.linkedin.com/company/rutee/"
+          target="_blank"
+          rel="noopener"
+          sx={{ color: "primary.main" }}
+        >
+          <LinkedIn />
+        </IconButton>
+
+        <IconButton
+          component={Link}
+          href="https://www.facebook.com/share/1BB8JszsDM/"
           target="_blank"
           rel="noopener"
           sx={{ color: "primary.main" }}
