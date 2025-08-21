@@ -14,21 +14,21 @@ import "slick-carousel/slick/slick-theme.css";
 const personalityData = [
   {
     type: "SOLARIETH",
-    nickname: "The fallen hero who believes “might makes right.”",
+    nickname: "Visionary & Strategic",
   },
-  { type: "VARNETH", nickname: "The strategist who plans 10 steps ahead." },
+  { type: "VARNETH", nickname: "Analytical & Detail-Oriented" },
   {
     type: "NIVARETH",
-    nickname: "The diplomat who drowns enemies in sweet words.",
+    nickname: "Collaborative & Empathetic",
   },
-  { type: "ZERYTH", nickname: "The berserker who fights like a wildfire." },
+  { type: "ZERYTH", nickname: "Principled & High Integrity" },
   {
     type: "AERYTH",
-    nickname: "The wanderer who knows every secret but shares none",
+    nickname: "Creative & Innovative",
   },
-  { type: "THARITH", nickname: "The unbreakable wall between allies and doom" },
-  { type: "ELARITH", nickname: "The guardian who protect the nature" },
-  { type: "LUNARETH", nickname: "The eye of the dark in every corner" },
+  { type: "THARITH", nickname: "Stable & Diligent" },
+  { type: "ELARITH", nickname: "Adaptive & Flexible" },
+  { type: "LUNARETH", nickname: "Independent & Proactive" },
 ];
 
 const PersonalityCarousel = () => {

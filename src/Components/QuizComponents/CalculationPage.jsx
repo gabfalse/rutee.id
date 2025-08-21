@@ -12,7 +12,7 @@ const CalculationPage = () => {
   const location = useLocation();
 
   const [progressText, setProgressText] = useState(
-    "⏳ Memproses hasil kuis..."
+    "⏳ Processing Test Result..."
   );
 
   const answers = location.state?.answers;
@@ -23,7 +23,7 @@ const CalculationPage = () => {
 
   const processResult = async () => {
     if (personalityResult) {
-      setProgressText("✅ Anda sudah pernah tes. Mengarahkan ke hasil...");
+      setProgressText("✅ You have taken the test. redirecting to result...");
       await delay(1000);
       navigate("/result");
       return;
@@ -40,7 +40,7 @@ const CalculationPage = () => {
     }
 
     try {
-      setProgressText("🔍 Menganalisis tipe kepribadian...");
+      setProgressText("🔍 Analyzing your personality type...");
       await delay(1000);
 
       // Hitung skor berdasarkan type
@@ -56,7 +56,7 @@ const CalculationPage = () => {
       const finalType = sorted[0]?.[0];
       if (!finalType) throw new Error("Gagal menentukan tipe kepribadian.");
 
-      setProgressText("💾 Menyimpan hasil...");
+      setProgressText("💾 Save result...");
       await delay(1000);
 
       let imageUrl =

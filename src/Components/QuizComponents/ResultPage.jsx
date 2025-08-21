@@ -81,7 +81,7 @@ const ResultPage = () => {
         minHeight="60vh"
       >
         <Typography variant="h6" color="textSecondary">
-          Belum ada data kepribadian.
+          No personality data yet.
         </Typography>
       </Box>
     );
@@ -92,7 +92,7 @@ const ResultPage = () => {
       <Navbar />
       <Box sx={{ maxWidth: 1000, mx: "auto", mt: 5, px: 3, pb: 5 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom align="center">
-          Hasil Kepribadian Anda
+          Your Personality Result
         </Typography>
 
         <Paper
@@ -153,7 +153,7 @@ const ResultPage = () => {
             <Box flex={1}>
               {typeDetail.description && (
                 <Typography variant="body1" gutterBottom sx={{ mt: 1 }}>
-                  <strong>{user?.display_name}</strong> adalah{" "}
+                  <strong>{user?.display_name}</strong> is{" "}
                   {typeDetail.description}
                 </Typography>
               )}
@@ -163,7 +163,7 @@ const ResultPage = () => {
               {typeDetail.strengths && (
                 <Box mt={1}>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Kekuatan
+                    Strength
                   </Typography>
                   <Typography variant="body2">
                     {typeDetail.strengths}
@@ -174,7 +174,7 @@ const ResultPage = () => {
               {typeDetail.weaknesses && (
                 <Box mt={1}>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Kelemahan
+                    Weakness
                   </Typography>
                   <Typography variant="body2">
                     {typeDetail.weaknesses}
@@ -185,7 +185,7 @@ const ResultPage = () => {
               {typeDetail.suitable_roles && (
                 <Box mt={1}>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Cocok untuk peran
+                    Suitable roles:
                   </Typography>
                   <Typography variant="body2">
                     {typeDetail.suitable_roles}
@@ -195,7 +195,7 @@ const ResultPage = () => {
 
               <Box mt={3}>
                 <Typography variant="caption" color="textSecondary">
-                  Hasil ini disimpan pada{" "}
+                  Result saved on{" "}
                   {new Date(result.created_at).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "long",

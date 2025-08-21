@@ -103,13 +103,13 @@ const QuizPage = () => {
         }}
       >
         <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Temukan Jati Dirimu
+          Find Your True Self
         </Typography>
         <Typography color="text.secondary" mb={3}>
-          Jawab pertanyaan sejujur mungkin.
+          Answer the question with honesty
         </Typography>
 
-        <Divider sx={{ my: 2, width: "100%" }}>Pilih Jenis Kelamin</Divider>
+        <Divider sx={{ my: 2, width: "100%" }}>Choose Your Gender</Divider>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
             startIcon={<Male />}
@@ -117,7 +117,7 @@ const QuizPage = () => {
             onClick={() => setGender("male")}
             color="primary"
           >
-            Laki-laki
+            Male
           </Button>
           <Button
             startIcon={<Female />}
@@ -125,7 +125,7 @@ const QuizPage = () => {
             onClick={() => setGender("female")}
             color="primary"
           >
-            Perempuan
+            Female
           </Button>
         </Stack>
 
@@ -136,7 +136,7 @@ const QuizPage = () => {
           disabled={!gender}
           sx={{ mb: 2 }}
         >
-          Ikuti Tes Sekarang
+          Take the test
         </Button>
 
         {personalityResult && (
@@ -145,7 +145,7 @@ const QuizPage = () => {
             onClick={() => navigate("/result")}
             sx={{ mt: 1 }}
           >
-            Lihat Hasil Sebelumnya
+            View Result
           </Button>
         )}
       </Box>

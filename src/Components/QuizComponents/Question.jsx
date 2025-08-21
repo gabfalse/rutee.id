@@ -1,422 +1,459 @@
 const Questions = [
   {
-    question:
-      "Bagaimana kamu menghadapi proyek besar atau tugas penting di pekerjaan?",
+    question: "How do you handle a big project or important task at work?",
     options: [
       {
-        text: "Menyusun visi besar, membagi peran, dan memimpin tim.",
+        text: "Create a big vision, divide roles, and lead the team.",
         type: "SOLARIETH",
       },
       {
-        text: "Analisa detail dan data sebelum mulai bergerak.",
-        type: "VARNETH",
-      },
-      { text: "Cari ide kreatif dan solusi out-of-the-box.", type: "AERYTH" },
-      { text: "Ajak diskusi tim dan fokus ke kolaborasi.", type: "NIVARETH" },
-      {
-        text: "Ambil keputusan cepat dan langsung eksekusi.",
-        type: "LUNARETH",
-      },
-      { text: "Ikuti prosedur, kerja stabil sampai selesai.", type: "THARITH" },
-      { text: "Fleksibel, menyesuaikan dengan perubahan.", type: "ELARITH" },
-      { text: "Pastikan sesuai aturan dan transparan.", type: "ZERYTH" },
-    ],
-  },
-  {
-    question:
-      "Saat harus mengambil keputusan sulit, apa yang biasanya kamu pertimbangkan?",
-    options: [
-      {
-        text: "Dampaknya terhadap visi besar dan kepemimpinan.",
-        type: "SOLARIETH",
-      },
-      { text: "Logika, data, dan fakta yang ada.", type: "VARNETH" },
-      { text: "Kemungkinan ide baru atau peluang kreatif.", type: "AERYTH" },
-      { text: "Pendapat dan perasaan orang lain.", type: "NIVARETH" },
-      { text: "Efisiensi dan kecepatan penyelesaian.", type: "LUNARETH" },
-      { text: "Keamanan, kestabilan, dan prosedur.", type: "THARITH" },
-      { text: "Apakah ini jadi tantangan menarik buatku.", type: "ELARITH" },
-      { text: "Nilai moral dan etika yang benar.", type: "ZERYTH" },
-    ],
-  },
-  {
-    question:
-      "Bagaimana cara kamu mengatur prioritas antara beberapa tugas sekaligus?",
-    options: [
-      {
-        text: "Membuat strategi jangka panjang dan delegasi.",
-        type: "SOLARIETH",
-      },
-      {
-        text: "Menganalisa detail lalu menyusun urutan logis.",
+        text: "Analyze details and data before taking action.",
         type: "VARNETH",
       },
       {
-        text: "Memilih yang paling menarik atau kreatif dulu.",
+        text: "Look for creative ideas and out-of-the-box solutions.",
         type: "AERYTH",
       },
       {
-        text: "Mendiskusikan dengan orang lain untuk cari kesepakatan.",
+        text: "Invite team discussions and focus on collaboration.",
         type: "NIVARETH",
       },
       {
-        text: "Fokus pada hasil cepat dan langsung eksekusi.",
+        text: "Make quick decisions and execute immediately.",
         type: "LUNARETH",
       },
-      { text: "Mengerjakan sesuai prosedur satu per satu.", type: "THARITH" },
-      { text: "Menyesuaikan dengan perubahan situasi.", type: "ELARITH" },
-      { text: "Memilih yang paling benar secara moral.", type: "ZERYTH" },
-    ],
-  },
-  {
-    question:
-      "Bagaimana tipe lingkungan kerja yang membuatmu paling produktif?",
-    options: [
       {
-        text: "Lingkungan yang kompetitif dan penuh tantangan.",
-        type: "SOLARIETH",
+        text: "Follow procedures and work steadily until done.",
+        type: "THARITH",
       },
-      { text: "Tempat yang teratur, tenang, dan penuh data.", type: "VARNETH" },
-      { text: "Ruang kreatif dengan banyak kebebasan ide.", type: "AERYTH" },
-      { text: "Lingkungan kolaboratif dengan tim suportif.", type: "NIVARETH" },
+      { text: "Be flexible and adapt to changes.", type: "ELARITH" },
       {
-        text: "Tempat yang memberi kebebasan ambil keputusan.",
-        type: "LUNARETH",
-      },
-      { text: "Lingkungan stabil, rapi, dan terstruktur.", type: "THARITH" },
-      { text: "Situasi dinamis yang penuh tantangan baru.", type: "ELARITH" },
-      {
-        text: "Tempat yang menjunjung integritas dan kejujuran.",
+        text: "Ensure everything is according to rules and transparent.",
         type: "ZERYTH",
       },
     ],
   },
   {
-    question: "Bagaimana kamu merencanakan dan menjalani hari-hari rutin?",
+    question:
+      "When you have to make a tough decision, what do you usually consider?",
     options: [
       {
-        text: "Dengan target ambisius dan strategi terukur.",
+        text: "Its impact on the bigger vision and leadership.",
+        type: "SOLARIETH",
+      },
+      { text: "Logic, data, and available facts.", type: "VARNETH" },
+      {
+        text: "The possibility of new ideas or creative opportunities.",
+        type: "AERYTH",
+      },
+      { text: "The opinions and feelings of others.", type: "NIVARETH" },
+      { text: "Efficiency and speed of completion.", type: "LUNARETH" },
+      { text: "Safety, stability, and procedure.", type: "THARITH" },
+      {
+        text: "Whether it becomes an exciting challenge for me.",
+        type: "ELARITH",
+      },
+      { text: "The right moral and ethical values.", type: "ZERYTH" },
+    ],
+  },
+  {
+    question: "How do you prioritize between multiple tasks at the same time?",
+    options: [
+      {
+        text: "Create a long-term strategy and delegate.",
         type: "SOLARIETH",
       },
       {
-        text: "Dengan checklist detail dan analisa prioritas.",
+        text: "Analyze details and arrange in logical order.",
         type: "VARNETH",
       },
       {
-        text: "Dengan spontanitas, biar ada hal baru tiap hari.",
+        text: "Choose the most interesting or creative first.",
         type: "AERYTH",
       },
       {
-        text: "Dengan fleksibel, menyesuaikan kebutuhan orang sekitar.",
+        text: "Discuss with others to find agreement.",
         type: "NIVARETH",
       },
       {
-        text: "Dengan langsung bergerak cepat ke hal penting.",
+        text: "Focus on quick results and execute immediately.",
         type: "LUNARETH",
       },
-      { text: "Dengan jadwal teratur dan disiplin.", type: "THARITH" },
-      { text: "Dengan flow bebas, siap adaptasi kapan saja.", type: "ELARITH" },
-      { text: "Dengan aturan moral yang jadi pegangan.", type: "ZERYTH" },
+      { text: "Work step by step according to procedure.", type: "THARITH" },
+      { text: "Adjust to changing situations.", type: "ELARITH" },
+      { text: "Choose what is most morally right.", type: "ZERYTH" },
     ],
   },
   {
-    question:
-      "Apa yang biasanya kamu lakukan saat menghadapi gangguan atau perubahan mendadak?",
-    options: [
-      { text: "Tetap memimpin, mengarahkan orang lain.", type: "SOLARIETH" },
-      { text: "Analisa situasi baru dengan hati-hati.", type: "VARNETH" },
-      { text: "Cari cara kreatif agar tetap jalan.", type: "AERYTH" },
-      { text: "Mencari masukan dari orang sekitar.", type: "NIVARETH" },
-      { text: "Segera ambil keputusan cepat.", type: "LUNARETH" },
-      { text: "Tetap pada rencana awal sebaik mungkin.", type: "THARITH" },
-      { text: "Menyesuaikan diri dengan fleksibel.", type: "ELARITH" },
-      { text: "Pastikan solusi tidak melanggar prinsip.", type: "ZERYTH" },
-    ],
-  },
-  {
-    question:
-      "Bagaimana kamu menjaga konsistensi dalam menyelesaikan tugas sehari-hari?",
+    question: "What type of work environment makes you most productive?",
     options: [
       {
-        text: "Dengan motivasi kepemimpinan dan visi besar.",
+        text: "A competitive and challenging environment.",
         type: "SOLARIETH",
       },
-      { text: "Dengan disiplin analisis dan detail teknis.", type: "VARNETH" },
-      { text: "Dengan mencoba cara baru agar tidak bosan.", type: "AERYTH" },
-      { text: "Dengan dukungan dan kerja sama orang lain.", type: "NIVARETH" },
-      { text: "Dengan tekad pribadi yang kuat.", type: "LUNARETH" },
+      { text: "An orderly, calm place full of data.", type: "VARNETH" },
+      { text: "A creative space with freedom of ideas.", type: "AERYTH" },
       {
-        text: "Dengan rutinitas yang stabil dan terstruktur.",
+        text: "A collaborative environment with supportive team.",
+        type: "NIVARETH",
+      },
+      {
+        text: "A place that gives freedom to make decisions.",
+        type: "LUNARETH",
+      },
+      { text: "A stable, neat, and structured environment.", type: "THARITH" },
+      { text: "A dynamic situation full of new challenges.", type: "ELARITH" },
+      {
+        text: "A place that upholds integrity and honesty.",
+        type: "ZERYTH",
+      },
+    ],
+  },
+  {
+    question: "How do you plan and go through your daily routines?",
+    options: [
+      {
+        text: "With ambitious targets and measured strategy.",
+        type: "SOLARIETH",
+      },
+      {
+        text: "With detailed checklists and priority analysis.",
+        type: "VARNETH",
+      },
+      {
+        text: "With spontaneity, so there’s something new every day.",
+        type: "AERYTH",
+      },
+      {
+        text: "With flexibility, adjusting to people’s needs around me.",
+        type: "NIVARETH",
+      },
+      {
+        text: "By quickly moving straight to important things.",
+        type: "LUNARETH",
+      },
+      { text: "With a regular and disciplined schedule.", type: "THARITH" },
+      { text: "With free flow, ready to adapt anytime.", type: "ELARITH" },
+      { text: "With moral rules as my guide.", type: "ZERYTH" },
+    ],
+  },
+  {
+    question:
+      "What do you usually do when facing sudden disturbances or changes?",
+    options: [
+      { text: "Keep leading and guiding others.", type: "SOLARIETH" },
+      { text: "Carefully analyze the new situation.", type: "VARNETH" },
+      { text: "Find creative ways to keep going.", type: "AERYTH" },
+      { text: "Seek input from people around me.", type: "NIVARETH" },
+      { text: "Immediately make a quick decision.", type: "LUNARETH" },
+      {
+        text: "Stick to the original plan as much as possible.",
         type: "THARITH",
       },
-      { text: "Dengan tantangan baru sebagai pemicu.", type: "ELARITH" },
-      { text: "Dengan komitmen pada nilai dan integritas.", type: "ZERYTH" },
+      { text: "Adapt flexibly.", type: "ELARITH" },
+      { text: "Ensure the solution doesn’t break principles.", type: "ZERYTH" },
     ],
   },
   {
-    question:
-      "Apa hal yang kamu lakukan untuk meningkatkan efektivitas dirimu?",
-    options: [
-      { text: "Belajar leadership dan strategi baru.", type: "SOLARIETH" },
-      { text: "Mengasah skill teknis dan analisa.", type: "VARNETH" },
-      { text: "Eksperimen dengan ide-ide segar.", type: "AERYTH" },
-      { text: "Belajar komunikasi dan empati.", type: "NIVARETH" },
-      { text: "Latihan mengambil keputusan cepat.", type: "LUNARETH" },
-      { text: "Meningkatkan kedisiplinan rutinitas.", type: "THARITH" },
-      { text: "Mencari tantangan lebih besar.", type: "ELARITH" },
-      { text: "Menguatkan prinsip etika diri.", type: "ZERYTH" },
-    ],
-  },
-  {
-    question:
-      "Bagaimana kamu biasanya berinteraksi dengan orang baru atau tim baru?",
+    question: "How do you maintain consistency in completing daily tasks?",
     options: [
       {
-        text: "Muncul percaya diri dan jadi pusat perhatian.",
+        text: "With leadership motivation and a big vision.",
         type: "SOLARIETH",
       },
       {
-        text: "Observasi dulu, bicara berdasarkan data/fakta.",
+        text: "With disciplined analysis and technical detail.",
         type: "VARNETH",
       },
-      { text: "Menyapa ramah dan berbagi ide kreatif.", type: "AERYTH" },
-      { text: "Berusaha akrab dan mendengarkan mereka.", type: "NIVARETH" },
-      { text: "To the point, langsung ajak kerja sama.", type: "LUNARETH" },
-      { text: "Formal dan sesuai aturan.", type: "THARITH" },
-      { text: "Santai dan mudah menyesuaikan diri.", type: "ELARITH" },
-      { text: "Tegas, transparan, dan jujur.", type: "ZERYTH" },
+      { text: "By trying new methods to avoid boredom.", type: "AERYTH" },
+      { text: "With support and teamwork from others.", type: "NIVARETH" },
+      { text: "With strong personal determination.", type: "LUNARETH" },
+      {
+        text: "With a stable and structured routine.",
+        type: "THARITH",
+      },
+      { text: "With new challenges as a trigger.", type: "ELARITH" },
+      { text: "With commitment to values and integrity.", type: "ZERYTH" },
     ],
   },
   {
-    question:
-      "Apa yang biasanya kamu lakukan saat ada konflik dalam pekerjaan?",
+    question: "What do you usually do to improve your effectiveness?",
     options: [
-      { text: "Ambil alih dan arahkan agar cepat selesai.", type: "SOLARIETH" },
+      { text: "Learn leadership and new strategies.", type: "SOLARIETH" },
+      { text: "Sharpen technical and analytical skills.", type: "VARNETH" },
+      { text: "Experiment with fresh ideas.", type: "AERYTH" },
+      { text: "Learn communication and empathy.", type: "NIVARETH" },
+      { text: "Practice making quick decisions.", type: "LUNARETH" },
+      { text: "Improve routine discipline.", type: "THARITH" },
+      { text: "Seek bigger challenges.", type: "ELARITH" },
+      { text: "Strengthen personal ethics.", type: "ZERYTH" },
+    ],
+  },
+  {
+    question: "How do you usually interact with new people or a new team?",
+    options: [
       {
-        text: "Gunakan logika dan analisa untuk cari solusi.",
+        text: "Appear confident and become the center of attention.",
+        type: "SOLARIETH",
+      },
+      {
+        text: "Observe first, then speak based on data/facts.",
         type: "VARNETH",
       },
-      { text: "Tawarkan ide kreatif untuk jalan tengah.", type: "AERYTH" },
-      { text: "Jadi penengah dan dengerin semua pihak.", type: "NIVARETH" },
-      { text: "Tegas, cepat ambil keputusan sendiri.", type: "LUNARETH" },
-      { text: "Ikuti prosedur yang berlaku.", type: "THARITH" },
+      { text: "Greet warmly and share creative ideas.", type: "AERYTH" },
+      { text: "Try to be friendly and listen to them.", type: "NIVARETH" },
       {
-        text: "Cari tantangan untuk menyelesaikan dengan cara baru.",
+        text: "Straight to the point, directly propose teamwork.",
+        type: "LUNARETH",
+      },
+      { text: "Formal and by the rules.", type: "THARITH" },
+      { text: "Relaxed and easily adaptable.", type: "ELARITH" },
+      { text: "Firm, transparent, and honest.", type: "ZERYTH" },
+    ],
+  },
+  {
+    question: "What do you usually do when there’s conflict at work?",
+    options: [
+      { text: "Take charge and direct to finish quickly.", type: "SOLARIETH" },
+      {
+        text: "Use logic and analysis to find a solution.",
+        type: "VARNETH",
+      },
+      { text: "Offer creative ideas as a middle ground.", type: "AERYTH" },
+      { text: "Be a mediator and listen to all sides.", type: "NIVARETH" },
+      { text: "Be firm, quickly make my own decision.", type: "LUNARETH" },
+      { text: "Follow existing procedures.", type: "THARITH" },
+      {
+        text: "Look for challenges to solve it in a new way.",
         type: "ELARITH",
       },
       {
-        text: "Pegang teguh integritas, jangan kompromi salah.",
+        text: "Stick firmly to integrity, never compromise on wrong.",
         type: "ZERYTH",
       },
     ],
   },
   {
-    question:
-      "Bagaimana kamu membantu teman atau rekan kerja yang sedang menghadapi kesulitan?",
+    question: "How do you help a friend or colleague facing difficulties?",
     options: [
-      { text: "Memberi arahan dan motivasi agar bangkit.", type: "SOLARIETH" },
-      { text: "Membantu dengan analisa atau solusi teknis.", type: "VARNETH" },
       {
-        text: "Mencarikan ide kreatif untuk mempermudah masalah.",
+        text: "Give direction and motivation to rise again.",
+        type: "SOLARIETH",
+      },
+      { text: "Help with analysis or technical solutions.", type: "VARNETH" },
+      {
+        text: "Find creative ideas to ease the problem.",
         type: "AERYTH",
       },
       {
-        text: "Mendengarkan, memberi empati, dan dukungan emosional.",
+        text: "Listen, give empathy, and emotional support.",
         type: "NIVARETH",
       },
       {
-        text: "Langsung turun tangan membantu secara praktis.",
+        text: "Directly step in to help practically.",
         type: "LUNARETH",
       },
       {
-        text: "Mengarahkan sesuai prosedur dan aturan kerja.",
+        text: "Guide according to procedures and work rules.",
         type: "THARITH",
       },
-      { text: "Menawarkan sudut pandang baru dan fleksibel.", type: "ELARITH" },
+      { text: "Offer new and flexible perspectives.", type: "ELARITH" },
       {
-        text: "Menjadi penopang dengan kejujuran dan integritas.",
+        text: "Be a support with honesty and integrity.",
         type: "ZERYTH",
       },
     ],
   },
   {
-    question:
-      "Apa peran yang biasanya kamu ambil dalam kelompok atau komunitas?",
+    question: "What role do you usually take in a group or community?",
     options: [
-      { text: "Pemimpin yang mengarahkan visi bersama.", type: "SOLARIETH" },
-      { text: "Ahli analisa yang fokus pada detail.", type: "VARNETH" },
-      { text: "Inovator yang membawa ide-ide baru.", type: "AERYTH" },
-      { text: "Mediator yang menjaga keharmonisan tim.", type: "NIVARETH" },
-      { text: "Eksekutor yang bergerak cepat.", type: "LUNARETH" },
-      { text: "Penjaga struktur dan kedisiplinan.", type: "THARITH" },
-      { text: "Penggerak yang adaptif sesuai situasi.", type: "ELARITH" },
-      { text: "Penegak nilai dan etika kelompok.", type: "ZERYTH" },
+      { text: "Leader who directs the shared vision.", type: "SOLARIETH" },
+      { text: "Analyst who focuses on details.", type: "VARNETH" },
+      { text: "Innovator who brings new ideas.", type: "AERYTH" },
+      { text: "Mediator who maintains team harmony.", type: "NIVARETH" },
+      { text: "Executor who acts quickly.", type: "LUNARETH" },
+      { text: "Keeper of structure and discipline.", type: "THARITH" },
+      { text: "Mover who adapts to the situation.", type: "ELARITH" },
+      { text: "Enforcer of group values and ethics.", type: "ZERYTH" },
     ],
   },
   {
-    question:
-      "Apa yang mendorongmu untuk mencapai tujuan tertentu dalam pekerjaan?",
+    question: "What drives you to achieve certain goals at work?",
     options: [
-      { text: "Ambisi besar untuk memimpin dan berhasil.", type: "SOLARIETH" },
+      { text: "Big ambition to lead and succeed.", type: "SOLARIETH" },
       {
-        text: "Keinginan menyelesaikan masalah secara logis.",
+        text: "Desire to solve problems logically.",
         type: "VARNETH",
       },
-      { text: "Kesempatan untuk mengekspresikan kreativitas.", type: "AERYTH" },
-      { text: "Dukungan dan kolaborasi dengan orang lain.", type: "NIVARETH" },
+      { text: "Opportunities to express creativity.", type: "AERYTH" },
+      { text: "Support and collaboration with others.", type: "NIVARETH" },
       {
-        text: "Dorongan tantangan yang harus segera ditaklukkan.",
+        text: "The push of challenges to be conquered immediately.",
         type: "LUNARETH",
       },
       {
-        text: "Kepuasan dari keteraturan dan keberhasilan stabil.",
+        text: "Satisfaction from order and stable success.",
         type: "THARITH",
       },
       {
-        text: "Semangat menghadapi situasi baru dan fleksibel.",
+        text: "Excitement facing new and flexible situations.",
         type: "ELARITH",
       },
-      { text: "Komitmen pada prinsip moral dan integritas.", type: "ZERYTH" },
+      { text: "Commitment to moral principles and integrity.", type: "ZERYTH" },
     ],
   },
   {
-    question: "Bagaimana cara kamu menentukan tujuan pribadi atau profesional?",
+    question: "How do you usually determine personal or professional goals?",
     options: [
-      { text: "Menyusun visi besar dan target strategis.", type: "SOLARIETH" },
-      { text: "Berdasarkan analisa data dan realitas.", type: "VARNETH" },
       {
-        text: "Dengan mempertimbangkan ide segar atau peluang unik.",
+        text: "Develop a big vision and strategic targets.",
+        type: "SOLARIETH",
+      },
+      { text: "Based on data analysis and reality.", type: "VARNETH" },
+      {
+        text: "By considering fresh ideas or unique opportunities.",
         type: "AERYTH",
       },
       {
-        text: "Melibatkan masukan orang-orang penting di sekitar.",
+        text: "Involving input from important people around me.",
         type: "NIVARETH",
       },
       {
-        text: "Menentukan cepat apa yang harus dicapai segera.",
+        text: "Quickly decide what must be achieved right away.",
         type: "LUNARETH",
       },
       {
-        text: "Mengikuti prosedur atau langkah yang sudah terbukti.",
+        text: "Follow proven procedures or steps.",
         type: "THARITH",
       },
-      { text: "Membiarkan tujuan berkembang sesuai situasi.", type: "ELARITH" },
-      { text: "Memastikan tujuan selaras dengan nilai moral.", type: "ZERYTH" },
+      { text: "Let goals evolve with the situation.", type: "ELARITH" },
+      { text: "Ensure goals align with moral values.", type: "ZERYTH" },
     ],
   },
   {
-    question: "Apa yang biasanya membuatmu termotivasi untuk bertindak?",
+    question: "What usually motivates you to take action?",
     options: [
-      { text: "Keinginan memimpin dan mencapai prestasi.", type: "SOLARIETH" },
-      { text: "Rasa puas saat menemukan solusi logis.", type: "VARNETH" },
-      { text: "Semangat mencoba ide kreatif baru.", type: "AERYTH" },
-      { text: "Hubungan baik dan dukungan dari orang lain.", type: "NIVARETH" },
       {
-        text: "Adrenalin menyelesaikan sesuatu dengan cepat.",
+        text: "The desire to lead and achieve accomplishments.",
+        type: "SOLARIETH",
+      },
+      {
+        text: "The satisfaction of finding logical solutions.",
+        type: "VARNETH",
+      },
+      { text: "The excitement of trying new creative ideas.", type: "AERYTH" },
+      { text: "Good relationships and support from others.", type: "NIVARETH" },
+      {
+        text: "The adrenaline of completing something quickly.",
         type: "LUNARETH",
       },
-      { text: "Keteraturan dan keberhasilan yang konsisten.", type: "THARITH" },
-      { text: "Kebebasan menghadapi tantangan baru.", type: "ELARITH" },
+      { text: "Order and consistent success.", type: "THARITH" },
+      { text: "Freedom to face new challenges.", type: "ELARITH" },
       {
-        text: "Keyakinan bahwa saya bertindak sesuai prinsip benar.",
+        text: "Belief that I act according to the right principles.",
         type: "ZERYTH",
       },
     ],
   },
   {
     question:
-      "Jika diberi kesempatan, apa hal baru yang ingin kamu coba atau capai?",
+      "If given the chance, what new thing would you like to try or achieve?",
     options: [
-      { text: "Memimpin proyek besar dengan dampak luas.", type: "SOLARIETH" },
+      { text: "Lead a big project with wide impact.", type: "SOLARIETH" },
       {
-        text: "Mencoba riset atau analisa mendalam di bidang baru.",
+        text: "Try research or deep analysis in a new field.",
         type: "VARNETH",
       },
-      { text: "Mengembangkan karya kreatif atau inovasi.", type: "AERYTH" },
-      { text: "Membangun komunitas atau tim yang solid.", type: "NIVARETH" },
+      { text: "Develop creative work or innovations.", type: "AERYTH" },
+      { text: "Build a solid community or team.", type: "NIVARETH" },
       {
-        text: "Mengejar target ambisius dalam waktu singkat.",
+        text: "Chase ambitious targets in a short time.",
         type: "LUNARETH",
       },
       {
-        text: "Mengambil sertifikasi atau jalur profesional terstruktur.",
+        text: "Take certification or a structured professional path.",
         type: "THARITH",
       },
-      { text: "Menjelajah peluang di luar zona nyaman.", type: "ELARITH" },
-      { text: "Membuat program yang berlandaskan integritas.", type: "ZERYTH" },
+      { text: "Explore opportunities beyond comfort zone.", type: "ELARITH" },
+      { text: "Create programs based on integrity.", type: "ZERYTH" },
     ],
   },
   {
-    question: "Apa yang paling membuatmu tidak nyaman dalam pekerjaan?",
+    question: "What makes you most uncomfortable at work?",
     options: [
-      { text: "Kurangnya tantangan atau arah yang jelas.", type: "SOLARIETH" },
-      { text: "Ketidakakuratan data atau informasi.", type: "VARNETH" },
-      { text: "Lingkungan yang membatasi kreativitas.", type: "AERYTH" },
-      { text: "Sikap tidak peduli atau kurang empati.", type: "NIVARETH" },
-      { text: "Proses kerja yang terlalu lambat.", type: "LUNARETH" },
-      { text: "Ketidakpastian dan perubahan mendadak.", type: "THARITH" },
-      { text: "Rutinitas monoton tanpa variasi.", type: "ELARITH" },
-      { text: "Ketidakjujuran atau perilaku tidak etis.", type: "ZERYTH" },
+      { text: "Lack of challenge or clear direction.", type: "SOLARIETH" },
+      { text: "Inaccuracy of data or information.", type: "VARNETH" },
+      { text: "An environment that restricts creativity.", type: "AERYTH" },
+      { text: "Indifference or lack of empathy.", type: "NIVARETH" },
+      { text: "Work processes that are too slow.", type: "LUNARETH" },
+      { text: "Uncertainty and sudden changes.", type: "THARITH" },
+      { text: "Monotonous routines without variety.", type: "ELARITH" },
+      { text: "Dishonesty or unethical behavior.", type: "ZERYTH" },
     ],
   },
   {
     question:
-      "Bagaimana kamu biasanya bereaksi ketika menghadapi situasi tidak sesuai harapan?",
+      "How do you usually react when facing situations that don’t go as expected?",
     options: [
-      { text: "Tetap memimpin dan mencari jalan baru.", type: "SOLARIETH" },
+      { text: "Keep leading and look for new ways.", type: "SOLARIETH" },
       {
-        text: "Menganalisis ulang untuk memahami akar masalah.",
+        text: "Re-analyze to understand the root problem.",
         type: "VARNETH",
       },
-      { text: "Mengubah pendekatan dengan ide baru.", type: "AERYTH" },
+      { text: "Change approach with new ideas.", type: "AERYTH" },
       {
-        text: "Mencari dukungan atau saran dari orang lain.",
+        text: "Seek support or advice from others.",
         type: "NIVARETH",
       },
       {
-        text: "Bertindak cepat untuk menutup celah masalah.",
+        text: "Act quickly to close problem gaps.",
         type: "LUNARETH",
       },
       {
-        text: "Bertahan dengan rencana yang ada sebaik mungkin.",
+        text: "Stick with the existing plan as best as possible.",
         type: "THARITH",
       },
       {
-        text: "Menyesuaikan diri dengan fleksibilitas tinggi.",
+        text: "Adapt with high flexibility.",
         type: "ELARITH",
       },
       {
-        text: "Tetap berpegang pada nilai yang saya yakini benar.",
+        text: "Stay committed to the values I believe are right.",
         type: "ZERYTH",
       },
     ],
   },
   {
     question:
-      "Hal apa yang biasanya kamu hindari karena tidak ingin merasa gagal?",
+      "What do you usually avoid because you don’t want to feel like a failure?",
     options: [
-      { text: "Kehilangan kendali atau pengaruh.", type: "SOLARIETH" },
-      { text: "Kesalahan perhitungan atau data yang salah.", type: "VARNETH" },
-      { text: "Gagal mengekspresikan kreativitas.", type: "AERYTH" },
-      { text: "Konflik yang merusak hubungan.", type: "NIVARETH" },
-      { text: "Tidak mampu bertindak cepat.", type: "LUNARETH" },
-      { text: "Kekacauan yang merusak keteraturan.", type: "THARITH" },
-      { text: "Terjebak rutinitas tanpa tantangan baru.", type: "ELARITH" },
-      { text: "Mengorbankan prinsip atau integritas.", type: "ZERYTH" },
+      { text: "Losing control or influence.", type: "SOLARIETH" },
+      { text: "Miscalculations or wrong data.", type: "VARNETH" },
+      { text: "Failing to express creativity.", type: "AERYTH" },
+      { text: "Conflicts that damage relationships.", type: "NIVARETH" },
+      { text: "Being unable to act quickly.", type: "LUNARETH" },
+      { text: "Chaos that destroys order.", type: "THARITH" },
+      {
+        text: "Being stuck in routine without new challenges.",
+        type: "ELARITH",
+      },
+      { text: "Compromising principles or integrity.", type: "ZERYTH" },
     ],
   },
   {
-    question:
-      "Apa yang biasanya membuatmu merasa stres atau frustrasi dalam pekerjaan?",
+    question: "What usually makes you stressed or frustrated at work?",
     options: [
-      { text: "Kurangnya arahan atau kepemimpinan jelas.", type: "SOLARIETH" },
-      { text: "Data yang tidak konsisten atau rancu.", type: "VARNETH" },
-      { text: "Lingkungan yang menekan kreativitas.", type: "AERYTH" },
-      { text: "Hubungan kerja yang penuh konflik.", type: "NIVARETH" },
-      { text: "Proses yang lambat dan bertele-tele.", type: "LUNARETH" },
-      { text: "Perubahan tiba-tiba tanpa prosedur jelas.", type: "THARITH" },
-      { text: "Tugas monoton tanpa variasi menantang.", type: "ELARITH" },
-      { text: "Tindakan yang bertentangan dengan etika.", type: "ZERYTH" },
+      { text: "Lack of direction or clear leadership.", type: "SOLARIETH" },
+      { text: "Inconsistent or unclear data.", type: "VARNETH" },
+      { text: "An environment that suppresses creativity.", type: "AERYTH" },
+      { text: "Work relationships full of conflict.", type: "NIVARETH" },
+      { text: "Processes that are slow and lengthy.", type: "LUNARETH" },
+      { text: "Sudden changes without clear procedures.", type: "THARITH" },
+      {
+        text: "Monotonous tasks without challenging variety.",
+        type: "ELARITH",
+      },
+      { text: "Actions that go against ethics.", type: "ZERYTH" },
     ],
   },
 ];
