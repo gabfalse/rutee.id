@@ -5,19 +5,25 @@ import { createTheme } from "@mui/material/styles";
 // =====================
 const lightPalette = {
   mode: "light",
-  primary: { main: "#2E8B8B", contrastText: "#FFFFFF" },
-  secondary: { main: "#FFFFFF", contrastText: "#2E8B8B" },
-  background: { default: "#F7FDFC", paper: "#FFFFFF" },
+  primary: { main: "#3A9D9D", contrastText: "#FFFFFF" },
+  secondary: { main: "#FFFFFF", contrastText: "#2E8B8B" }, // biar bubble lawan jelas
+  background: { default: "#F0FBFB", paper: "#FFFFFF" },
   text: { primary: "#2E8B8B", secondary: "#4C7E7E" },
-  divider: "#2E8B8B",
-  hover: { main: "#247171" },
-  border: { main: "#2E8B8B" },
+  divider: "#B2DFDB",
   action: {
-    active: "#2E8B8B",
-    hover: "rgba(46, 139, 139, 0.08)",
-    selected: "rgba(46, 139, 139, 0.16)",
+    active: "#3A9D9D",
+    hover: "rgba(58, 157, 157, 0.08)",
+    selected: "rgba(58, 157, 157, 0.16)",
   },
   tertiary: { main: "#247171", contrastText: "#FFFFFF" },
+
+  // ✅ tambahan khusus chat
+  chat: {
+    ownBg: "#3A9D9D",
+    ownText: "#FFFFFF",
+    otherBg: "#E0F2F2",
+    otherText: "#2E8B8B",
+  },
 };
 
 // =====================
@@ -25,19 +31,25 @@ const lightPalette = {
 // =====================
 const darkPalette = {
   mode: "dark",
-  primary: { main: "#2E8B8B", contrastText: "#FFFFFF" },
-  secondary: { main: "#212121ff", contrastText: "#E0F2F2" },
-  background: { default: "#141414ff", paper: "#212121ff" },
-  text: { primary: "#E0F2F2", secondary: "#C0DADA" },
-  divider: "#2E8B8B",
-  hover: { main: "#3FAFAF" },
-  border: { main: "#2E8B8B" },
+  primary: { main: "#3FAFAF", contrastText: "#FFFFFF" },
+  secondary: { main: "#1E1E1E", contrastText: "#E0F2F2" },
+  background: { default: "#121212", paper: "#1E1E1E" },
+  text: { primary: "#E0F2F2", secondary: "#A0C4C4" },
+  divider: "#3FAFAF",
   action: {
-    active: "#2E8B8B",
-    hover: "rgba(46, 139, 139, 0.1)",
-    selected: "rgba(46, 139, 139, 0.2)",
+    active: "#3FAFAF",
+    hover: "rgba(63, 175, 175, 0.12)",
+    selected: "rgba(63, 175, 175, 0.24)",
   },
-  tertiary: { main: "#3FAFAF", contrastText: "#2a2a2aff" },
+  tertiary: { main: "#3FAFAF", contrastText: "#FFFFFF" },
+
+  // ✅ tambahan khusus chat
+  chat: {
+    ownBg: "#3FAFAF",
+    ownText: "#FFFFFF",
+    otherBg: "#2C2C2C",
+    otherText: "#E0F2F2",
+  },
 };
 
 // =====================
@@ -80,8 +92,8 @@ export const getAppTheme = (mode = "light") => {
           root: {
             boxShadow:
               mode === "light"
-                ? "0 4px 12px rgba(0,0,0,0.1)"
-                : "0 4px 12px rgba(34, 34, 34, 0.3)",
+                ? "0 4px 12px rgba(0,0,0,0.08)"
+                : "0 4px 12px rgba(0,0,0,0.5)",
           },
         },
       },
@@ -103,26 +115,29 @@ export const getAppTheme = (mode = "light") => {
       container: {
         fontFamily: "Arial, sans-serif",
         fontSize: "12px",
-        color: "#000",
+        color: mode === "dark" ? "#E0F2F2" : "#000",
         lineHeight: 1.3,
-        backgroundColor: "#fff",
+        backgroundColor: mode === "dark" ? "#1E1E1E" : "#fff",
         padding: "16px",
         maxWidth: "595px",
         margin: "0 auto",
       },
       header: { textAlign: "center", marginBottom: "8px" },
-      h1: { fontSize: "36px", fontWeight: "bold", margin: 0, color: "#000" },
-      h2: {
-        fontSize: "16px",
-        fontWeight: "bold",
-        marginBottom: "4px",
-        color: "#000",
-      },
-      p: { fontSize: "12px", margin: "2px 0", color: "#000" },
+      h1: { fontSize: "36px", fontWeight: "bold", margin: 0 },
+      h2: { fontSize: "16px", fontWeight: "bold", marginBottom: "4px" },
+      p: { fontSize: "12px", margin: "2px 0" },
       ul: { paddingLeft: "18px", margin: 0 },
       li: { fontSize: "11px", marginBottom: "2px" },
-      divider: { borderTop: "0.3px solid #000", margin: "8px 0" },
-      link: { color: "#000", textDecoration: "none", fontSize: "11px" },
+      divider: {
+        borderTop: "0.3px solid",
+        margin: "8px 0",
+        borderColor: palette.divider,
+      },
+      link: {
+        textDecoration: "none",
+        fontSize: "11px",
+        color: palette.primary.main,
+      },
     },
   });
 };

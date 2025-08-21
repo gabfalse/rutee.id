@@ -30,9 +30,9 @@ const defaultSkill = {
 };
 
 const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+  const userId = propUserId || paramUserId || user?.id;
 
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
   const [form, setForm] = useState(defaultSkill);
   const [error, setError] = useState("");
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchSkills = async () => {
     if (!userId || !token) return;
@@ -54,10 +54,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
       if (limit) data = data.slice(0, limit);
       setSkills(data);
     } catch (err) {
-      console.error(
-        "❌ Error fetch skills:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch skills:", err.response || err.message);
     } finally {
       setLoading(false);
     }
@@ -69,10 +66,8 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
 
   const handleSave = async () => {
     setError("");
-
     if (!userId || !token) return;
 
-    // 🔒 Validasi: jika level Expert maka sertifikat wajib diisi
     if (form.level === "Expert" && !form.certificate_url.trim()) {
       setError("URL wajib diisi untuk level Expert!");
       return;
@@ -89,7 +84,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultSkill);
       fetchSkills();
     } catch (err) {
-      console.error("❌ Error save skill:", err.response || err.message || err);
+      console.error("❌ Error save skill:", err.response || err.message);
     }
   };
 
@@ -104,10 +99,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
       });
       fetchSkills();
     } catch (err) {
-      console.error(
-        "❌ Error delete skill:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete skill:", err.response || err.message);
     }
   };
 
@@ -134,14 +126,14 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {skills.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada skill
+          No skill yet
         </Typography>
       ) : (
         <Box display="flex" flexWrap="wrap" gap={1} justifyContent="center">
@@ -179,14 +171,13 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>{form.id ? "Edit Skill" : "Tambah Skill"}</DialogTitle>
+        <DialogTitle>{form.id ? "Edit Skill" : "Add Skill"}</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
@@ -211,7 +202,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
 
           <TextField
             margin="dense"
-            label="URL Web / Drive Sertifikat"
+            label="Certficate URL"
             fullWidth
             value={form.certificate_url || ""}
             onChange={(e) =>
@@ -220,7 +211,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
             required={form.level === "Expert"}
             helperText={
               form.level === "Expert"
-                ? "Wajib diisi jika level Expert"
+                ? "Expert need to fill the URL"
                 : "Opsional"
             }
             error={form.level === "Expert" && !form.certificate_url}
@@ -233,9 +224,9 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

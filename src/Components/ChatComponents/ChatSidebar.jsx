@@ -231,24 +231,21 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={() => setConfirmOpen(true)}>
-          Hapus Chat Room
-        </MenuItem>
+        <MenuItem onClick={() => setConfirmOpen(true)}>Delete Chat</MenuItem>
       </Menu>
 
       {/* Konfirmasi hapus */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Hapus Chat Room</DialogTitle>
+        <DialogTitle>Delete Chat</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Apakah Anda yakin ingin menghapus chat room ini beserta semua
-            pesannya?
+            Are you sure want to delete This message?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Batal</Button>
           <Button onClick={handleDeleteRoom} color="error">
-            Hapus
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,4 +1,3 @@
-// src/components/Profile/EducationList.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -20,7 +19,6 @@ import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
 
-// Sesuaikan default education dengan DB baru
 const defaultEducation = {
   id: "",
   institution: "",
@@ -32,33 +30,30 @@ const defaultEducation = {
 };
 
 const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+  const userId = propUserId || paramUserId || user?.id;
 
   const [educations, setEducations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultEducation);
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchEducations = async () => {
     if (!userId || !token) return;
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-education.php`,
+        `https://rutee.id/dapur/profile/edit-education.php?user_id=${userId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.educations || [];
       if (limit) data = data.slice(0, limit);
       setEducations(data);
     } catch (err) {
-      console.error(
-        "❌ Error fetch educations:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch educations:", err.response || err.message);
     } finally {
       setLoading(false);
     }
@@ -75,13 +70,9 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
       await axios[method](
         `https://rutee.id/dapur/profile/edit-education.php`,
         {
-          id: form.id,
-          institution: form.institution,
-          major: form.major,
-          start_year: form.start_year,
+          ...form,
+          user_id: userId,
           end_year: form.still_study ? null : form.end_year,
-          still_study: form.still_study,
-          description: form.description,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -89,10 +80,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultEducation);
       fetchEducations();
     } catch (err) {
-      console.error(
-        "❌ Error save education:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error save education:", err.response || err.message);
     }
   };
 
@@ -102,14 +90,11 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       await axios.delete(`https://rutee.id/dapur/profile/edit-education.php`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { id },
+        data: { id, user_id: userId },
       });
       fetchEducations();
     } catch (err) {
-      console.error(
-        "❌ Error delete education:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete education:", err.response || err.message);
     }
   };
 
@@ -135,14 +120,14 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {educations.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada education
+          No education yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={1}>
@@ -180,7 +165,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Hapus">
+                  <Tooltip title="Delete">
                     <Delete
                       fontSize="small"
                       sx={{ cursor: "pointer" }}
@@ -194,7 +179,6 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -202,7 +186,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
         maxWidth="sm"
       >
         <DialogTitle>
-          {form.id ? "Edit Education" : "Tambah Education"}
+          {form.id ? "Edit Education" : "Add Education"}
         </DialogTitle>
         <DialogContent>
           <TextField
@@ -246,7 +230,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
                 }
               />
             }
-            label="Masih Studi"
+            label="Still Studying"
           />
           <TextField
             margin="dense"
@@ -259,9 +243,9 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,20 +8,18 @@ import {
   Stack,
   Typography,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 
-// Fungsi helper time ago dari timestamp MySQL (UTC safe)
+// Fungsi hitung waktu
 const timeAgo = (mysqlTimestamp) => {
   if (!mysqlTimestamp) return "";
-
-  // Tambahkan 'Z' agar JS menganggap timestamp MySQL sebagai UTC
   const messageTime = new Date(mysqlTimestamp + "Z");
   const now = new Date();
-  const diff = Math.floor((now - messageTime) / 1000); // selisih detik
-
+  const diff = Math.floor((now - messageTime) / 1000);
   if (diff < 60) return `${diff} second${diff !== 1 ? "s" : ""} ago`;
   const minutes = Math.floor(diff / 60);
   if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
@@ -38,30 +36,30 @@ const timeAgo = (mysqlTimestamp) => {
 };
 
 const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
-  const { user_id, avatar: userAvatar } = useAuth();
+  const { user } = useAuth();
+  const authId = user?.id;
+  const userAvatar = user?.avatar || user?.profile_url || "/default-avatar.png";
+
   const theme = useTheme();
   const navigate = useNavigate();
   const scrollRef = useRef();
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
 
-  // Sync messages saat parent update
-  useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
+  useEffect(() => setMessages(initialMessages), [initialMessages]);
 
-  // Scroll otomatis ke bawah
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [messages]);
 
   const handleSend = async () => {
-    if (!text.trim()) return;
-
+    if (!text.trim() || !authId) return;
     const token = localStorage.getItem("token");
-
     try {
       const res = await fetch("https://rutee.id/dapur/chat/send-message.php", {
         method: "POST",
@@ -69,31 +67,24 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
           "Content-Type": "application/x-www-form-urlencoded",
           Authorization: `Bearer ${token}`,
         },
-        body: new URLSearchParams({
-          room_id: roomId,
-          message: text.trim(),
-        }),
+        body: new URLSearchParams({ room_id: roomId, message: text.trim() }),
       });
-
       const data = await res.json();
       if (data.success) {
         const newMessage = {
           id: data.message_id,
           sender_id: data.sender_id,
           message: data.content,
-          created_at: data.created_at, // timestamp MySQL
+          created_at: data.created_at,
           sender_name: "You",
-          sender_avatar: userAvatar || "/default-avatar.png",
+          sender_avatar: userAvatar,
         };
-
-        // Update parent state
+        setMessages((prev) => [...prev, newMessage]);
         if (onSendExternal) onSendExternal(newMessage);
         setText("");
-      } else {
-        console.error("Gagal mengirim pesan:", data.message);
       }
     } catch (err) {
-      console.error("Error mengirim pesan:", err);
+      console.error("Error sending message", err);
     }
   };
 
@@ -101,11 +92,24 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
     if (sender_id) navigate(`/profile/${sender_id}`);
   };
 
+  if (!user) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100%"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >
-      {/* Chat list */}
+      {/* Messages */}
       <Box
         ref={scrollRef}
         sx={{
@@ -113,24 +117,24 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
           minHeight: 0,
           overflowY: "auto",
           p: 2,
-          bgcolor: "background.default",
+          bgcolor: theme.palette.background.default,
         }}
       >
         {messages
           .filter((msg) => msg && msg.sender_id)
           .map((msg) => {
-            const isOwn = msg.sender_id === user_id;
+            const isOwn = String(msg.sender_id) === String(authId);
             const senderName = msg.sender_name || "Unknown";
             const senderAvatar = msg.sender_avatar || "/default-avatar.png";
             const textMsg = msg.message || "";
-            const time = timeAgo(msg.created_at); // gunakan timestamp MySQL
+            const time = timeAgo(msg.created_at);
 
             return (
               <Stack
                 key={msg.id}
                 direction={isOwn ? "row-reverse" : "row"}
                 spacing={1}
-                sx={{ mb: 1, alignItems: "flex-start" }}
+                sx={{ mb: 1, alignItems: "flex-end" }}
               >
                 <Avatar
                   src={senderAvatar}
@@ -141,20 +145,30 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
                 <Box
                   sx={{
                     p: 1.5,
-                    borderRadius: 2,
                     maxWidth: "70%",
                     bgcolor: isOwn
-                      ? theme.palette.secondary.main
-                      : theme.palette.primary.dark,
-                    color: "white",
+                      ? theme.palette.grey[300]
+                      : theme.palette.secondary.main,
+                    color: isOwn
+                      ? theme.palette.primary.contrastText
+                      : theme.palette.secondary.contrastText,
                     wordBreak: "break-word",
+                    borderRadius: isOwn
+                      ? "16px 16px 0 16px"
+                      : "16px 16px 16px 0",
+                    ml: isOwn ? 0 : 1,
+                    mr: isOwn ? 1 : 0,
                   }}
                 >
                   {!isOwn && (
                     <Typography
                       variant="subtitle2"
                       fontWeight={600}
-                      sx={{ mb: 0.5, cursor: "pointer" }}
+                      sx={{
+                        mb: 0.5,
+                        cursor: "pointer",
+                        color: theme.palette.text.primary,
+                      }}
                       onClick={() => handleProfileClick(msg.sender_id)}
                     >
                       {senderName}
@@ -170,7 +184,7 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
           })}
       </Box>
 
-      {/* Chat input */}
+      {/* Input box */}
       <Paper
         sx={{
           p: 1,

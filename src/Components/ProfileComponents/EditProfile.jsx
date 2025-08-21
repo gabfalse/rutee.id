@@ -220,13 +220,13 @@ export default function EditProfile() {
         {/* Form */}
         <Box display="flex" flexDirection="column" gap={2} mt={4}>
           <TextField
-            label="Nama"
+            label="Name"
             value={profile.name}
             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
             fullWidth
           />
           <TextField
-            label="Bio"
+            label="Professional Summary"
             multiline
             rows={3}
             value={profile.bio}
@@ -247,7 +247,7 @@ export default function EditProfile() {
           </TextField>
 
           <DatePicker
-            label="Tanggal Lahir"
+            label="Birth date"
             value={profile.birthdate}
             onChange={(newValue) =>
               setProfile({
@@ -261,7 +261,7 @@ export default function EditProfile() {
           />
 
           <TextField
-            label="Negara"
+            label="Country"
             value={profile.country}
             onChange={(e) =>
               setProfile({ ...profile, country: e.target.value })
@@ -269,7 +269,7 @@ export default function EditProfile() {
             fullWidth
           />
           <TextField
-            label="Provinsi"
+            label="Province"
             value={profile.province}
             onChange={(e) =>
               setProfile({ ...profile, province: e.target.value })
@@ -277,7 +277,7 @@ export default function EditProfile() {
             fullWidth
           />
           <TextField
-            label="Kota"
+            label="City"
             value={profile.city}
             onChange={(e) => setProfile({ ...profile, city: e.target.value })}
             fullWidth
@@ -305,8 +305,8 @@ export default function EditProfile() {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Karir (maks 2)"
-                placeholder="Ketik dan pilih karir"
+                label="Careers (maks 2)"
+                placeholder="Type and select or enter career"
                 fullWidth
               />
             )}
@@ -319,7 +319,7 @@ export default function EditProfile() {
             disabled={loading}
             sx={{ mt: 2 }}
           >
-            {loading ? <CircularProgress size={24} /> : "Simpan Perubahan"}
+            {loading ? <CircularProgress size={24} /> : "Save Change"}
           </Button>
         </Box>
       </Paper>

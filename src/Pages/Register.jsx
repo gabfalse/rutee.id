@@ -11,6 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import GoogleLoginButton from "../Components/GoogleLoginButton";
 
 export default function RegisterWithOtp() {
   const [step, setStep] = useState(1);
@@ -212,7 +213,13 @@ export default function RegisterWithOtp() {
               </Button>
             </form>
 
-            <Stack mt={3} direction="row" justifyContent="center" spacing={1}>
+            {/* Tombol Google */}
+            <Box mt={2} mb={2} display="flex" justifyContent="center">
+              <GoogleLoginButton />
+            </Box>
+
+            {/* Link sudah punya akun */}
+            <Stack mt={1} direction="row" justifyContent="center" spacing={1}>
               <Typography variant="body2">Sudah punya akun?</Typography>
               <Link
                 component={RouterLink}

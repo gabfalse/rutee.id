@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   IconButton,
@@ -14,6 +14,7 @@ import {
   useMediaQuery,
   Button,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import WorkIcon from "@mui/icons-material/Work";
@@ -27,29 +28,57 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import axios from "axios";
 
 export default function NavigationButton({ mode, setMode }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // ================== Fetch profile untuk avatar ==================
+  useEffect(() => {
+    async function fetchProfile() {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(
+          `https://rutee.id/dapur/profile/get-profile.php?user_id=${user.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data?.profile) setProfileData(res.data.profile);
+      } catch (err) {
+        console.error("Fetch profile error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, [user?.id]);
+
   const menuItems = [
     {
       label: "Profile",
-      path: `/profile/${user.id}`,
+      path: `/profile/${user?.id}`,
       icon: <AccountCircleIcon />,
       active: true,
     },
     {
-      label: "Hubungi Admin",
+      label: "Contact Admin",
       path: "/contact-admin",
       icon: <ContactMailIcon />,
       active: true,
     },
     {
-      label: "Rekomendasi Karir",
+      label: "Career Recommendations",
       path: "/career-recommendations",
       icon: <WorkIcon />,
       active: false,
@@ -67,7 +96,7 @@ export default function NavigationButton({ mode, setMode }) {
       icon: <LeaderboardIcon />,
       active: false,
     },
-    { label: "Logout", path: "/logout", icon: <LogoutIcon />, active: true },
+    { label: "Sign Out", path: "/logout", icon: <LogoutIcon />, active: true },
   ];
 
   const toggleDrawer = (state) => () => setOpen(state);
@@ -95,7 +124,7 @@ export default function NavigationButton({ mode, setMode }) {
           onClick={() => navigate("/login")}
           size={isMobile ? "medium" : "large"}
         >
-          Login
+          Sign In
         </Button>
       </Box>
     );
@@ -116,14 +145,18 @@ export default function NavigationButton({ mode, setMode }) {
             "&:hover": { backgroundColor: theme.palette.action.hover },
           }}
         >
-          <Avatar
-            src={user.profile_image_url || undefined}
-            alt={user.display_name || user.username}
-            sx={{ width: 48, height: 48 }}
-          >
-            {!user.profile_image_url &&
-              (user.display_name?.[0] || user.username?.[0] || "?")}
-          </Avatar>
+          {loading ? (
+            <CircularProgress size={40} />
+          ) : (
+            <Avatar
+              src={profileData?.profile_image_url || undefined}
+              alt={user.display_name || user.username}
+              sx={{ width: 48, height: 48 }}
+            >
+              {!profileData?.profile_image_url &&
+                (user.display_name?.[0] || user.username?.[0] || "?")}
+            </Avatar>
+          )}
         </IconButton>
       </Tooltip>
 
@@ -133,19 +166,17 @@ export default function NavigationButton({ mode, setMode }) {
         onClose={toggleDrawer(false)}
         PaperProps={{
           sx: {
-            width: isMobile ? "75vw" : 280,
+            width: isMobile ? "80vw" : 280,
             bgcolor: theme.palette.background.paper,
             boxShadow: theme.shadows[6],
+            height: "100%",
+            overflowY: "auto", // scrollable jika menu panjang
           },
         }}
       >
         <Box
           role="presentation"
-          onKeyDown={(event) => {
-            if (event.key === "Tab" || event.key === "Shift") return;
-            setOpen(false);
-          }}
-          sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          sx={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
           {/* Header */}
           <Box
@@ -159,15 +190,15 @@ export default function NavigationButton({ mode, setMode }) {
             }}
           >
             <Avatar
-              src={user.profile_image_url || undefined}
+              src={profileData?.profile_image_url}
               alt={user.display_name || user.username}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: isMobile ? 36 : 40, height: isMobile ? 36 : 40 }}
             >
-              {!user.profile_image_url &&
+              {!profileData?.profile_image_url &&
                 (user.display_name?.[0] || user.username?.[0] || "?")}
             </Avatar>
-            <Box>
-              <Typography variant="subtitle1" noWrap>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant={isMobile ? "body2" : "subtitle1"} noWrap>
                 {user.display_name || user.username}
               </Typography>
               <Typography variant="caption" color="text.secondary" noWrap>
@@ -179,37 +210,6 @@ export default function NavigationButton({ mode, setMode }) {
           {/* List Menu */}
           <List sx={{ flexGrow: 1 }}>
             {menuItems.map(({ label, path, icon, active }, index) => {
-              // Tombol Logout ditempatkan paling bawah, jadi kita akan sisipkan tombol Dark/Light sebelum Logout
-              if (label === "Logout") {
-                return (
-                  <Box key={index}>
-                    {/* Tombol Dark / Light */}
-                    <ListItemButton onClick={handleToggleMode}>
-                      <ListItemIcon>
-                        {mode === "light" ? (
-                          <Brightness4Icon />
-                        ) : (
-                          <Brightness7Icon />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          mode === "light" ? "Mode Gelap" : "Mode Terang"
-                        }
-                      />
-                    </ListItemButton>
-
-                    {/* Tombol Logout */}
-                    <ListItemButton onClick={() => handleNavigate(path)}>
-                      <ListItemIcon sx={{ color: theme.palette.primary.main }}>
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText primary={label} />
-                    </ListItemButton>
-                  </Box>
-                );
-              }
-
               const button = (
                 <ListItemButton
                   key={index}
@@ -225,11 +225,15 @@ export default function NavigationButton({ mode, setMode }) {
                   <ListItemIcon sx={{ color: theme.palette.primary.main }}>
                     {icon}
                   </ListItemIcon>
-                  <ListItemText primary={label} />
+                  <ListItemText
+                    primary={label}
+                    primaryTypographyProps={{ noWrap: true }}
+                  />
                 </ListItemButton>
               );
 
-              return active ? (
+              // Tooltip hanya untuk desktop
+              return isMobile || active ? (
                 button
               ) : (
                 <Tooltip key={index} title="Coming soon" arrow placement="left">
@@ -237,6 +241,20 @@ export default function NavigationButton({ mode, setMode }) {
                 </Tooltip>
               );
             })}
+
+            {/* Toggle Theme */}
+            {/* <ListItemButton onClick={handleToggleMode}>
+              <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  mode === "light"
+                    ? "Switch to Dark Mode"
+                    : "Switch to Light Mode"
+                }
+              />
+            </ListItemButton> */}
           </List>
 
           <Divider />

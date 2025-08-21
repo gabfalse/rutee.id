@@ -75,14 +75,14 @@ const Navbar = () => {
           ) : (
             <>
               <Button variant="text" color="primary" onClick={handleLoginClick}>
-                Masuk
+                Sign In
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleRegisterClick}
               >
-                Daftar
+                Sign Up
               </Button>
             </>
           )}

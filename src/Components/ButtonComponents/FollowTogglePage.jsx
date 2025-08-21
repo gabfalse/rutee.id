@@ -60,10 +60,7 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
         }
       }
     } catch (err) {
-      console.error(
-        "[DEBUG] Gagal toggle follow:",
-        err.response?.data ?? err.message
-      );
+      console.error("Error", err.response?.data ?? err.message);
     } finally {
       setLoading(false);
     }

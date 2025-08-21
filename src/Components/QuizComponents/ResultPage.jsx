@@ -196,7 +196,11 @@ const ResultPage = () => {
               <Box mt={3}>
                 <Typography variant="caption" color="textSecondary">
                   Hasil ini disimpan pada{" "}
-                  {new Date(result.created_at).toLocaleString()}
+                  {new Date(result.created_at).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </Typography>
               </Box>
             </Box>

@@ -28,16 +28,16 @@ const defaultCertificate = {
 };
 
 const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+  const userId = propUserId || paramUserId || user?.id;
 
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultCertificate);
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchCertificates = async () => {
     if (!userId || !token) return;
@@ -48,12 +48,12 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.certificates || [];
-      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      if (limit) data = data.slice(0, limit);
       setCertificates(data);
     } catch (err) {
       console.error(
         "❌ Error fetch certificates:",
-        err.response || err.message || err
+        err.response || err.message
       );
     } finally {
       setLoading(false);
@@ -77,17 +77,14 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultCertificate);
       fetchCertificates();
     } catch (err) {
-      console.error(
-        "❌ Error save certificate:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error save certificate:", err.response || err.message);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Yakin hapus sertifikat ini?")) return;
+    if (!window.confirm("Are you sure want to delete this certificate?"))
+      return;
     if (!userId || !token) return;
-
     try {
       await axios.delete(
         `https://rutee.id/dapur/profile/edit-certificate.php`,
@@ -100,7 +97,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
     } catch (err) {
       console.error(
         "❌ Error delete certificate:",
-        err.response || err.message || err
+        err.response || err.message
       );
     }
   };
@@ -127,14 +124,14 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {certificates.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada sertifikat
+          No Certificate Yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={2}>
@@ -162,24 +159,22 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
                 )}
                 <Typography fontWeight="bold">{cert.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Diterbitkan oleh {cert.issued_by} - {cert.issue_date}
+                  Issued By {cert.issued_by} - {cert.issue_date}
                 </Typography>
                 {cert.description && (
                   <Typography variant="body2">{cert.description}</Typography>
                 )}
                 {cert.certificate_url && (
-                  <Typography variant="body2">
-                    <Button
-                      href={cert.certificate_url}
-                      sx={{ mt: 1 }}
-                      target="_blank"
-                      variant="outlined"
-                      rel="noreferrer"
-                      size="small"
-                    >
-                      Lihat
-                    </Button>
-                  </Typography>
+                  <Button
+                    href={cert.certificate_url}
+                    sx={{ mt: 1 }}
+                    target="_blank"
+                    variant="outlined"
+                    rel="noreferrer"
+                    size="small"
+                  >
+                    View
+                  </Button>
                 )}
               </Box>
 
@@ -195,7 +190,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Hapus">
+                  <Tooltip title="Delete">
                     <Delete
                       fontSize="small"
                       sx={{ cursor: "pointer" }}
@@ -209,7 +204,6 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -217,26 +211,26 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
         maxWidth="sm"
       >
         <DialogTitle>
-          {form.id ? "Edit Certificate" : "Tambah Certificate"}
+          {form.id ? "Edit Certificate" : "Add Certificate"}
         </DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
-            label="Nama Sertifikat"
+            label="Title"
             fullWidth
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Diterbitkan Oleh"
+            label="Issued By"
             fullWidth
             value={form.issued_by}
             onChange={(e) => setForm({ ...form, issued_by: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Tanggal Terbit"
+            label="Issued Date"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
@@ -245,7 +239,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="Deskripsi"
+            label="Description"
             fullWidth
             multiline
             rows={3}
@@ -254,7 +248,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="URL Sertifikat"
+            label="Certificate URL"
             fullWidth
             value={form.certificate_url || ""}
             onChange={(e) =>
@@ -263,7 +257,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="URL Gambar"
+            label="Image URL"
             fullWidth
             value={form.image_url || ""}
             onChange={(e) => setForm({ ...form, image_url: e.target.value })}
@@ -272,7 +266,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Batal</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

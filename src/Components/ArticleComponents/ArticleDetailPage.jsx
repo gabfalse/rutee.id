@@ -11,12 +11,13 @@ import {
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
+import ArticleReactions from "./ArticleReactions";
 
 const API_URL = "https://rutee.id/dapur/article/get-article-detail.php";
 
 export default function ArticleDetailPage() {
   const { article_id } = useParams(); // sesuai routing
-  const { token } = useAuth();
+  const { token, user } = useAuth(); // ⬅️ pastikan AuthContext expose user.id
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -71,7 +72,7 @@ export default function ArticleDetailPage() {
     return (
       <Box textAlign="center" mt={5}>
         <Typography variant="h6" color="text.secondary">
-          Artikel tidak ditemukan
+          Article not found
         </Typography>
       </Box>
     );
@@ -102,7 +103,7 @@ export default function ArticleDetailPage() {
           color="text.secondary"
           sx={{ textAlign: "center", mb: 2 }}
         >
-          Oleh {article.author_name || "Anonim"} •{" "}
+          Author : {article.author_name || "Anonim"} •{" "}
           {article.created_at
             ? new Date(article.created_at).toLocaleDateString("id-ID", {
                 day: "numeric",
@@ -131,16 +132,27 @@ export default function ArticleDetailPage() {
         <Divider sx={{ mb: 3 }} />
 
         {/* Konten */}
-        <Typography
-          variant="body1"
-          sx={{
-            lineHeight: 1.8,
-            whiteSpace: "pre-line",
-            textAlign: "justify",
-          }}
-        >
-          {article.content}
-        </Typography>
+        {article.content && (
+          <Box>
+            {article.content
+              .split("\n")
+              .filter((p) => p.trim() !== "")
+              .map((p, idx) => (
+                <Typography
+                  key={idx}
+                  variant="body1"
+                  sx={{
+                    lineHeight: 1.8,
+                    whiteSpace: "pre-line",
+                    textAlign: "justify",
+                    mb: 2,
+                  }}
+                >
+                  {p}
+                </Typography>
+              ))}
+          </Box>
+        )}
 
         {/* Tags */}
         {article.tags && (
@@ -150,6 +162,13 @@ export default function ArticleDetailPage() {
             ))}
           </Box>
         )}
+
+        {/* 🔥 Reactions (Like + Comments) */}
+        <ArticleReactions
+          articleId={article_id}
+          currentUserId={user?.id}
+          token={token}
+        />
       </Paper>
     </Box>
   );

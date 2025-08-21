@@ -13,11 +13,13 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 
 const API_URL = "https://rutee.id/dapur/article/articles.php";
+const UPLOAD_URL = "https://rutee.id/dapur/article/upload-article-image.php";
 
 export default function ArticleFormPage() {
   const [alert, setAlert] = useState({
@@ -27,9 +29,10 @@ export default function ArticleFormPage() {
   });
   const [articleIdCreated, setArticleIdCreated] = useState(null);
 
-  const { id } = useParams(); // id untuk edit
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { token, user_id: loggedInUserId } = useAuth(); // ambil user_id login
+  const { token, user } = useAuth();
+  const loggedInUserId = user?.id;
 
   const [form, setForm] = useState({
     title: "",
@@ -37,13 +40,13 @@ export default function ArticleFormPage() {
     image_url: "",
     tags: "",
     status: "draft",
-    user_id: "", // simpan user_id pemilik
+    user_id: "",
   });
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const isOwner = id ? form.user_id === loggedInUserId : true; // cek kepemilikan
+  const isOwner = id ? form.user_id === loggedInUserId : true;
 
-  // Ambil data artikel untuk edit
   useEffect(() => {
     if (!id || !token) return;
     const fetchArticle = async () => {
@@ -52,27 +55,24 @@ export default function ArticleFormPage() {
         const res = await axios.get(`${API_URL}?id=${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const article = res.data.article;
         if (!article) throw new Error("Artikel tidak ditemukan");
 
-        // cek kepemilikan
         if (article.user_id !== loggedInUserId) {
           setAlert({
             open: true,
-            message: "Anda tidak memiliki izin untuk mengedit artikel ini",
+            message: "Unauthorzed",
             severity: "error",
           });
-          navigate("/articles"); // redirect ke daftar artikel
+          navigate("/articles");
           return;
         }
-
         setForm(article);
       } catch (err) {
         console.error(err.response || err);
         setAlert({
           open: true,
-          message: "Gagal memuat artikel",
+          message: "Failed to load article",
           severity: "error",
         });
         navigate("/articles");
@@ -85,12 +85,29 @@ export default function ArticleFormPage() {
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+  const handleFileChange = (e) => setFile(e.target.files[0]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!token || !isOwner) return; // aman jika bukan pemilik
+    if (!token || !isOwner) return;
     setLoading(true);
+
     try {
+      let imageUrl = form.image_url;
+
+      if (file) {
+        const formData = new FormData();
+        formData.append("image", file);
+        const uploadRes = await axios.post(UPLOAD_URL, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        if (uploadRes.data.success) imageUrl = uploadRes.data.url;
+        else throw new Error(uploadRes.data.error || "Upload gagal");
+      }
+
       const res = await axios({
         method: id ? "put" : "post",
         url: API_URL,
@@ -98,22 +115,22 @@ export default function ArticleFormPage() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        data: id ? { ...form, id } : form,
+        data: id
+          ? { ...form, id, image_url: imageUrl }
+          : { ...form, user_id: loggedInUserId, image_url: imageUrl },
       });
 
-      const returnedId = id || res.data.id; // pakai id baru jika create
-      setArticleIdCreated(returnedId);
-
+      setArticleIdCreated(id || res.data.id);
       setAlert({
         open: true,
-        message: id ? "Artikel berhasil diupdate" : "Artikel berhasil dibuat",
+        message: id ? "Update success" : "Article created",
         severity: "success",
       });
     } catch (err) {
       console.error(err.response || err);
       setAlert({
         open: true,
-        message: "Terjadi kesalahan saat submit",
+        message: "Error occured",
         severity: "error",
       });
     } finally {
@@ -123,22 +140,18 @@ export default function ArticleFormPage() {
 
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", my: 4, px: 2 }}>
-      {/* === FORM === */}
       <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, mb: 4 }}>
-        {/* Tombol Back */}
         <Button variant="outlined" onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-          Kembali
+          Back
         </Button>
         <Box sx={{ textAlign: "center" }}>
           <Typography variant="h5" fontWeight="bold" mb={2}>
-            {id ? "Edit Artikel" : "Buat Artikel Baru"}
+            {id ? "Edit Article" : "Create New Article"}
           </Typography>
         </Box>
 
         {!isOwner && id ? (
-          <Typography color="error">
-            Anda tidak memiliki izin untuk mengedit artikel ini
-          </Typography>
+          <Typography color="error">Unauthorized</Typography>
         ) : (
           <Box
             component="form"
@@ -146,7 +159,7 @@ export default function ArticleFormPage() {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <TextField
-              label="Judul"
+              label="Title"
               name="title"
               value={form.title}
               onChange={handleChange}
@@ -155,7 +168,7 @@ export default function ArticleFormPage() {
               disabled={!isOwner}
             />
             <TextField
-              label="Konten"
+              label="Content"
               name="content"
               value={form.content}
               onChange={handleChange}
@@ -165,24 +178,63 @@ export default function ArticleFormPage() {
               fullWidth
               disabled={!isOwner}
             />
+
+            {/* Styled Upload Button + Preview */}
+            <Box>
+              <Button
+                variant="contained"
+                component="label"
+                startIcon={<PhotoCamera />}
+                sx={{ textTransform: "none", mb: 1 }}
+                disabled={!isOwner}
+              >
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </Button>
+
+              {file && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2">Image Preview:</Typography>
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt="preview"
+                    style={{
+                      maxWidth: "200px",
+                      marginTop: "5px",
+                      borderRadius: 5,
+                    }}
+                  />
+                </Box>
+              )}
+              {!file && form.image_url && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2">Image:</Typography>
+                  <img
+                    src={form.image_url}
+                    alt="current"
+                    style={{
+                      maxWidth: "200px",
+                      marginTop: "5px",
+                      borderRadius: 5,
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
             <TextField
-              label="Image URL"
-              name="image_url"
-              value={form.image_url}
-              onChange={handleChange}
-              fullWidth
-              disabled={!isOwner}
-            />
-            <TextField
-              label="Tags"
+              label="Tags (Separate with commas)"
               name="tags"
               value={form.tags}
               onChange={handleChange}
               fullWidth
               disabled={!isOwner}
             />
-
-            {/* === Status Dropdown === */}
             <FormControl fullWidth>
               <InputLabel id="status-label">Status</InputLabel>
               <Select
@@ -194,7 +246,7 @@ export default function ArticleFormPage() {
                 disabled={!isOwner}
               >
                 <MenuItem value="draft">Draft</MenuItem>
-                <MenuItem value="published">Published</MenuItem>
+                <MenuItem value="published">Publish</MenuItem>
               </Select>
             </FormControl>
 
@@ -209,16 +261,15 @@ export default function ArticleFormPage() {
                 ) : id ? (
                   "Update"
                 ) : (
-                  "Buat"
+                  "Create"
                 )}
               </Button>
-
               {articleIdCreated && (
                 <Button
                   variant="outlined"
                   onClick={() => navigate(`/article/${articleIdCreated}`)}
                 >
-                  Lihat Artikel
+                  View Artikel
                 </Button>
               )}
             </Box>
@@ -226,7 +277,6 @@ export default function ArticleFormPage() {
         )}
       </Paper>
 
-      {/* Snackbar Alert */}
       <Snackbar
         open={alert.open}
         autoHideDuration={4000}

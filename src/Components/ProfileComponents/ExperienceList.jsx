@@ -9,7 +9,6 @@ import {
   DialogActions,
   TextField,
   CircularProgress,
-  Chip,
   Paper,
   Tooltip,
   FormControlLabel,
@@ -32,16 +31,16 @@ const defaultExperience = {
 };
 
 const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+  const userId = propUserId || paramUserId || user?.id;
 
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultExperience);
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchExperiences = async () => {
     if (!userId || !token) return;
@@ -52,13 +51,10 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.experiences || [];
-      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      if (limit) data = data.slice(0, limit);
       setExperiences(data);
     } catch (err) {
-      console.error(
-        "❌ Error fetch experiences:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch experiences:", err.response || err.message);
     } finally {
       setLoading(false);
     }
@@ -81,17 +77,13 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultExperience);
       fetchExperiences();
     } catch (err) {
-      console.error(
-        "❌ Error save experience:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error save experience:", err.response || err.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin hapus pengalaman ini?")) return;
     if (!userId || !token) return;
-
     try {
       await axios.delete(`https://rutee.id/dapur/profile/edit-experience.php`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -99,10 +91,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
       });
       fetchExperiences();
     } catch (err) {
-      console.error(
-        "❌ Error delete experience:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete experience:", err.response || err.message);
     }
   };
 
@@ -128,7 +117,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
@@ -162,18 +151,16 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
                   <Typography variant="body2">{exp.description}</Typography>
                 )}
                 {exp.proof_url && (
-                  <Typography variant="body2" color="text.primary">
-                    <Button
-                      href={exp.proof_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      size="small"
-                      sx={{ mt: 1 }}
-                      variant="outlined"
-                    >
-                      Lihat
-                    </Button>
-                  </Typography>
+                  <Button
+                    href={exp.proof_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    size="small"
+                    sx={{ mt: 1 }}
+                    variant="outlined"
+                  >
+                    View
+                  </Button>
                 )}
               </Box>
               {isOwner && (
@@ -188,7 +175,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Hapus">
+                  <Tooltip title="Delete">
                     <Delete
                       fontSize="small"
                       sx={{ cursor: "pointer" }}
@@ -202,7 +189,6 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -210,26 +196,26 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
         maxWidth="sm"
       >
         <DialogTitle>
-          {form.id ? "Edit Experience" : "Tambah Experience"}
+          {form.id ? "Edit Experience" : "Add Experience"}
         </DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
-            label="Perusahaan"
+            label="Company"
             fullWidth
             value={form.company_name}
             onChange={(e) => setForm({ ...form, company_name: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Jabatan"
+            label="Position"
             fullWidth
             value={form.position}
             onChange={(e) => setForm({ ...form, position: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Tanggal Mulai"
+            label="Start date"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
@@ -238,7 +224,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="Tanggal Selesai"
+            label="End date"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
@@ -255,11 +241,11 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
                 }
               />
             }
-            label="Masih bekerja di sini"
+            label="Still in this position"
           />
           <TextField
             margin="dense"
-            label="Deskripsi"
+            label="Description"
             fullWidth
             multiline
             rows={3}
@@ -268,16 +254,16 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="URL Bukti"
+            label="URL (drive/image, etc)"
             fullWidth
             value={form.proof_url || ""}
             onChange={(e) => setForm({ ...form, proof_url: e.target.value })}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

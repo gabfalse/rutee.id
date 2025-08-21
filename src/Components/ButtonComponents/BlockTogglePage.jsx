@@ -36,11 +36,10 @@ export default function BlockTogglePage({ blockedId }) {
   // ✅ Toggle block/unblock (toggle-block.php)
   const toggleBlock = async () => {
     if (!token) {
-      alert("Silakan login terlebih dahulu");
+      alert("Unauthorized");
       return;
     }
 
-    console.log("🔍 blockedId dikirim:", blockedId); // cek value
     setLoading(true);
     try {
       const res = await axios.post(

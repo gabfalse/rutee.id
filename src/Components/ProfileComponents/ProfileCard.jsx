@@ -31,7 +31,9 @@ import FollowTogglePage from "../ButtonComponents/FollowTogglePage";
 import FollowerCount from "./FollowerCount";
 
 export default function ProfileCard({ user_id }) {
-  const { user_id: authUserId } = useAuth();
+  const { user } = useAuth();
+  const authUserId = user?.id;
+
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -220,19 +222,19 @@ export default function ProfileCard({ user_id }) {
               transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
               {isOwner && (
-                <MenuItem onClick={handleEditProfile}>Edit Profil</MenuItem>
+                <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
               )}
               <MenuItem onClick={handleArticleProfile}>
-                {isOwner ? "Artikel Saya" : "Artikel " + profileData.name}
+                {isOwner ? "My Article" : profileData.name + "'s Article"}
               </MenuItem>
               {isOwner && (
-                <MenuItem onClick={handleCheckResume}>Cek Resume</MenuItem>
+                <MenuItem onClick={handleCheckResume}>Check Resume</MenuItem>
               )}
               <MenuItem onClick={handleContacts}>
-                {isOwner ? "Edit Kontak" : "Lihat Kontak"}
+                {isOwner ? "Edit Contact" : "View Contact"}
               </MenuItem>
               <MenuItem onClick={handleShareProfile}>
-                <ShareIcon fontSize="small" sx={{ mr: 1 }} /> Bagikan Profil
+                <ShareIcon fontSize="small" sx={{ mr: 1 }} /> Share Profile
               </MenuItem>
             </Menu>
 
@@ -359,22 +361,22 @@ export default function ProfileCard({ user_id }) {
           </Box>
 
           {/* Sections */}
-          <Box mb={2}>{renderSectionHeader("Bahasa", "languages")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "languages")}</Box>
           <LanguageList limit={2} user_id={user_id} readOnly />
 
-          <Box mb={2}>{renderSectionHeader("Keahlian", "skills")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "skills")}</Box>
           <SkillList limit={2} user_id={user_id} readOnly />
 
-          <Box mb={2}>{renderSectionHeader("Pendidikan", "educations")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "educations")}</Box>
           <EducationList limit={3} userId={user_id} readOnly />
 
-          <Box mb={2}>{renderSectionHeader("Pengalaman", "experiences")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "experiences")}</Box>
           <ExperienceList limit={1} user_id={user_id} readOnly />
 
-          <Box mb={2}>{renderSectionHeader("Sertifikat", "certificates")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "certificates")}</Box>
           <CertificateList limit={1} user_id={user_id} readOnly />
 
-          <Box mb={2}>{renderSectionHeader("Proyek", "projects")}</Box>
+          <Box mb={2}>{renderSectionHeader("", "projects")}</Box>
           <ProjectList limit={1} user_id={user_id} readOnly />
         </Box>
       </Card>

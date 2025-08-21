@@ -24,28 +24,40 @@ const defaultContact = {
 };
 
 const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
+  const loggedInUserId = user?.id; // ambil dari AuthContext
   const userId = propUserId || paramUserId || loggedInUserId;
 
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultContact);
-
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const [isOwner, setIsOwner] = useState(false);
 
   const fetchContacts = async () => {
-    if (!userId || !token) return;
+    if (!token) return;
     try {
       setLoading(true);
-      const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-contact.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+
+      const url = userId
+        ? `https://rutee.id/dapur/profile/edit-contact.php?user_id=${userId}`
+        : `https://rutee.id/dapur/profile/edit-contact.php`;
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       let data = res.data.contacts || [];
       if (limit) data = data.slice(0, limit);
       setContacts(data);
+
+      // cek owner dari backend
+      if (typeof res.data.is_owner !== "undefined") {
+        setIsOwner(res.data.is_owner);
+      } else {
+        setIsOwner(!readOnly && String(userId) === String(loggedInUserId));
+      }
     } catch (err) {
       console.error(
         "❌ Error fetch contacts:",
@@ -57,16 +69,17 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
   };
 
   useEffect(() => {
-    if (userId && token) fetchContacts();
+    if (token) fetchContacts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, token, limit]);
 
   const handleSave = async () => {
-    if (!userId || !token) return;
+    if (!token) return;
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
         `https://rutee.id/dapur/profile/edit-contact.php`,
-        { ...form, user_id: userId },
+        { ...form }, // user_id sengaja tidak dikirim (backend pakai token)
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setOpenDialog(false);
@@ -82,12 +95,12 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin hapus kontak ini?")) return;
-    if (!userId || !token) return;
+    if (!token) return;
 
     try {
       await axios.delete(`https://rutee.id/dapur/profile/edit-contact.php`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { id, user_id: userId },
+        data: { id }, // user_id sengaja tidak dikirim
       });
       fetchContacts();
     } catch (err) {
@@ -120,14 +133,14 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {contacts.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada kontak
+          No contact yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={1}>
@@ -160,7 +173,7 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Hapus">
+                  <Tooltip title="Delete">
                     <Delete
                       fontSize="small"
                       sx={{ cursor: "pointer" }}
@@ -181,18 +194,18 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>{form.id ? "Edit Kontak" : "Tambah Kontak"}</DialogTitle>
+        <DialogTitle>{form.id ? "Edit Contact" : "Add Contact"}</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
-            label="Jenis Kontak (mis. Email, WhatsApp, Instagram)"
+            label="Contact type (ex: Email, WhatsApp, Instagram)"
             fullWidth
             value={form.contact_type}
             onChange={(e) => setForm({ ...form, contact_type: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Nilai Kontak"
+            label="Contact"
             fullWidth
             value={form.contact_value}
             onChange={(e) =>
@@ -201,9 +214,9 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

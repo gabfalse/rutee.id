@@ -16,12 +16,12 @@ import axios from "axios";
 import FeatureButton from "../Components/FeatureButton";
 
 const notificationText = {
-  follow: "mengirim permintaan koneksi",
-  unfollow: "berhenti mengikuti Anda",
-  like: "menyukai konten Anda",
-  comment: "mengomentari konten Anda",
-  connection: "menerima koneksi Anda",
-  chat: "mengirim pesan kepada Anda",
+  follow: "Invite you to connect",
+
+  like: "Liked Your Content",
+  comment: "Commented",
+  connection: "Now Connected",
+  chat: "Sent a message",
 };
 
 const getNotificationLink = (notification) => {
@@ -73,8 +73,8 @@ const Notifications = () => {
           latestNotificationId.current = newest.id;
 
           if (Notification.permission === "granted") {
-            new Notification("Rutee Notifikasi", {
-              body: `${newest.sender_name || "Seseorang"} ${
+            new Notification("Rutee's Notification", {
+              body: `${newest.sender_name || "Someone"} ${
                 notificationText[newest.type]
               }`,
               icon: newest.sender_avatar || "/default-avatar.png",
@@ -83,7 +83,7 @@ const Notifications = () => {
         }
       }
     } catch (err) {
-      console.error("Kesalahan saat mengambil notifikasi:", err);
+      console.error("Error");
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ const Notifications = () => {
       );
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (err) {
-      console.error("Kesalahan saat menandai semua notifikasi:", err);
+      console.error("Error");
     }
   };
 
@@ -117,7 +117,7 @@ const Notifications = () => {
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
     } catch (err) {
-      console.error("Gagal menandai notifikasi:", err);
+      console.error("Error");
     }
   };
 
@@ -140,7 +140,7 @@ const Notifications = () => {
       container.onclick = () => {
         Notification.requestPermission().then((perm) => {
           if (perm === "granted") {
-            alert("Notifikasi diaktifkan!");
+            alert("Notification's Activated");
           }
           document.body.removeChild(container);
         });
@@ -180,7 +180,7 @@ const Notifications = () => {
           sx={{ mb: 2 }}
         >
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Notifikasi
+            Notification
           </Typography>
           <Badge color="error" badgeContent={unreadCount} />
         </Stack>
@@ -197,7 +197,7 @@ const Notifications = () => {
             variant="outlined"
             onClick={fetchNotifications}
           >
-            Segarkan
+            Refresh
           </Button>
           <Button
             fullWidth
@@ -205,7 +205,7 @@ const Notifications = () => {
             variant="outlined"
             onClick={markAllAsRead}
           >
-            Tandai Semua Terbaca
+            Mark All As Read
           </Button>
         </Stack>
 
@@ -219,7 +219,7 @@ const Notifications = () => {
             color="text.secondary"
             sx={{ p: 2, textAlign: "center" }}
           >
-            Tidak ada notifikasi
+            No notification yet
           </Typography>
         ) : (
           <Stack spacing={1}>
@@ -262,8 +262,8 @@ const Notifications = () => {
                         lineHeight: 1.4,
                       }}
                     >
-                      {n.sender_name || "Seseorang"}{" "}
-                      {notificationText[n.type] || "mengirim notifikasi"}
+                      {n.sender_name || "Someone"}{" "}
+                      {notificationText[n.type] || "Sending Notification"}
                     </Typography>
                     <Typography
                       variant="caption"

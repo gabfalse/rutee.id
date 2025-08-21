@@ -6,6 +6,7 @@ import {
   useMediaQuery,
   useTheme,
   IconButton,
+  Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -13,7 +14,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import ChatSidebar from "../Components/ChatComponents/ChatSidebar";
 import ChatRoom from "../Components/ChatComponents/ChatRoom";
-import Avatar from "@mui/material/Avatar";
 
 const ChatsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -27,7 +27,7 @@ const ChatsPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const location = useLocation();
-  const { user_id } = useAuth();
+  const { id: authId } = useAuth(); // pastikan ambil id user yang sedang login
 
   // Ambil rooms saat pertama kali load
   useEffect(() => {
@@ -82,6 +82,7 @@ const ChatsPage = () => {
             created_at: msg.created_at,
             sender_name: msg.sender_name || "Unknown",
             sender_avatar: msg.sender_avatar || "/default-avatar.png",
+            isOwn: String(msg.sender_id) === String(authId), // tambah flag isOwn
           }));
           setMessages(formattedMessages);
 
@@ -93,11 +94,10 @@ const ChatsPage = () => {
       }
     };
     fetchMessages();
-  }, [selectedRoomId, rooms]);
+  }, [selectedRoomId, rooms, authId]);
 
   const handleRoomClick = (roomId) => setSelectedRoomId(roomId);
 
-  // Tombol back di mobile: kalau room terbuka, close room; kalau di sidebar, ke "/"
   const handleBack = () => {
     if (selectedRoomId) {
       setSelectedRoomId(null);
@@ -109,7 +109,10 @@ const ChatsPage = () => {
   };
 
   const handleSend = (newMessage) => {
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [
+      ...prev,
+      { ...newMessage, isOwn: String(newMessage.sender_id) === String(authId) },
+    ]);
     setRooms((prevRooms) =>
       prevRooms.map((room) =>
         room.id === selectedRoomId
@@ -207,14 +210,15 @@ const ChatsPage = () => {
                 </Box>
               )}
             </Box>
-            <IconButton>
-              <MoreVertIcon />
-            </IconButton>
           </Box>
 
           {/* ChatRoom */}
           <ChatRoom
-            initialMessages={messages}
+            initialMessages={messages.map((msg) => ({
+              ...msg,
+              sender_avatar: msg.sender_avatar || "/default-avatar.png",
+              sender_name: msg.sender_name || "Unknown",
+            }))}
             onSendExternal={handleSend}
             roomId={selectedRoomId}
           />

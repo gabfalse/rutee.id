@@ -34,16 +34,16 @@ const defaultProject = {
 };
 
 const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+  const userId = propUserId || paramUserId || user?.id;
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultProject);
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchProjects = async () => {
     if (!userId || !token) return;
@@ -54,13 +54,10 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.projects || [];
-      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      if (limit) data = data.slice(0, limit);
       setProjects(data);
     } catch (err) {
-      console.error(
-        "❌ Error fetch projects:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch projects:", err.response || err.message);
     } finally {
       setLoading(false);
     }
@@ -83,17 +80,13 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultProject);
       fetchProjects();
     } catch (err) {
-      console.error(
-        "❌ Error save project:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error save project:", err.response || err.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin hapus project ini?")) return;
     if (!userId || !token) return;
-
     try {
       await axios.delete(`https://rutee.id/dapur/profile/edit-project.php`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -101,10 +94,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
       });
       fetchProjects();
     } catch (err) {
-      console.error(
-        "❌ Error delete project:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete project:", err.response || err.message);
     }
   };
 
@@ -130,14 +120,14 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {projects.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada project
+          No project yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={1}>
@@ -159,7 +149,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {proj.start_date} -{" "}
-                  {proj.still_on_project ? "Sekarang" : proj.end_date}
+                  {proj.still_on_project ? "Sekarang" : proj.end_date || "-"}
                 </Typography>
                 {proj.description && (
                   <Typography variant="body2">{proj.description}</Typography>
@@ -176,10 +166,9 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                     rel="noreferrer"
                     sx={{ mt: 1 }}
                   >
-                    Lihat
+                    View
                   </Button>
                 )}
-
                 {proj.image_url && (
                   <Box mt={0.5}>
                     <img
@@ -190,6 +179,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                   </Box>
                 )}
               </Box>
+
               {isOwner && (
                 <Box display="flex" gap={1} mt={{ xs: 1, sm: 0 }}>
                   <Tooltip title="Edit">
@@ -219,7 +209,6 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -230,28 +219,28 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
         <DialogContent>
           <TextField
             margin="dense"
-            label="Judul Project"
+            label="Project Title"
             fullWidth
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Peran"
+            label="Role"
             fullWidth
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Perusahaan / Klien"
+            label="Company / Client"
             fullWidth
             value={form.company || ""}
             onChange={(e) => setForm({ ...form, company: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="Tanggal Mulai"
+            label="Start date"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
@@ -278,11 +267,11 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                 }
               />
             }
-            label="Masih Berjalan"
+            label="Still ongoing"
           />
           <TextField
             margin="dense"
-            label="Deskripsi"
+            label="Description"
             fullWidth
             multiline
             rows={3}
@@ -291,30 +280,30 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
           />
           <TextField
             margin="dense"
-            label="Skills (pisahkan koma)"
+            label="Skills (separate by comma)"
             fullWidth
             value={form.skills || ""}
             onChange={(e) => setForm({ ...form, skills: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="URL Bukti / Proof"
+            label="URL document (Ex: Drive, etc)"
             fullWidth
             value={form.proof_url || ""}
             onChange={(e) => setForm({ ...form, proof_url: e.target.value })}
           />
           <TextField
             margin="dense"
-            label="URL Gambar"
+            label="Image URL"
             fullWidth
             value={form.image_url || ""}
             onChange={(e) => setForm({ ...form, image_url: e.target.value })}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Batal</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

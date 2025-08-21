@@ -66,11 +66,11 @@ const Footer = () => {
         onClick={() => navigate("/infoweb")}
         sx={{ mt: 1, color: "primary.main", textTransform: "none" }}
       >
-        Tentang Kami & Kebijakan
+        Term and Service
       </Button>
 
       <Typography variant="body2" sx={{ mt: 1 }}>
-        © {new Date().getFullYear()} RUTEE — Ruang Temukan Eksistensi
+        © {new Date().getFullYear()} RUTEE — Your Journey Begin here
       </Typography>
     </Box>
   );

@@ -5,18 +5,23 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { getAppTheme } from "./Theme/theme";
 import { AuthProvider } from "./Context/AuthContext";
 import App from "./App";
+import { NotificationProvider } from "./Context/NotificationContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 function Root() {
-  // state untuk mode, default dark
+  // state untuk mode, default light
   const [mode, setMode] = useState("dark");
 
   return (
     <ThemeProvider theme={getAppTheme(mode)}>
       <CssBaseline />
       <AuthProvider>
-        <App mode={mode} setMode={setMode} />
+        <NotificationProvider>
+          {/* teruskan props ke App */}
+
+          <App mode={mode} setMode={setMode} />
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

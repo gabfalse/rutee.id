@@ -1,9 +1,9 @@
-// src/components/FeatureButton.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
   IconButton,
   Typography,
+  Badge,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -13,19 +13,22 @@ import CreateIcon from "@mui/icons-material/Create";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext"; // ⬅️ ambil AuthContext
+import { useAuth } from "../Context/AuthContext";
+import { useNotification } from "../Context/NotificationContext"; // 🔥 pakai context
 
 export default function FeatureButton() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
-  const { user_id } = useAuth(); // ⬅️ ambil user_id dari context
+  const { user } = useAuth();
+  const { unread } = useNotification(); // 🔥 ambil unread count
+  const user_id = user?.id;
 
   const [show, setShow] = useState(true);
   const [lastScroll, setLastScroll] = useState(window.scrollY);
 
-  // Detect scroll for auto-hide
+  // auto-hide navbar
   useEffect(() => {
     let timer;
     const handleScroll = () => {
@@ -42,20 +45,45 @@ export default function FeatureButton() {
   }, [lastScroll]);
 
   const features = [
-    { label: "Beranda", icon: <HomeIcon />, path: "/" },
+    { label: "Home", icon: <HomeIcon />, path: "/" },
     {
-      label: "Koneksi",
-      icon: <GroupIcon />,
-      path: user_id ? `/connections/${user_id}` : "/connections", // ⬅️ fallback kalau belum login
+      label: "Connection",
+      icon: (
+        <Badge color="error" variant="dot" invisible={unread.connection === 0}>
+          <GroupIcon />
+        </Badge>
+      ),
+      path: user_id ? `/connections/${user_id}` : "/login",
     },
-    { label: "Tulis Artikel", icon: <CreateIcon />, path: "/articles/new" },
+    { label: "Write Article", icon: <CreateIcon />, path: "/articles/new" },
     {
-      label: "Notifikasi",
-      icon: <NotificationsIcon />,
+      label: "Notification",
+      icon: (
+        <Badge
+          color="error"
+          badgeContent={unread.all}
+          invisible={unread.all === 0}
+        >
+          <NotificationsIcon />
+        </Badge>
+      ),
       path: "/notifications",
     },
-    { label: "Chat", icon: <ChatIcon />, path: "/chats" },
+    {
+      label: "Chat",
+      icon: (
+        <Badge color="error" variant="dot" invisible={unread.chat === 0}>
+          <ChatIcon />
+        </Badge>
+      ),
+      path: "/chats",
+    },
   ];
+
+  const handleNavigate = (path) => {
+    if (path === "/") navigate(path, { replace: true });
+    else navigate(path);
+  };
 
   return (
     <Box
@@ -78,7 +106,7 @@ export default function FeatureButton() {
       {features.map((feature, index) => (
         <Box
           key={index}
-          onClick={() => navigate(feature.path)}
+          onClick={() => handleNavigate(feature.path)}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -88,7 +116,7 @@ export default function FeatureButton() {
             "&:hover": { color: theme.palette.primary.main },
           }}
         >
-          <IconButton sx={{ color: "primary" }}>{feature.icon}</IconButton>
+          <IconButton color="primary">{feature.icon}</IconButton>
           <Typography variant="caption" sx={{ mt: 0.5 }}>
             {feature.label}
           </Typography>

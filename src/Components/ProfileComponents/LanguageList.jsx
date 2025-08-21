@@ -15,9 +15,9 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
-import { useParams } from "react-router-dom";
 
 const defaultLanguage = {
   id: "",
@@ -26,16 +26,18 @@ const defaultLanguage = {
 };
 
 const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
-  const { token, user_id: loggedInUserId } = useAuth();
+  const { user, token } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const userId = propUserId || paramUserId || loggedInUserId;
+
+  // Gunakan propUserId > paramUserId > Auth user
+  const userId = propUserId || paramUserId || user?.id;
 
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState(defaultLanguage);
 
-  const isOwner = !readOnly && String(userId) === String(loggedInUserId);
+  const isOwner = !readOnly && String(userId) === String(user?.id);
 
   const fetchLanguages = async () => {
     if (!userId || !token) return;
@@ -46,13 +48,10 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       let data = res.data.languages || [];
-      if (limit) data = data.slice(0, limit); // ✅ apply limit
+      if (limit) data = data.slice(0, limit);
       setLanguages(data);
     } catch (err) {
-      console.error(
-        "❌ Error fetch languages:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch languages:", err.response || err.message);
     } finally {
       setLoading(false);
     }
@@ -75,10 +74,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
       setForm(defaultLanguage);
       fetchLanguages();
     } catch (err) {
-      console.error(
-        "❌ Error save language:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error save language:", err.response || err.message);
     }
   };
 
@@ -93,10 +89,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
       });
       fetchLanguages();
     } catch (err) {
-      console.error(
-        "❌ Error delete language:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete language:", err.response || err.message);
     }
   };
 
@@ -108,7 +101,6 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        textAlign={"center"}
         mb={2}
       >
         <Typography variant="h6" fontWeight="bold">
@@ -123,14 +115,14 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
               setOpenDialog(true);
             }}
           >
-            Tambah
+            Add
           </Button>
         )}
       </Box>
 
       {languages.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada bahasa
+          No language yet
         </Typography>
       ) : (
         <Box display="flex" flexWrap="wrap" gap={1} justifyContent="center">
@@ -162,18 +154,17 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>{form.id ? "Edit Bahasa" : "Tambah Bahasa"}</DialogTitle>
+        <DialogTitle>{form.id ? "Edit Language" : "Add Language"}</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
-            label="Nama Bahasa"
+            label="Language"
             fullWidth
             value={form.language}
             onChange={(e) => setForm({ ...form, language: e.target.value })}
@@ -195,7 +186,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Batal</Button>
           <Button onClick={handleSave} variant="contained">
-            Simpan
+            Save
           </Button>
         </DialogActions>
       </Dialog>

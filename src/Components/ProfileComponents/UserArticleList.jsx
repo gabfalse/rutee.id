@@ -12,10 +12,9 @@ import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-// ...import dan hook sama seperti sebelumnya
-
 const UserArticleList = ({ limit }) => {
-  const { token, user_id: loggedInUser } = useAuth();
+  const { token, user } = useAuth();
+  const loggedInUser = user?.id; // ✅ ambil id dari object user
   const navigate = useNavigate();
   const { user_id: paramUserId } = useParams();
   const location = useLocation();
@@ -28,7 +27,8 @@ const UserArticleList = ({ limit }) => {
   const isOwnedRoute = location.pathname.startsWith("/articles/owned");
   const targetUserId = isOwnedRoute ? loggedInUser : paramUserId;
   const isOwner =
-    loggedInUser && (isOwnedRoute || loggedInUser === paramUserId);
+    loggedInUser &&
+    (isOwnedRoute || String(loggedInUser) === String(paramUserId));
 
   const fetchArticles = async () => {
     if (!targetUserId) return;
@@ -45,8 +45,6 @@ const UserArticleList = ({ limit }) => {
 
       if (limit) data = data.slice(0, limit);
       setArticles(data);
-
-      // --------------
     } catch (err) {
       console.error(
         "❌ Error fetch articles:",
@@ -62,10 +60,6 @@ const UserArticleList = ({ limit }) => {
     fetchArticles();
   }, [targetUserId, token, limit]);
 
-  // --- DEBUG sebelum render ---
-
-  // ----------------------------
-
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin hapus artikel ini?")) return;
     if (!token || !id) return;
@@ -73,7 +67,7 @@ const UserArticleList = ({ limit }) => {
     try {
       await axios.delete(`https://rutee.id/dapur/article/articles.php`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { id, user_id: loggedInUser },
+        data: { id, user_id: loggedInUser }, // ✅ tetap kirim user_id dari loggedInUser
       });
       fetchArticles();
     } catch (err) {
@@ -85,8 +79,7 @@ const UserArticleList = ({ limit }) => {
     }
   };
 
-  // ...render sama seperti sebelumnya
-
+  // --- UI rendering ---
   if (loading) {
     return (
       <Box textAlign="center" mt={2}>
@@ -112,7 +105,7 @@ const UserArticleList = ({ limit }) => {
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
       {/* Judul utama */}
       <Typography variant="h6" fontWeight="bold" mb={2}>
-        {isOwner ? "Artikel Saya" : `Artikel ${ownerName || "yang dimiliki"}`}
+        {isOwner ? "My Article" : `Article ${ownerName || "List"}`}
       </Typography>
 
       {/* Tombol buat artikel hanya untuk owner */}
@@ -123,14 +116,14 @@ const UserArticleList = ({ limit }) => {
             color="primary"
             onClick={() => navigate("/articles/new")}
           >
-            + Buat Artikel
+            + Add Article
           </Button>
         </Box>
       )}
 
       {articles.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada artikel
+          No article yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={1}>
@@ -149,7 +142,7 @@ const UserArticleList = ({ limit }) => {
               }}
             >
               <Box display="flex" alignItems="center" gap={3}>
-                {art.image_url && (
+                {art.image_url ? (
                   <Box
                     component="img"
                     src={art.image_url}
@@ -161,6 +154,22 @@ const UserArticleList = ({ limit }) => {
                       borderRadius: 2,
                     }}
                   />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "grey.200",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      No image
+                    </Typography>
+                  </Box>
                 )}
 
                 <Box>
@@ -176,7 +185,7 @@ const UserArticleList = ({ limit }) => {
               </Box>
 
               <Box display="flex" gap={2}>
-                <Tooltip title="Lihat Detail">
+                <Tooltip title="View">
                   <Visibility
                     fontSize="medium"
                     sx={{ cursor: "pointer" }}
@@ -193,7 +202,7 @@ const UserArticleList = ({ limit }) => {
                         onClick={() => navigate(`/articles/edit/${art.id}`)}
                       />
                     </Tooltip>
-                    <Tooltip title="Hapus">
+                    <Tooltip title="Delete">
                       <Delete
                         fontSize="medium"
                         sx={{ cursor: "pointer" }}

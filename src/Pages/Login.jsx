@@ -16,6 +16,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import GoogleLoginButton from "../Components/GoogleLoginButton";
 
 export default function Login() {
   const { user, login, isAuthenticated, loading, error } = useAuth();
@@ -59,11 +60,15 @@ export default function Login() {
           p: 4,
           borderRadius: 3,
           backgroundColor: "background.paper",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
         }}
       >
+        {/* Judul */}
         <Typography
           variant="h5"
-          mb={3}
+          mb={1}
           fontWeight={700}
           align="center"
           color="primary"
@@ -74,7 +79,7 @@ export default function Login() {
         {/* Alert Error */}
         <Collapse in={!!error}>
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }} variant="filled">
+            <Alert severity="error" sx={{ mb: 1 }} variant="filled">
               {error}
             </Alert>
           )}
@@ -83,12 +88,13 @@ export default function Login() {
         {/* Alert Success */}
         <Collapse in={!!success}>
           {success && (
-            <Alert severity="success" sx={{ mb: 2 }} variant="filled">
+            <Alert severity="success" sx={{ mb: 1 }} variant="filled">
               {success}
             </Alert>
           )}
         </Collapse>
 
+        {/* Form login manual */}
         <form onSubmit={handleSubmit}>
           <TextField
             label="Username atau Email"
@@ -140,7 +146,23 @@ export default function Login() {
           </Button>
         </form>
 
-        <Stack mt={3} direction="row" justifyContent="center" spacing={1}>
+        {/* Divider teks */}
+        <Typography
+          variant="body2"
+          align="center"
+          color="text.secondary"
+          sx={{ mt: 1, mb: 1 }}
+        >
+          Atau masuk dengan
+        </Typography>
+
+        {/* Tombol Google */}
+        <Box display="flex" justifyContent="center" mb={1}>
+          <GoogleLoginButton />
+        </Box>
+
+        {/* Link daftar */}
+        <Stack direction="row" justifyContent="center" spacing={1}>
           <Typography variant="body2">Belum punya akun?</Typography>
           <Link
             component={RouterLink}

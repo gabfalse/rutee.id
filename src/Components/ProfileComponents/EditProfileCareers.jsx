@@ -156,7 +156,7 @@ export default function EditProfileCareer() {
           SelectProps={{ native: true }}
           fullWidth
         >
-          <option value="">-- Pilih Karir --</option>
+          <option value="">-- Select Career --</option>
           {careerOptions.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -165,7 +165,7 @@ export default function EditProfileCareer() {
         </TextField>
 
         <TextField
-          label="Atau isi sendiri"
+          label="Or type manually"
           value={career}
           onChange={(e) => setCareer(e.target.value)}
           fullWidth

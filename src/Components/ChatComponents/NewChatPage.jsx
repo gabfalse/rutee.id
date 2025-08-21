@@ -233,11 +233,11 @@ export default function NewChatPage() {
 
         <Stack spacing={1}>
           <Typography variant="subtitle1" fontWeight={600}>
-            Pencarian Terakhir
+            Search History
           </Typography>
           {recentSearches.length === 0 ? (
             <Typography color="text.secondary" fontStyle="italic">
-              Tidak ada pencarian terakhir
+              Nothing Yet
             </Typography>
           ) : (
             recentSearches.map((u, index) => (

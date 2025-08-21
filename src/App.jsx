@@ -2,10 +2,11 @@ import { Box } from "@mui/material";
 import React from "react";
 import AppRouter from "./Router/AppRouter";
 
-function App() {
+function App({ mode, setMode }) {
   return (
     <Box>
-      <AppRouter />
+      {/* teruskan juga ke AppRouter biar bisa dipakai di Navbar/NavigationButton */}
+      <AppRouter mode={mode} setMode={setMode} />
     </Box>
   );
 }
