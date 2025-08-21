@@ -1,2 +1,2 @@
 # rutee.id
-Rutee — A self-discovery platform with personality test and self-improvement feature such as article, resume maker, and a friendly community.
+Rutee is a self-discovery platform that helps individuals explore their potential through personality tests, coaching, and community engagement.
