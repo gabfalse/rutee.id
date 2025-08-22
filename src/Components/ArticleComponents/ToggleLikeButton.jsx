@@ -3,6 +3,7 @@ import { IconButton, Typography, Stack } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import axios from "axios";
+import API from "../../Config/API"; // pastikan path benar
 
 export default function ToggleLikeButton({ articleId, token }) {
   const [liked, setLiked] = useState(false);
@@ -16,13 +17,13 @@ export default function ToggleLikeButton({ articleId, token }) {
 
       try {
         const res = await axios.get(
-          `https://rutee.id/dapur/article/get-like-counts.php?content_id=${articleId}`,
+          `${API.ARTICLE_LIKE_COUNT}?content_id=${articleId}`, // ✅ ganti id jadi content_id
           token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
         );
 
         if (res.data.success) {
           setLikeCount(res.data.likes_count || 0);
-          setLiked(res.data.is_liked || false); // tombol merah jika sudah like
+          setLiked(res.data.is_liked || false);
         }
       } catch (err) {
         console.error("[DEBUG] Error fetching like status:", err);
@@ -37,7 +38,7 @@ export default function ToggleLikeButton({ articleId, token }) {
 
     try {
       const res = await axios.post(
-        "https://rutee.id/dapur/article/toggle-like.php",
+        API.ARTICLE_TOGGLE_LIKE,
         {
           content_type: contentType,
           content_id: articleId,
@@ -58,7 +59,7 @@ export default function ToggleLikeButton({ articleId, token }) {
         setLikeCount((prev) => Math.max(prev - 1, 0));
       }
     } catch (err) {
-      console.error("Error");
+      console.error("Error toggle like:", err);
       alert("Error");
     }
   };

@@ -12,12 +12,11 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import ArticleReactions from "./ArticleReactions";
-
-const API_URL = "https://rutee.id/dapur/article/get-article-detail.php";
+import API from "../../Config/API"; // ✅ konsisten pakai Config/Api.js
 
 export default function ArticleDetailPage() {
-  const { article_id } = useParams(); // sesuai routing
-  const { token, user } = useAuth(); // ⬅️ pastikan AuthContext expose user.id
+  const { article_id } = useParams();
+  const { token, user } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -29,9 +28,12 @@ export default function ArticleDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await axios.get(`${API_URL}?id=${article_id}`, {
+        // ✅ gunakan config API
+        const url = API.ARTICLE_DETAIL(article_id);
+        const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         if (res.data?.article) {
           setArticle(res.data.article);
         } else {
@@ -78,14 +80,7 @@ export default function ArticleDetailPage() {
     );
 
   return (
-    <Box
-      sx={{
-        maxWidth: 900,
-        mx: "auto",
-        my: 4,
-        px: { xs: 2, md: 0 },
-      }}
-    >
+    <Box sx={{ maxWidth: 900, mx: "auto", my: 4, px: { xs: 2, md: 0 } }}>
       <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3 }}>
         {/* Judul */}
         <Typography
@@ -163,7 +158,7 @@ export default function ArticleDetailPage() {
           </Box>
         )}
 
-        {/* 🔥 Reactions (Like + Comments) */}
+        {/* 🔥 Reactions */}
         <ArticleReactions
           articleId={article_id}
           currentUserId={user?.id}

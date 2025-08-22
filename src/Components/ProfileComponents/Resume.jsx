@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Box, Button, Divider, CircularProgress } from "@mui/material";
 import jsPDF from "jspdf";
+import API from "../../Config/API";
 
 const Resume = () => {
   const { user_id } = useParams();
@@ -11,7 +12,6 @@ const Resume = () => {
   const [loading, setLoading] = useState(true);
   const resumeRef = useRef();
 
-  const API_URL = "https://rutee.id/dapur/profile/get-profile.php";
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -19,8 +19,9 @@ const Resume = () => {
       setLoading(false);
       return;
     }
+
     axios
-      .get(`${API_URL}?user_id=${user_id}`, {
+      .get(`${API.PROFILE_GET}?user_id=${user_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -135,12 +136,10 @@ const Resume = () => {
               {profile?.name}
             </h1>
 
-            {/* Contacts */}
             {contactLine && (
               <p style={{ fontSize: "12px", margin: 0 }}>{contactLine}</p>
             )}
 
-            {/* Address */}
             {profile?.city && profile?.province && profile?.country && (
               <p style={{ fontSize: "12px", margin: 0 }}>
                 {profile.city}, {profile.province}, {profile.country}
@@ -148,7 +147,6 @@ const Resume = () => {
             )}
           </header>
 
-          {/* Professional Summary */}
           {profile?.bio && (
             <section>
               <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -161,9 +159,8 @@ const Resume = () => {
 
           <Divider sx={{ my: 1 }} />
 
-          {/* Main content */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {/* Experience */}
+            {/* Experiences */}
             {experiences?.length > 0 && (
               <section>
                 <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>

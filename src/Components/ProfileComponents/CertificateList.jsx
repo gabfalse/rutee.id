@@ -16,6 +16,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API";
 
 const defaultCertificate = {
   id: "",
@@ -44,8 +45,10 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-certificate.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_CERTIFICATE}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.certificates || [];
       if (limit) data = data.slice(0, limit);
@@ -69,7 +72,7 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-certificate.php`,
+        API.PROFILE_EDIT_CERTIFICATE,
         { ...form, user_id: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -86,13 +89,10 @@ const CertificateList = ({ userId: propUserId, readOnly = false, limit }) => {
       return;
     if (!userId || !token) return;
     try {
-      await axios.delete(
-        `https://rutee.id/dapur/profile/edit-certificate.php`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { id, user_id: userId },
-        }
-      );
+      await axios.delete(API.PROFILE_EDIT_CERTIFICATE, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { id, user_id: userId },
+      });
       fetchCertificates();
     } catch (err) {
       console.error(

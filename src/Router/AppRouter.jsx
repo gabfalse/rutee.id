@@ -41,7 +41,7 @@ import ArticleListPage from "../Pages/ArticleListPage";
 import ArticleDetailPage from "../Components/ArticleComponents/ArticleDetailPage";
 import ContactAdmin from "../Pages/ContactAdmin";
 import Connections from "../Pages/Connections";
-import GetFollowing from "../Pages/GetFollowing";
+
 import ChatsPage from "../Pages/ChatPage";
 import NewChatPage from "../Components/ChatComponents/NewChatPage";
 import Notifications from "../Pages/Notifications";
@@ -152,14 +152,7 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/tes"
-          element={
-            <PrivateRoute>
-              <GetFollowing />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/quiz"
           element={

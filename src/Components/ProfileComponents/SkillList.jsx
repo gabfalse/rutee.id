@@ -1,3 +1,4 @@
+// src/components/Profile/SkillList.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -21,6 +22,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API";
 
 const defaultSkill = {
   id: "",
@@ -47,8 +49,10 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-skill.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_SKILL}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.skills || [];
       if (limit) data = data.slice(0, limit);
@@ -76,7 +80,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-skill.php`,
+        API.PROFILE_EDIT_SKILL,
         { ...form, user_id: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +97,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!userId || !token) return;
 
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-skill.php`, {
+      await axios.delete(API.PROFILE_EDIT_SKILL, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id, user_id: userId },
       });
@@ -202,7 +206,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
 
           <TextField
             margin="dense"
-            label="Certficate URL"
+            label="Certificate URL"
             fullWidth
             value={form.certificate_url || ""}
             onChange={(e) =>
@@ -212,7 +216,7 @@ const SkillList = ({ userId: propUserId, readOnly = false, limit }) => {
             helperText={
               form.level === "Expert"
                 ? "Expert need to fill the URL"
-                : "Opsional"
+                : "Optional"
             }
             error={form.level === "Expert" && !form.certificate_url}
           />

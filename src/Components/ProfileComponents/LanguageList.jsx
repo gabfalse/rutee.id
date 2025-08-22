@@ -18,6 +18,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
+import API from "../../Config/API"; // pastikan path sesuai
 
 const defaultLanguage = {
   id: "",
@@ -29,7 +30,6 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
   const { user, token } = useAuth();
   const { user_id: paramUserId } = useParams();
 
-  // Gunakan propUserId > paramUserId > Auth user
   const userId = propUserId || paramUserId || user?.id;
 
   const [languages, setLanguages] = useState([]);
@@ -44,8 +44,10 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-language.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_LANGUAGE}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.languages || [];
       if (limit) data = data.slice(0, limit);
@@ -66,7 +68,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-language.php`,
+        API.PROFILE_EDIT_LANGUAGE,
         { ...form, user_id: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -83,7 +85,7 @@ const LanguageList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!userId || !token) return;
 
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-language.php`, {
+      await axios.delete(API.PROFILE_EDIT_LANGUAGE, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id, user_id: userId },
       });

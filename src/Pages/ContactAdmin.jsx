@@ -12,8 +12,9 @@ import SendIcon from "@mui/icons-material/Send";
 import ChatIcon from "@mui/icons-material/Chat";
 import axios from "axios";
 import { useAuth } from "../Context/AuthContext";
+import API from "../Config/API"; // pakai config API
 
-// Fungsi waktu lokal WIB
+// Fungsi waktu lokal WIB (untuk tampilan, backend yang menentukan waktu resmi)
 const getWIBDateTime = () => {
   const now = new Date();
   return new Intl.DateTimeFormat("id-ID", {
@@ -35,17 +36,22 @@ const ContactAdmin = () => {
   const [name, setName] = useState(user?.name || "");
   const [userId] = useState(user?.id || `guest-${Date.now()}`);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const chatBoxRef = useRef(null);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!currentMessage.trim()) return;
+    if (!currentMessage.trim() || !name.trim()) {
+      setError("Nama dan pesan wajib diisi.");
+      return;
+    }
 
     const newMsg = { sender: "user", text: currentMessage };
     setMessages((prev) => [...prev, newMsg]);
+    setError("");
 
     try {
-      await axios.post("https://rutee.id/dapur/admin/send-telegram.php", {
+      const res = await axios.post(API.ADMIN_SEND_TELEGRAM, {
         name,
         user_id: userId,
         message: currentMessage,
@@ -53,19 +59,26 @@ const ContactAdmin = () => {
         email: user?.email || "",
       });
 
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "admin",
-            text: "Pesan kamu sudah diterima! Kami akan menghubungi lewat email jika diperlukan. 🙏",
-          },
-        ]);
-      }, 800);
-
-      setSent(true);
+      if (res.data.success) {
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "admin",
+              text: "Pesan kamu sudah diterima! Kami akan menghubungi lewat email jika diperlukan. 🙏",
+            },
+          ]);
+        }, 800);
+        setSent(true);
+      } else {
+        setError(res.data.error || "Gagal mengirim pesan.");
+      }
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
+      setError(
+        err.response?.data?.error ||
+          "Terjadi kesalahan jaringan. Cek koneksi atau CORS."
+      );
     }
 
     setCurrentMessage("");
@@ -146,7 +159,7 @@ const ContactAdmin = () => {
             <Box
               sx={{
                 bgcolor:
-                  msg.sender === "user" ? "primary.main" : "secondary.main",
+                  msg.sender === "user" ? "primary.dark" : "secondary.main",
                 color: msg.sender === "user" ? "#fff" : "#000",
                 px: 2,
                 py: 1,
@@ -189,6 +202,11 @@ const ContactAdmin = () => {
       {sent && (
         <Alert severity="success" sx={{ m: 1 }}>
           Terima kasih! Pesan sudah terkirim.
+        </Alert>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ m: 1 }}>
+          {error}
         </Alert>
       )}
     </Paper>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, CircularProgress } from "@mui/material";
+import API from "../../Config/API";
 
 export default function BlockTogglePage({ blockedId }) {
   const [loading, setLoading] = useState(false);
@@ -8,9 +9,11 @@ export default function BlockTogglePage({ blockedId }) {
   const [initialLoading, setInitialLoading] = useState(true);
 
   const token = localStorage.getItem("token"); // ambil JWT dari localStorage
-  const API_BASE = "https://rutee.id/dapur/user";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
-  // ✅ Cek status awal (block-status.php)
+  // ✅ Cek status awal (USER_BLOCK_STATUS)
   useEffect(() => {
     const checkStatus = async () => {
       if (!blockedId || !token) {
@@ -18,9 +21,9 @@ export default function BlockTogglePage({ blockedId }) {
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE}/block-status.php`, {
+        const res = await axios.get(API.USER_BLOCK_STATUS, {
           params: { blocked_id: blockedId },
-          headers: { Authorization: `Bearer ${token}` },
+          ...axiosConfig,
         });
         setIsBlocked(res.data.is_blocked);
       } catch (err) {
@@ -33,7 +36,7 @@ export default function BlockTogglePage({ blockedId }) {
     checkStatus();
   }, [blockedId, token]);
 
-  // ✅ Toggle block/unblock (toggle-block.php)
+  // ✅ Toggle block/unblock (USER_TOGGLE_BLOCK)
   const toggleBlock = async () => {
     if (!token) {
       alert("Unauthorized");
@@ -43,9 +46,9 @@ export default function BlockTogglePage({ blockedId }) {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${API_BASE}/toggle-block.php`,
+        API.USER_TOGGLE_BLOCK,
         { blocked_id: blockedId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        axiosConfig
       );
 
       setIsBlocked(res.data.status === "blocked");
@@ -71,7 +74,7 @@ export default function BlockTogglePage({ blockedId }) {
       ) : (
         <Button
           variant={isBlocked ? "outlined" : "contained"}
-          color={isBlocked ? "error" : "error"}
+          color="error"
           onClick={toggleBlock}
         >
           {isBlocked ? "Unblock" : "Block"}

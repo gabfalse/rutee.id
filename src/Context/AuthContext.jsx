@@ -1,5 +1,7 @@
+// src/Context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import API from "../Config/API"; // ✅ pakai config
 
 const AuthContext = createContext(null);
 
@@ -8,7 +10,6 @@ export function AuthProvider({ children }) {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
-
   const [token, setToken] = useState(
     () => localStorage.getItem("token") || null
   );
@@ -16,10 +17,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
   const [personalityResult, setPersonalityResult] = useState(null);
 
-  // Restore session
-  useEffect(() => setLoading(false), []);
-
-  // Simpan user dan token ke localStorage
+  // ===== Persist user & token =====
   useEffect(() => {
     if (user) localStorage.setItem("user", JSON.stringify(user));
     else localStorage.removeItem("user");
@@ -30,25 +28,32 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem("token");
   }, [token]);
 
+  useEffect(() => setLoading(false), []);
+
+  // ===== Axios instance =====
+  const axiosAuth = axios.create({
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
+  });
+
   // ===== Login manual =====
   async function login({ usernameOrEmail, password }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post(
-        "https://rutee.id/dapur/auth-user/login.php",
-        { usernameOrEmail, password }
-      );
-
+      const res = await axios.post(API.AUTH_LOGIN, {
+        usernameOrEmail,
+        password,
+      });
       if (res.data?.token && res.data?.user) {
         setToken(res.data.token);
         setUser(res.data.user);
         await fetchPersonalityResult(res.data.token, res.data.user.id);
         return true;
-      } else throw new Error("Invalid login response");
+      }
+      throw new Error("Invalid login response");
     } catch (err) {
       console.error("❌ Login error:", err);
-      setError(err.response?.data?.error || "Login gagal");
+      setError(err.response?.data?.error || err.message || "Login gagal");
       return false;
     } finally {
       setLoading(false);
@@ -60,21 +65,19 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      // Sesuaikan body key menjadi id_token sesuai backend
-      const res = await axios.post(
-        "https://rutee.id/dapur/auth-user/auth-google.php",
-        { id_token: googleToken } // 🔹 penting, backend expect 'id_token'
-      );
-
+      const res = await axios.post(API.AUTH_GOOGLE, { id_token: googleToken });
       if (res.data?.token && res.data?.user) {
         setToken(res.data.token);
         setUser(res.data.user);
         await fetchPersonalityResult(res.data.token, res.data.user.id);
         return true;
-      } else throw new Error("Login Google gagal");
+      }
+      throw new Error("Login Google gagal");
     } catch (err) {
       console.error("❌ Login Google error:", err);
-      setError(err.response?.data?.error || "Login Google gagal");
+      setError(
+        err.response?.data?.error || err.message || "Login Google gagal"
+      );
       return false;
     } finally {
       setLoading(false);
@@ -95,18 +98,11 @@ export function AuthProvider({ children }) {
     const activeToken = customToken || token;
     if (!activeToken) return;
     try {
-      const res = await axios.get(
-        "https://rutee.id/dapur/profile/get/get-profile.php",
-        {
-          headers: {
-            Authorization: `Bearer ${activeToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (res.data?.profile) {
-        setUser({ ...user, ...res.data.profile });
-      }
+      const res = await axios.get(API.PROFILE_GET, {
+        headers: { Authorization: `Bearer ${activeToken}` },
+      });
+      if (res.data?.profile)
+        setUser((prev) => ({ ...prev, ...res.data.profile }));
     } catch (err) {
       console.error("❌ Gagal refresh profile:", err);
     }
@@ -119,13 +115,9 @@ export function AuthProvider({ children }) {
   ) {
     if (!customToken || !customUserId) return null;
     try {
-      const res = await axios.get(
-        "https://rutee.id/dapur/personality/personality-results.php",
-        {
-          headers: { Authorization: `Bearer ${customToken}` },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(API.PERSONALITY_RESULTS, {
+        headers: { Authorization: `Bearer ${customToken}` },
+      });
       if (res.data?.success && res.data?.data) {
         setPersonalityResult(res.data.data);
         return res.data.data;

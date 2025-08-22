@@ -8,10 +8,12 @@ import {
   Avatar,
   Stack,
 } from "@mui/material";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import axios from "axios";
 import ReactionCount from "../Components/ArticleComponents/ReactionCount";
+import API from "../Config/API";
+
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,9 +24,11 @@ export default function ArticleListPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(
-        "https://rutee.id/dapur/article/get-article.php"
-      );
+      const token = localStorage.getItem("token");
+      const res = await axios.get(API.ARTICLE_LIST, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       setArticles(res.data.articles || []);
     } catch (err) {
       console.error("❌ Error fetching articles:", err);
@@ -58,7 +62,9 @@ export default function ArticleListPage() {
   if (!articles.length)
     return (
       <Box textAlign="center" mt={5}>
-        <Typography color="text.secondary">There are no article yet</Typography>
+        <Typography color="text.secondary">
+          There are no articles yet
+        </Typography>
       </Box>
     );
 
@@ -82,19 +88,25 @@ export default function ArticleListPage() {
           <Paper
             key={art.id}
             sx={{
-              flex: {
-                xs: "1 1 100%",
-                sm: "1 1 calc(50% - 12px)",
-                md: "1 1 calc(33.333% - 16px)",
-              },
+              flex: "1 1 calc(33.333% - 16px)", // default desktop 3 kolom
+              maxWidth: 360, // batasi lebar maksimal
               display: "flex",
               flexDirection: "column",
+              flexGrow: 0,
               borderRadius: 3,
               boxShadow: "0px 6px 18px rgba(0,0,0,0.12)",
               transition: "all 0.3s",
               "&:hover": {
                 transform: "translateY(-4px)",
                 boxShadow: "0px 10px 24px rgba(0,0,0,0.2)",
+              },
+              "@media (max-width:900px)": {
+                flex: "1 1 calc(50% - 12px)",
+                maxWidth: "calc(50% - 12px)",
+              },
+              "@media (max-width:600px)": {
+                flex: "1 1 100%",
+                maxWidth: "100%",
               },
             }}
           >
@@ -180,7 +192,7 @@ export default function ArticleListPage() {
               {/* Reaction Count */}
               <ReactionCount
                 contentId={art.id}
-                token={null} // opsional
+                token={localStorage.getItem("token") || null}
                 initialLikesCount={art.likes_count || 0}
                 initialCommentsCount={art.comments_count || 0}
               />

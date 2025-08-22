@@ -17,6 +17,7 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
+import API from "../Config/API"; // pakai config API
 
 const RECENT_SEARCH_KEY = "recent_user_searches";
 
@@ -61,13 +62,10 @@ export default function UserSearch() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(
-        "https://rutee.id/dapur/user/search-user.php",
-        {
-          params: { q },
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axios.get(API.USER_SEARCH, {
+        params: { q },
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setResults(res.data.results || []);
     } catch (err) {
       setError(err.response?.data?.error || "Gagal mengambil data user");

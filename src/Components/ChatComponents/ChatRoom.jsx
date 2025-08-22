@@ -13,6 +13,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
+import API from "../../Config/API";
 
 // Fungsi hitung waktu
 const timeAgo = (mysqlTimestamp) => {
@@ -61,7 +62,7 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
     if (!text.trim() || !authId) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("https://rutee.id/dapur/chat/send-message.php", {
+      const res = await fetch(API.CHAT_SEND_MESSAGE, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -147,7 +148,7 @@ const ChatRoom = ({ initialMessages = [], roomId, onSendExternal }) => {
                     p: 1.5,
                     maxWidth: "70%",
                     bgcolor: isOwn
-                      ? theme.palette.grey[300]
+                      ? theme.palette.primary.main
                       : theme.palette.secondary.main,
                     color: isOwn
                       ? theme.palette.primary.contrastText

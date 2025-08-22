@@ -12,6 +12,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import axios from "axios";
+import API from "../../Config/API"; // pastikan path sesuai
 
 export default function FollowerCount({ targetUserId }) {
   const [followerCount, setFollowerCount] = useState(0);
@@ -26,7 +27,7 @@ export default function FollowerCount({ targetUserId }) {
     setLoading(true);
     try {
       const res = await axios.get(
-        `https://rutee.id/dapur/user/follow-status.php?target_id=${targetUserId}`,
+        `${API.USER_FOLLOW_STATUS}?target_id=${targetUserId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -84,7 +85,7 @@ export default function FollowerCount({ targetUserId }) {
               ))}
             </List>
           ) : (
-            <Typography>Belum ada follower</Typography>
+            <Typography>No follower yet</Typography>
           )}
         </DialogContent>
         <DialogActions>

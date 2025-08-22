@@ -14,8 +14,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import axios from "axios";
 import Autocomplete from "@mui/material/Autocomplete";
+import API from "../../Config/API";
 
-// Import careerOptions dari file EditProfileCareer.jsx
 import { careerOptions as careerOptionsList } from "./EditProfileCareers";
 
 export default function EditProfile() {
@@ -32,7 +32,7 @@ export default function EditProfile() {
     city: "",
     profile_image_url: "",
     cover_image_url: "",
-    career: [], // array karir
+    career: [],
   });
 
   const [profileImageFile, setProfileImageFile] = useState(null);
@@ -40,8 +40,10 @@ export default function EditProfile() {
 
   // Ambil profile user
   useEffect(() => {
+    if (!token) return;
+
     axios
-      .get("https://rutee.id/dapur/profile/get-profile.php", {
+      .get(API.PROFILE_GET, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -68,9 +70,9 @@ export default function EditProfile() {
         });
       })
       .catch((err) => console.error(err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Set career options dari EditProfileCareer.jsx
   useEffect(() => {
     setCareerOptions(careerOptionsList);
   }, []);
@@ -86,16 +88,12 @@ export default function EditProfile() {
     const formData = new FormData();
     formData.append("image", file);
     formData.append("type", type);
-    const res = await axios.post(
-      "https://rutee.id/dapur/profile/upload-image.php",
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const res = await axios.post(API.PROFILE_UPLOAD_IMAGE, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return res.data.file_url;
   };
 
@@ -112,7 +110,7 @@ export default function EditProfile() {
         coverImageUrl = await uploadImage(coverImageFile, "cover");
 
       await axios.post(
-        "https://rutee.id/dapur/profile/edit-profile.php",
+        API.PROFILE_EDIT_PROFILE,
         {
           ...profile,
           career: profile.career.join(", "), // kirim sebagai string
@@ -283,7 +281,6 @@ export default function EditProfile() {
             fullWidth
           />
 
-          {/* Career Autocomplete */}
           <Autocomplete
             multiple
             freeSolo
@@ -291,11 +288,8 @@ export default function EditProfile() {
             options={careerOptions}
             value={profile.career}
             onChange={(event, newValue) => {
-              // Maksimal 2 karir
               const filtered = newValue.slice(0, 2);
               setProfile((prev) => ({ ...prev, career: filtered }));
-
-              // Tambahkan ke options jika user bikin karir baru
               filtered.forEach((val) => {
                 if (!careerOptions.includes(val)) {
                   setCareerOptions((prev) => [...prev, val]);

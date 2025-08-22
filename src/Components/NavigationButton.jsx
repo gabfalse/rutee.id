@@ -23,8 +23,6 @@ import BusinessIcon from "@mui/icons-material/Business";
 import GroupIcon from "@mui/icons-material/Group";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
@@ -111,10 +109,6 @@ export default function NavigationButton({ mode, setMode }) {
     navigate(path);
   };
 
-  const handleToggleMode = () => {
-    setMode(mode === "light" ? "dark" : "light");
-  };
-
   if (!user) {
     return (
       <Box display="flex" justifyContent="center" mt={2}>
@@ -129,6 +123,21 @@ export default function NavigationButton({ mode, setMode }) {
       </Box>
     );
   }
+
+  // Fallback avatar function
+  const getAvatarSrc = () => {
+    return (
+      profileData?.profile_image_url ||
+      user?.profile_url ||
+      "https://rutee.id/images/default-avatar.png"
+    );
+  };
+
+  const getAvatarFallback = () => {
+    return !profileData?.profile_image_url && !user?.profile_url
+      ? user.display_name?.[0] || user.username?.[0] || "?"
+      : null;
+  };
 
   return (
     <>
@@ -149,12 +158,11 @@ export default function NavigationButton({ mode, setMode }) {
             <CircularProgress size={40} />
           ) : (
             <Avatar
-              src={profileData?.profile_image_url || undefined}
+              src={getAvatarSrc()}
               alt={user.display_name || user.username}
               sx={{ width: 48, height: 48 }}
             >
-              {!profileData?.profile_image_url &&
-                (user.display_name?.[0] || user.username?.[0] || "?")}
+              {getAvatarFallback()}
             </Avatar>
           )}
         </IconButton>
@@ -170,7 +178,7 @@ export default function NavigationButton({ mode, setMode }) {
             bgcolor: theme.palette.background.paper,
             boxShadow: theme.shadows[6],
             height: "100%",
-            overflowY: "auto", // scrollable jika menu panjang
+            overflowY: "auto",
           },
         }}
       >
@@ -190,12 +198,11 @@ export default function NavigationButton({ mode, setMode }) {
             }}
           >
             <Avatar
-              src={profileData?.profile_image_url}
+              src={getAvatarSrc()}
               alt={user.display_name || user.username}
               sx={{ width: isMobile ? 36 : 40, height: isMobile ? 36 : 40 }}
             >
-              {!profileData?.profile_image_url &&
-                (user.display_name?.[0] || user.username?.[0] || "?")}
+              {getAvatarFallback()}
             </Avatar>
             <Box sx={{ overflow: "hidden" }}>
               <Typography variant={isMobile ? "body2" : "subtitle1"} noWrap>
@@ -232,7 +239,6 @@ export default function NavigationButton({ mode, setMode }) {
                 </ListItemButton>
               );
 
-              // Tooltip hanya untuk desktop
               return isMobile || active ? (
                 button
               ) : (
@@ -241,20 +247,6 @@ export default function NavigationButton({ mode, setMode }) {
                 </Tooltip>
               );
             })}
-
-            {/* Toggle Theme */}
-            {/* <ListItemButton onClick={handleToggleMode}>
-              <ListItemIcon sx={{ color: theme.palette.primary.main }}>
-                {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  mode === "light"
-                    ? "Switch to Dark Mode"
-                    : "Switch to Light Mode"
-                }
-              />
-            </ListItemButton> */}
           </List>
 
           <Divider />

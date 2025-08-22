@@ -18,6 +18,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API"; // pakai config API
 
 const defaultExperience = {
   id: "",
@@ -47,8 +48,10 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-experience.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_EXPERIENCE}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.experiences || [];
       if (limit) data = data.slice(0, limit);
@@ -69,7 +72,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-experience.php`,
+        API.PROFILE_EDIT_EXPERIENCE,
         { ...form, user_id: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -85,7 +88,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!window.confirm("Yakin hapus pengalaman ini?")) return;
     if (!userId || !token) return;
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-experience.php`, {
+      await axios.delete(API.PROFILE_EDIT_EXPERIENCE, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id, user_id: userId },
       });
@@ -124,7 +127,7 @@ const ExperienceList = ({ userId: propUserId, readOnly = false, limit }) => {
 
       {experiences.length === 0 ? (
         <Typography color="text.secondary" fontStyle="italic">
-          Belum ada pengalaman
+          No experience yet
         </Typography>
       ) : (
         <Box display="flex" flexDirection="column" gap={1}>

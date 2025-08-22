@@ -1,3 +1,4 @@
+// src/Pages/ResultPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -8,6 +9,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
+import API from "../../Config/API";
 import Navbar from "../Navbar";
 
 const ResultPage = () => {
@@ -20,37 +22,34 @@ const ResultPage = () => {
     const fetchResult = async () => {
       if (!token) return;
 
+      setLoading(true);
       try {
-        const resResult = await axios.get(
-          "https://rutee.id/dapur/personality/personality-results.php",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
+        // ===== Fetch user personality result =====
+        const resResult = await axios.get(API.PERSONALITY_RESULTS, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        if (!resResult.data.success || !resResult.data.data) {
-          setLoading(false);
+        const userResult = resResult.data?.data;
+        if (!resResult.data?.success || !userResult) {
+          setResult(null);
+          setTypeDetail(null);
           return;
         }
 
-        const userResult = resResult.data.data;
         setResult(userResult);
 
+        // ===== Fetch personality type details =====
         const resType = await axios.get(
-          `https://rutee.id/dapur/personality/personality-type.php?type=${encodeURIComponent(
-            userResult.type
-          )}`
+          `${API.PERSONALITY_TYPE}?type=${encodeURIComponent(userResult.type)}`
         );
 
-        if (resType.data.success && resType.data.data) {
+        if (resType.data?.success && resType.data?.data) {
           setTypeDetail(resType.data.data);
+        } else {
+          setTypeDetail(null);
         }
-      } catch (error) {
-        console.error("[DEBUG] Error fetching result:", error);
+      } catch (err) {
+        console.error("❌ Error fetching personality result:", err);
       } finally {
         setLoading(false);
       }
@@ -125,12 +124,8 @@ const ResultPage = () => {
                 <img
                   src={result.image_url}
                   alt={typeDetail.type}
-                  style={{
-                    width: "100%",
-                    display: "block",
-                  }}
+                  style={{ width: "100%", display: "block" }}
                 />
-                {/* Nama kepribadian di atas foto */}
                 <Box
                   sx={{
                     position: "absolute",
@@ -153,8 +148,7 @@ const ResultPage = () => {
             <Box flex={1}>
               {typeDetail.description && (
                 <Typography variant="body1" gutterBottom sx={{ mt: 1 }}>
-                  <strong>{user?.display_name}</strong> is{" "}
-                  {typeDetail.description}
+                  <strong>{user?.display_name}</strong> {typeDetail.description}
                 </Typography>
               )}
 

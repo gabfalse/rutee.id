@@ -9,11 +9,11 @@ import {
   Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import ChatSidebar from "../Components/ChatComponents/ChatSidebar";
 import ChatRoom from "../Components/ChatComponents/ChatRoom";
+import API from "../Config/API";
 
 const ChatsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -27,15 +27,15 @@ const ChatsPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const location = useLocation();
-  const { id: authId } = useAuth(); // pastikan ambil id user yang sedang login
+  const { id: authId } = useAuth();
 
-  // Ambil rooms saat pertama kali load
+  // Fetch chat rooms
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("https://rutee.id/dapur/chat/get-rooms.php", {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch(API.CHAT_GET_ROOMS, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();
         if (!res.ok || !data.success)
@@ -51,7 +51,7 @@ const ChatsPage = () => {
     fetchRooms();
   }, []);
 
-  // Kalau ada state room_id dari NewChatPage
+  // Handle new room from NewChatPage
   useEffect(() => {
     if (location.state?.newRoom) {
       const newRoom = location.state.newRoom;
@@ -63,15 +63,17 @@ const ChatsPage = () => {
     }
   }, [location.state, navigate]);
 
-  // Ambil messages ketika pilih room
+  // Fetch messages when room selected
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedRoomId) return;
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
-          `https://rutee.id/dapur/chat/get-messages.php?room_id=${selectedRoomId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${API.CHAT_GET_MESSAGES}?room_id=${selectedRoomId}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
         );
         const data = await res.json();
         if (data.success) {
@@ -82,7 +84,7 @@ const ChatsPage = () => {
             created_at: msg.created_at,
             sender_name: msg.sender_name || "Unknown",
             sender_avatar: msg.sender_avatar || "/default-avatar.png",
-            isOwn: String(msg.sender_id) === String(authId), // tambah flag isOwn
+            isOwn: String(msg.sender_id) === String(authId),
           }));
           setMessages(formattedMessages);
 
@@ -104,7 +106,7 @@ const ChatsPage = () => {
       setMessages([]);
       setOtherUser(null);
     } else {
-      navigate("/"); // mobile: kembali ke homepage
+      navigate("/");
     }
   };
 

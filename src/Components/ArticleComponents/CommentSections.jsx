@@ -1,3 +1,4 @@
+// src/Components/Article/CommentSection.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -12,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
-
+import API from "../../Config/API";
 export default function CommentSection({ articleId, currentUserId, token }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -24,7 +25,7 @@ export default function CommentSection({ articleId, currentUserId, token }) {
   const fetchComments = async () => {
     try {
       const res = await axios.get(
-        `https://rutee.id/dapur/article/comments.php?content_type=article&content_id=${articleId}`,
+        `${API.ARTICLE_COMMENTS}?content_type=article&content_id=${articleId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
@@ -46,7 +47,7 @@ export default function CommentSection({ articleId, currentUserId, token }) {
     if (!newComment.trim()) return;
     try {
       const res = await axios.post(
-        "https://rutee.id/dapur/article/comments.php",
+        API.ARTICLE_COMMENTS,
         {
           content_type: "article",
           content_id: articleId,
@@ -56,7 +57,6 @@ export default function CommentSection({ articleId, currentUserId, token }) {
       );
 
       if (res.data.success) {
-        // jika backend return user_name dan profile_image_url
         if (res.data.user_name) {
           setComments([
             ...comments,
@@ -70,13 +70,12 @@ export default function CommentSection({ articleId, currentUserId, token }) {
             },
           ]);
         } else {
-          // fallback: fetch ulang biar dapat data lengkap
-          await fetchComments();
+          await fetchComments(); // fallback supaya data konsisten
         }
         setNewComment("");
       }
     } catch (err) {
-      console.error("Error");
+      console.error("Error add comment:", err);
     }
   };
 
@@ -84,7 +83,7 @@ export default function CommentSection({ articleId, currentUserId, token }) {
   const handleUpdateComment = async (id) => {
     try {
       const res = await axios.put(
-        "https://rutee.id/dapur/article/comments.php",
+        API.ARTICLE_COMMENTS,
         { id, message: editMessage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -99,29 +98,26 @@ export default function CommentSection({ articleId, currentUserId, token }) {
         setEditMessage("");
       }
     } catch (err) {
-      console.error("Error");
+      console.error("Error update comment:", err);
     }
   };
 
   // === Hapus komentar ===
   const handleDeleteComment = async (id) => {
     try {
-      const res = await axios.delete(
-        "https://rutee.id/dapur/article/comments.php",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          data: `id=${encodeURIComponent(id)}`, // penting: format form-urlencoded
-        }
-      );
+      const res = await axios.delete(API.ARTICLE_COMMENTS, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data: `id=${encodeURIComponent(id)}`, // penting: form-urlencoded
+      });
 
       if (res.data.success) {
         setComments(comments.filter((c) => c.id !== id));
       }
     } catch (err) {
-      console.error("Error", err.response?.data || err);
+      console.error("Error delete comment:", err.response?.data || err);
     }
   };
 

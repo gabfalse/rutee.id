@@ -18,6 +18,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API"; // pakai config API
 
 const defaultEducation = {
   id: "",
@@ -46,8 +47,10 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-education.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_EDUCATIONS}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.educations || [];
       if (limit) data = data.slice(0, limit);
@@ -68,7 +71,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-education.php`,
+        API.PROFILE_EDIT_EDUCATIONS,
         {
           ...form,
           user_id: userId,
@@ -88,7 +91,7 @@ const EducationList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!window.confirm("Yakin hapus education ini?")) return;
     if (!userId || !token) return;
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-education.php`, {
+      await axios.delete(API.PROFILE_EDIT_EDUCATIONS, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id, user_id: userId },
       });

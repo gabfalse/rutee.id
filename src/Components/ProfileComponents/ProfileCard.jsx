@@ -29,6 +29,7 @@ import EducationList from "./EducationList";
 import ContactList from "./ContactList";
 import FollowTogglePage from "../ButtonComponents/FollowTogglePage";
 import FollowerCount from "./FollowerCount";
+import API from "../../Config/API"; // gunakan config API
 
 export default function ProfileCard({ user_id }) {
   const { user } = useAuth();
@@ -54,12 +55,12 @@ export default function ProfileCard({ user_id }) {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("Token tidak ditemukan.");
 
-        const url = `https://rutee.id/dapur/profile/get-profile.php?user_id=${encodeURIComponent(
-          user_id
-        )}`;
-        const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${API.PROFILE_GET}?user_id=${encodeURIComponent(user_id)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (response.data?.profile) {
           const profileWithPersonality = {
@@ -114,11 +115,7 @@ export default function ProfileCard({ user_id }) {
   };
 
   const handleArticleProfile = () => {
-    if (isOwner) {
-      navigate("/articles/owned");
-    } else {
-      navigate(`/articles/user/${user_id}`);
-    }
+    navigate(isOwner ? "/articles/owned" : `/articles/user/${user_id}`);
     handleMenuClose();
   };
 
@@ -169,22 +166,6 @@ export default function ProfileCard({ user_id }) {
     );
   };
 
-  // ================== Personality Chip Style ==================
-  const getPersonalityColor = (type) => {
-    switch (type) {
-      case "Fire":
-        return "error";
-      case "Water":
-        return "info";
-      case "Earth":
-        return "success";
-      case "Air":
-        return "primary";
-      default:
-        return "secondary";
-    }
-  };
-
   return (
     <Box>
       <Card
@@ -196,189 +177,173 @@ export default function ProfileCard({ user_id }) {
           borderRadius: 3,
         }}
       >
-        <Box>
-          {/* Cover + Avatar + Menu Titik Tiga */}
-          <Box sx={{ position: "relative", mb: 10 }}>
-            {/* Tombol titik tiga */}
-            <IconButton
-              onClick={handleMenuOpen}
-              sx={{
-                position: "absolute",
-                bgcolor: "secondary.main",
-                top: 8,
-                right: 8,
-                zIndex: 20,
-              }}
-            >
-              <MoreVertIcon />
-            </IconButton>
+        {/* Cover + Avatar + Menu */}
+        <Box sx={{ position: "relative", mb: 10 }}>
+          <IconButton
+            onClick={handleMenuOpen}
+            sx={{
+              position: "absolute",
+              bgcolor: "secondary.main",
+              top: 8,
+              right: 8,
+              zIndex: 20,
+            }}
+          >
+            <MoreVertIcon />
+          </IconButton>
 
-            {/* Menu Dropdown */}
-            <Menu
-              anchorEl={menuAnchor}
-              open={Boolean(menuAnchor)}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              {isOwner && (
-                <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
-              )}
-              <MenuItem onClick={handleArticleProfile}>
-                {isOwner ? "My Article" : profileData.name + "'s Article"}
-              </MenuItem>
-              {isOwner && (
-                <MenuItem onClick={handleCheckResume}>Check Resume</MenuItem>
-              )}
-              <MenuItem onClick={handleContacts}>
-                {isOwner ? "Edit Contact" : "View Contact"}
-              </MenuItem>
-              <MenuItem onClick={handleShareProfile}>
-                <ShareIcon fontSize="small" sx={{ mr: 1 }} /> Share Profile
-              </MenuItem>
-            </Menu>
-
-            {/* Cover */}
-            {profileData.cover_image_url ? (
-              <Box
-                component="img"
-                src={profileData.cover_image_url}
-                alt="Cover"
-                onClick={() => {
-                  setImageUrl(profileData.cover_image_url);
-                  setOpenImage(true);
-                }}
-                sx={{
-                  width: "100%",
-                  height: { xs: 180, sm: 220, md: 280 },
-                  objectFit: "cover",
-                  borderRadius: 3,
-                  boxShadow: "inset 0 0 20px rgba(0,0,0,0.1)",
-                  cursor: "pointer",
-                }}
-              />
-            ) : (
-              <Box
-                height={{ xs: 180, sm: 220, md: 280 }}
-                bgcolor="grey.300"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                borderRadius={3}
-              >
-                <Typography variant="h6" color="text.secondary">
-                  Tidak ada gambar cover
-                </Typography>
-              </Box>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+          >
+            {isOwner && (
+              <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
             )}
+            <MenuItem onClick={handleArticleProfile}>
+              {isOwner ? "My Article" : profileData.name + "'s Article"}
+            </MenuItem>
+            {isOwner && (
+              <MenuItem onClick={handleCheckResume}>Check Resume</MenuItem>
+            )}
+            <MenuItem onClick={handleContacts}>
+              {isOwner ? "Edit Contact" : "View Contact"}
+            </MenuItem>
+            <MenuItem onClick={handleShareProfile}>
+              <ShareIcon fontSize="small" sx={{ mr: 1 }} /> Share Profile
+            </MenuItem>
+          </Menu>
 
-            {/* Avatar */}
-            <Avatar
-              src={profileData.profile_image_url}
-              alt={profileData.name || profileData.username}
+          {profileData.cover_image_url ? (
+            <Box
+              component="img"
+              src={profileData.cover_image_url}
+              alt="Cover"
               onClick={() => {
-                if (profileData.profile_image_url) {
-                  setImageUrl(profileData.profile_image_url);
-                  setOpenImage(true);
-                }
+                setImageUrl(profileData.cover_image_url);
+                setOpenImage(true);
               }}
               sx={{
-                width: { xs: 120, sm: 140, md: 160 },
-                height: { xs: 120, sm: 140, md: 160 },
-                border: "5px solid white",
-                bgcolor: "grey.400",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                position: "absolute",
-                bottom: -60,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 10,
-                cursor: profileData.profile_image_url ? "pointer" : "default",
+                width: "100%",
+                height: { xs: 180, sm: 220, md: 280 },
+                objectFit: "cover",
+                borderRadius: 3,
+                boxShadow: "inset 0 0 20px rgba(0,0,0,0.1)",
+                cursor: "pointer",
               }}
             />
-          </Box>
-
-          {/* Nama + Personality + Bio */}
-          <Box sx={{ textAlign: "center", mb: 3, mt: 5 }}>
+          ) : (
             <Box
+              height={{ xs: 180, sm: 220, md: 280 }}
+              bgcolor="grey.300"
               display="flex"
-              justifyContent="center"
               alignItems="center"
-              gap={1}
+              justifyContent="center"
+              borderRadius={3}
             >
-              <Typography variant="h5" fontWeight="bold" color="text.primary">
-                {profileData.name || profileData.username}
+              <Typography variant="h6" color="text.secondary">
+                Tidak ada gambar cover
               </Typography>
             </Box>
-            <Box>
-              {profileData.personality?.type && (
-                <Chip
-                  label={profileData.personality.type}
-                  color="primary"
-                  variant="containded"
-                  size="small"
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "0.7rem",
-                    height: "20px",
-                    borderRadius: "6px",
-                  }}
-                />
-              )}
-            </Box>
+          )}
 
-            {profileData.career && (
-              <Typography variant="body2" color="text.secondary" mt={0.5}>
-                {profileData.career}
-              </Typography>
-            )}
-            {profileData.bio && (
-              <Typography
-                variant="body1"
-                color="text.primary"
-                sx={{ whiteSpace: "pre-line", mt: 1 }}
-              >
-                {profileData.bio}
-              </Typography>
-            )}
-          </Box>
-
-          {/* Follower / Follow */}
-          <Box
-            mt={2}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            gap={1.5}
-          >
-            <FollowerCount targetUserId={user_id} />
-            {!isOwner && (
-              <FollowTogglePage
-                currentUserId={authUserId}
-                targetUserId={user_id}
-              />
-            )}
-          </Box>
-
-          {/* Sections */}
-          <Box mb={2}>{renderSectionHeader("", "languages")}</Box>
-          <LanguageList limit={2} user_id={user_id} readOnly />
-
-          <Box mb={2}>{renderSectionHeader("", "skills")}</Box>
-          <SkillList limit={2} user_id={user_id} readOnly />
-
-          <Box mb={2}>{renderSectionHeader("", "educations")}</Box>
-          <EducationList limit={3} userId={user_id} readOnly />
-
-          <Box mb={2}>{renderSectionHeader("", "experiences")}</Box>
-          <ExperienceList limit={1} user_id={user_id} readOnly />
-
-          <Box mb={2}>{renderSectionHeader("", "certificates")}</Box>
-          <CertificateList limit={1} user_id={user_id} readOnly />
-
-          <Box mb={2}>{renderSectionHeader("", "projects")}</Box>
-          <ProjectList limit={1} user_id={user_id} readOnly />
+          <Avatar
+            src={profileData.profile_image_url}
+            alt={profileData.name || profileData.username}
+            onClick={() => {
+              if (profileData.profile_image_url) {
+                setImageUrl(profileData.profile_image_url);
+                setOpenImage(true);
+              }
+            }}
+            sx={{
+              width: { xs: 120, sm: 140, md: 160 },
+              height: { xs: 120, sm: 140, md: 160 },
+              border: "5px solid white",
+              bgcolor: "grey.400",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+              position: "absolute",
+              bottom: -60,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 10,
+              cursor: profileData.profile_image_url ? "pointer" : "default",
+            }}
+          />
         </Box>
+
+        {/* Nama + Personality + Bio */}
+        <Box sx={{ textAlign: "center", mb: 3, mt: 5 }}>
+          <Typography variant="h5" fontWeight="bold" color="text.primary">
+            {profileData.name || profileData.username}
+          </Typography>
+
+          {profileData.personality?.type && (
+            <Chip
+              label={profileData.personality.type}
+              color="primary"
+              variant="contained"
+              size="small"
+              sx={{
+                fontWeight: "bold",
+                fontSize: "0.7rem",
+                height: "20px",
+                borderRadius: "6px",
+              }}
+            />
+          )}
+
+          {profileData.career && (
+            <Typography variant="body2" color="text.secondary" mt={0.5}>
+              {profileData.career}
+            </Typography>
+          )}
+          {profileData.bio && (
+            <Typography
+              variant="body1"
+              color="text.primary"
+              sx={{ whiteSpace: "pre-line", mt: 1 }}
+            >
+              {profileData.bio}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Follower / Follow */}
+        <Box
+          mt={2}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          gap={1.5}
+        >
+          <FollowerCount targetUserId={user_id} />
+          {!isOwner && (
+            <FollowTogglePage
+              currentUserId={authUserId}
+              targetUserId={user_id}
+            />
+          )}
+        </Box>
+
+        {/* Sections */}
+        <Box mb={2}>{renderSectionHeader("", "languages")}</Box>
+        <LanguageList limit={2} userId={user_id} readOnly />
+
+        <Box mb={2}>{renderSectionHeader("", "skills")}</Box>
+        <SkillList limit={2} userId={user_id} readOnly />
+
+        <Box mb={2}>{renderSectionHeader("", "educations")}</Box>
+        <EducationList limit={3} userId={user_id} readOnly />
+
+        <Box mb={2}>{renderSectionHeader("", "experiences")}</Box>
+        <ExperienceList limit={1} userId={user_id} readOnly />
+
+        <Box mb={2}>{renderSectionHeader("", "certificates")}</Box>
+        <CertificateList limit={1} userId={user_id} readOnly />
+
+        <Box mb={2}>{renderSectionHeader("", "projects")}</Box>
+        <ProjectList limit={1} userId={user_id} readOnly />
       </Card>
 
       {/* Modal Preview Gambar */}

@@ -1,9 +1,11 @@
+// src/Components/ArticleComponents/ReactionCount.jsx
 import React, { useEffect, useState } from "react";
-import { Stack, Typography, CircularProgress, IconButton } from "@mui/material";
+import { Stack, Typography, CircularProgress } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import axios from "axios";
+import API from "../../Config/API";
 
 export default function ReactionCount({
   contentId,
@@ -25,14 +27,14 @@ export default function ReactionCount({
       setLoading(true);
       try {
         const res = await axios.get(
-          `https://rutee.id/dapur/article/reaction-counts.php?content_id=${contentId}`,
+          `${API.ARTICLE_REACTIONS}?content_id=${contentId}`,
           token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
         );
 
         if (res.data.success) {
           setLikeCount(res.data.likes_count || 0);
           setCommentCount(res.data.comments_count || 0);
-          setLiked(res.data.is_liked || false); // update status like user
+          setLiked(res.data.is_liked || false);
         }
       } catch (err) {
         console.error("[DEBUG] Error fetching reaction counts:", err);

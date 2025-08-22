@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Button, CircularProgress } from "@mui/material";
 import axios from "axios";
+import API from "../../Config/API";
 
 export default function FollowTogglePage({ currentUserId, targetUserId }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
   // ===== Cek status follow =====
   useEffect(() => {
@@ -16,10 +20,10 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
       if (!targetUserId || !token) return;
 
       try {
-        const res = await axios.get(
-          `https://rutee.id/dapur/user/follow-status.php?target_id=${targetUserId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await axios.get(API.USER_FOLLOW_STATUS, {
+          params: { target_id: targetUserId },
+          ...axiosConfig,
+        });
 
         if (res.data && isMounted) {
           setIsFollowing(res.data.isFollowing ?? false);
@@ -47,20 +51,16 @@ export default function FollowTogglePage({ currentUserId, targetUserId }) {
 
     try {
       const res = await axios.post(
-        `https://rutee.id/dapur/user/toggle-follow.php`,
+        API.USER_TOGGLE_FOLLOW,
         { following_id: targetUserId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        axiosConfig
       );
 
       if (res.data) {
-        if (res.data.status === "followed") {
-          setIsFollowing(true);
-        } else if (res.data.status === "unfollowed") {
-          setIsFollowing(false);
-        }
+        setIsFollowing(res.data.status === "followed");
       }
     } catch (err) {
-      console.error("Error", err.response?.data ?? err.message);
+      console.error("Error toggle follow:", err.response?.data ?? err.message);
     } finally {
       setLoading(false);
     }

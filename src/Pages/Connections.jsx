@@ -13,12 +13,9 @@ import {
 import axios from "axios";
 import { useAuth } from "../Context/AuthContext";
 import { useParams } from "react-router-dom";
-
-// Komponen tombol follow/unfollow
 import FollowToggleButton from "../Components/ButtonComponents/FollowTogglePage";
 import FeatureButton from "../Components/FeatureButton";
-
-const API_URL = "https://rutee.id/dapur/user/connections.php";
+import API from "../Config/API";
 
 export default function Connections() {
   const { userId } = useParams();
@@ -37,15 +34,15 @@ export default function Connections() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [resFollowers, resFollowing, resConnections] = await Promise.all([
-        axios.get(`${API_URL}?followers=${userId}`, { headers }),
-        axios.get(`${API_URL}?following=${userId}`, { headers }),
-        axios.get(`${API_URL}?connections=${userId}`, { headers }),
+      const [resConnections, resFollowers, resFollowing] = await Promise.all([
+        axios.get(`${API.USER_CONNECTIONS}?connections=${userId}`, { headers }),
+        axios.get(`${API.USER_CONNECTIONS}?followers=${userId}`, { headers }),
+        axios.get(`${API.USER_CONNECTIONS}?following=${userId}`, { headers }),
       ]);
 
+      setConnections(resConnections.data.connections || []);
       setFollowers(resFollowers.data.followers || []);
       setFollowing(resFollowing.data.following || []);
-      setConnections(resConnections.data.connections || []);
     } catch (err) {
       console.error("❌ Error fetchData:", err);
     } finally {
@@ -78,7 +75,6 @@ export default function Connections() {
                 boxShadow: 1,
               }}
             >
-              {/* Avatar + Nama */}
               <Box display="flex" alignItems="center" gap={2}>
                 <Avatar
                   src={user.avatar || ""}
@@ -89,7 +85,6 @@ export default function Connections() {
                 </Typography>
               </Box>
 
-              {/* Tombol follow/unfollow */}
               {userIdField !== loggedInUserId && (
                 <FollowToggleButton
                   currentUserId={loggedInUserId}
@@ -120,16 +115,15 @@ export default function Connections() {
         variant="fullWidth"
         sx={{ mb: 2 }}
       >
-        {" "}
         <Tab label={`Connections (${connections?.length || 0})`} />
         <Tab label={`Followers (${followers?.length || 0})`} />
         <Tab label={`Following (${following?.length || 0})`} />
       </Tabs>
 
       <Box sx={{ mt: 2 }}>
-        {tabIndex === 0 && renderUserList(followers)}
-        {tabIndex === 1 && renderUserList(following)}
-        {tabIndex === 2 && renderUserList(connections)}
+        {tabIndex === 0 && renderUserList(connections)}
+        {tabIndex === 1 && renderUserList(followers)}
+        {tabIndex === 2 && renderUserList(following)}
       </Box>
       <FeatureButton />
     </Box>

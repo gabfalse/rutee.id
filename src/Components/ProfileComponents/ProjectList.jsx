@@ -18,6 +18,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API";
 
 const defaultProject = {
   id: "",
@@ -50,8 +51,10 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `https://rutee.id/dapur/profile/edit-project.php?user_id=${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API.PROFILE_EDIT_PROJECT}?user_id=${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       let data = res.data.projects || [];
       if (limit) data = data.slice(0, limit);
@@ -72,7 +75,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-project.php`,
+        API.PROFILE_EDIT_PROJECT,
         { ...form, user_id: userId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -88,7 +91,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!window.confirm("Yakin hapus project ini?")) return;
     if (!userId || !token) return;
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-project.php`, {
+      await axios.delete(API.PROFILE_EDIT_PROJECT, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id, user_id: userId },
       });
@@ -195,7 +198,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Hapus">
+                  <Tooltip title="Delete">
                     <Delete
                       fontSize="small"
                       sx={{ cursor: "pointer" }}
@@ -250,7 +253,7 @@ const ProjectList = ({ userId: propUserId, readOnly = false, limit }) => {
           {!form.still_on_project && (
             <TextField
               margin="dense"
-              label="Tanggal Selesai"
+              label="End date"
               type="date"
               fullWidth
               InputLabelProps={{ shrink: true }}

@@ -21,6 +21,7 @@ import {
 import { Add, ArrowBack, MoreVert } from "@mui/icons-material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../../Config/API";
 
 const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
   const [roomsWithLastMsg, setRoomsWithLastMsg] = useState([]);
@@ -39,13 +40,10 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
         const updatedRooms = await Promise.all(
           rooms.map(async (room) => {
             try {
-              const res = await axios.get(
-                "https://rutee.id/dapur/chat/get-messages.php",
-                {
-                  params: { room_id: room.id },
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              );
+              const res = await axios.get(API.CHAT_GET_MESSAGES, {
+                params: { room_id: room.id },
+                headers: { Authorization: `Bearer ${token}` },
+              });
               const messages = res.data.success ? res.data.messages : [];
               const lastMsg =
                 messages.length > 0 ? messages[messages.length - 1] : null;
@@ -100,7 +98,7 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
 
     try {
       await axios.post(
-        "https://rutee.id/dapur/chat/delete-room.php",
+        API.CHAT_DELETE_ROOM,
         { room_id: selectedRoom.id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +137,7 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
         <Box display="flex" alignItems="center">
           {onBack && (
             <IconButton
-              onClick={onBack} // akan memanggil handleSidebarBack di ChatsPage
+              onClick={onBack}
               size="small"
               sx={{ mr: 1 }}
               aria-label="Kembali"
@@ -181,7 +179,7 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
                   <ListItemButton
                     key={room.id}
                     sx={{ py: 1.5 }}
-                    onClick={() => onRoomClick(room.id)} // klik chat room
+                    onClick={() => onRoomClick(room.id)}
                   >
                     <Stack
                       direction="row"
@@ -207,7 +205,7 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
                     {/* Menu Hapus */}
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation(); // ⬅️ cegah klik chat
+                        e.stopPropagation();
                         handleMenuClick(e, room);
                       }}
                     >
@@ -239,11 +237,11 @@ const ChatSidebar = ({ rooms, onRoomClick, onBack, onRoomDeleted }) => {
         <DialogTitle>Delete Chat</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure want to delete This message?
+            Are you sure want to delete this chat?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Batal</Button>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
           <Button onClick={handleDeleteRoom} color="error">
             Delete
           </Button>

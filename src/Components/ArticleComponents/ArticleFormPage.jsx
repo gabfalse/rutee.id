@@ -1,3 +1,4 @@
+// src/Pages/ArticleFormPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -17,9 +18,7 @@ import { PhotoCamera } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
-
-const API_URL = "https://rutee.id/dapur/article/articles.php";
-const UPLOAD_URL = "https://rutee.id/dapur/article/upload-article-image.php";
+import API from "../../Config/API"; // ✅ pakai config
 
 export default function ArticleFormPage() {
   const [alert, setAlert] = useState({
@@ -52,7 +51,7 @@ export default function ArticleFormPage() {
     const fetchArticle = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${API_URL}?id=${id}`, {
+        const res = await axios.get(API.ARTICLE_DETAIL(id), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const article = res.data.article;
@@ -61,7 +60,7 @@ export default function ArticleFormPage() {
         if (article.user_id !== loggedInUserId) {
           setAlert({
             open: true,
-            message: "Unauthorzed",
+            message: "Unauthorized",
             severity: "error",
           });
           navigate("/articles");
@@ -69,7 +68,7 @@ export default function ArticleFormPage() {
         }
         setForm(article);
       } catch (err) {
-        console.error(err.response || err);
+        console.error("❌ Fetch error:", err.response || err);
         setAlert({
           open: true,
           message: "Failed to load article",
@@ -95,10 +94,11 @@ export default function ArticleFormPage() {
     try {
       let imageUrl = form.image_url;
 
+      // Upload image jika ada
       if (file) {
         const formData = new FormData();
         formData.append("image", file);
-        const uploadRes = await axios.post(UPLOAD_URL, formData, {
+        const uploadRes = await axios.post(API.ARTICLE_UPLOAD_IMAGE, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
@@ -108,16 +108,19 @@ export default function ArticleFormPage() {
         else throw new Error(uploadRes.data.error || "Upload gagal");
       }
 
+      // Payload create / update
+      const payload = id
+        ? { ...form, id, image_url: imageUrl }
+        : { ...form, user_id: loggedInUserId, image_url: imageUrl };
+
       const res = await axios({
         method: id ? "put" : "post",
-        url: API_URL,
+        url: API.ARTICLE_SAVE, // ✅ pakai API SAVE
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        data: id
-          ? { ...form, id, image_url: imageUrl }
-          : { ...form, user_id: loggedInUserId, image_url: imageUrl },
+        data: payload,
       });
 
       setArticleIdCreated(id || res.data.id);
@@ -127,7 +130,7 @@ export default function ArticleFormPage() {
         severity: "success",
       });
     } catch (err) {
-      console.error(err.response || err);
+      console.error("❌ Submit error:", err.response || err);
       setAlert({
         open: true,
         message: "Error occured",
@@ -179,7 +182,7 @@ export default function ArticleFormPage() {
               disabled={!isOwner}
             />
 
-            {/* Styled Upload Button + Preview */}
+            {/* Upload Image + Preview */}
             <Box>
               <Button
                 variant="contained"

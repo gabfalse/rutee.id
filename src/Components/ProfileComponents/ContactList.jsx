@@ -16,6 +16,7 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useParams } from "react-router-dom";
+import API from "../../Config/API";
 
 const defaultContact = {
   id: "",
@@ -26,7 +27,7 @@ const defaultContact = {
 const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
   const { token, user } = useAuth();
   const { user_id: paramUserId } = useParams();
-  const loggedInUserId = user?.id; // ambil dari AuthContext
+  const loggedInUserId = user?.id;
   const userId = propUserId || paramUserId || loggedInUserId;
 
   const [contacts, setContacts] = useState([]);
@@ -41,8 +42,8 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
       setLoading(true);
 
       const url = userId
-        ? `https://rutee.id/dapur/profile/edit-contact.php?user_id=${userId}`
-        : `https://rutee.id/dapur/profile/edit-contact.php`;
+        ? `${API.PROFILE_EDIT_CONTACT}?user_id=${userId}`
+        : API.PROFILE_EDIT_CONTACT;
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -52,7 +53,6 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
       if (limit) data = data.slice(0, limit);
       setContacts(data);
 
-      // cek owner dari backend
       if (typeof res.data.is_owner !== "undefined") {
         setIsOwner(res.data.is_owner);
       } else {
@@ -78,8 +78,8 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
     try {
       const method = form.id ? "put" : "post";
       await axios[method](
-        `https://rutee.id/dapur/profile/edit-contact.php`,
-        { ...form }, // user_id sengaja tidak dikirim (backend pakai token)
+        API.PROFILE_EDIT_CONTACT,
+        { ...form }, // user_id tidak dikirim, backend pakai token
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setOpenDialog(false);
@@ -98,9 +98,9 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
     if (!token) return;
 
     try {
-      await axios.delete(`https://rutee.id/dapur/profile/edit-contact.php`, {
+      await axios.delete(API.PROFILE_EDIT_CONTACT, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { id }, // user_id sengaja tidak dikirim
+        data: { id }, // user_id tidak dikirim
       });
       fetchContacts();
     } catch (err) {
@@ -187,7 +187,6 @@ const ContactList = ({ userId: propUserId, readOnly = false, limit }) => {
         </Box>
       )}
 
-      {/* Modal tambah/edit */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}

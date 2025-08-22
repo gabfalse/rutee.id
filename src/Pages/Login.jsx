@@ -17,6 +17,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import GoogleLoginButton from "../Components/GoogleLoginButton";
+import API from "../Config/API"; // pastikan import config API
 
 export default function Login() {
   const { user, login, isAuthenticated, loading, error } = useAuth();
@@ -25,7 +26,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect otomatis jika sudah login
   useEffect(() => {
     if (isAuthenticated) {
       const name = user?.display_name || user?.username || "Pengguna";
@@ -42,13 +42,17 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(""); // Reset dulu success sebelum login
-    const loggedInUser = await login(form);
-    if (loggedInUser) {
-      // Gunakan user hasil login langsung, jangan dari context yang mungkin belum updated
-      const name =
-        loggedInUser.display_name || loggedInUser.username || "Pengguna";
-      setSuccess(`Selamat datang, ${name}!`);
+    setSuccess("");
+    try {
+      // login pakai config API
+      const loggedInUser = await login(form, API.LOGIN);
+      if (loggedInUser) {
+        const name =
+          loggedInUser.display_name || loggedInUser.username || "Pengguna";
+        setSuccess(`Selamat datang, ${name}!`);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -65,7 +69,6 @@ export default function Login() {
           gap: 2,
         }}
       >
-        {/* Judul */}
         <Typography
           variant="h5"
           mb={1}
@@ -76,7 +79,6 @@ export default function Login() {
           Login ke Akun Anda
         </Typography>
 
-        {/* Alert Error */}
         <Collapse in={!!error}>
           {error && (
             <Alert severity="error" sx={{ mb: 1 }} variant="filled">
@@ -85,7 +87,6 @@ export default function Login() {
           )}
         </Collapse>
 
-        {/* Alert Success */}
         <Collapse in={!!success}>
           {success && (
             <Alert severity="success" sx={{ mb: 1 }} variant="filled">
@@ -94,7 +95,6 @@ export default function Login() {
           )}
         </Collapse>
 
-        {/* Form login manual */}
         <form onSubmit={handleSubmit}>
           <TextField
             label="Username atau Email"
@@ -146,7 +146,6 @@ export default function Login() {
           </Button>
         </form>
 
-        {/* Divider teks */}
         <Typography
           variant="body2"
           align="center"
@@ -156,12 +155,10 @@ export default function Login() {
           Atau masuk dengan
         </Typography>
 
-        {/* Tombol Google */}
         <Box display="flex" justifyContent="center" mb={1}>
           <GoogleLoginButton />
         </Box>
 
-        {/* Link daftar */}
         <Stack direction="row" justifyContent="center" spacing={1}>
           <Typography variant="body2">Belum punya akun?</Typography>
           <Link

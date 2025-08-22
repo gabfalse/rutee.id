@@ -13,11 +13,17 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API from "../Config/API"; // pakai config API
 import FeatureButton from "../Components/FeatureButton";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 const notificationText = {
   follow: "Invite you to connect",
-
   like: "Liked Your Content",
   comment: "Commented",
   connection: "Now Connected",
@@ -46,32 +52,29 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
   const latestNotificationId = useRef(null);
 
-  // Fetch notifikasi
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        "https://rutee.id/dapur/notification/get-notifications.php",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get(API.NOTIFICATION_LIST, axiosConfig);
       if (res.data.success) {
         const newNotifications = res.data.notifications;
         setNotifications(newNotifications);
 
-        // tampilkan push notification hanya untuk notifikasi terbaru
-        const newest = newNotifications[0]; // asumsikan array sorted terbaru di awal
+        const newest = newNotifications[0];
         if (
           newest &&
           newest.id !== latestNotificationId.current &&
           !newest.is_read
         ) {
           latestNotificationId.current = newest.id;
-
           if (Notification.permission === "granted") {
             new Notification("Rutee's Notification", {
               body: `${newest.sender_name || "Someone"} ${
@@ -83,45 +86,38 @@ const Notifications = () => {
         }
       }
     } catch (err) {
-      console.error("Error");
+      console.error("Error fetching notifications:", err);
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  // Tandai semua notifikasi terbaca
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id);
-    if (unreadIds.length === 0) return;
+    if (!unreadIds.length) return;
     try {
       await axios.post(
-        "https://rutee.id/dapur/notification/mark-read.php",
+        API.NOTIFICATION_MARK_READ,
         { ids: unreadIds },
-        { headers: { Authorization: `Bearer ${token}` } }
+        axiosConfig
       );
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (err) {
-      console.error("Error");
+      console.error("Error marking all as read:", err);
     }
   };
 
-  // Tandai notifikasi tertentu terbaca
   const markNotificationAsRead = async (id) => {
     try {
-      await axios.post(
-        "https://rutee.id/dapur/notification/mark-read.php",
-        { ids: [id] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.post(API.NOTIFICATION_MARK_READ, { ids: [id] }, axiosConfig);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
     } catch (err) {
-      console.error("Error");
+      console.error("Error marking notification as read:", err);
     }
   };
 
-  // Minta izin notifikasi browser dengan styling custom
   const requestNotificationPermission = () => {
     if (Notification.permission === "default") {
       const container = document.createElement("div");
@@ -139,9 +135,7 @@ const Notifications = () => {
 
       container.onclick = () => {
         Notification.requestPermission().then((perm) => {
-          if (perm === "granted") {
-            alert("Notification's Activated");
-          }
+          if (perm === "granted") alert("Notification's Activated");
           document.body.removeChild(container);
         });
       };
@@ -270,7 +264,9 @@ const Notifications = () => {
                       color="text.secondary"
                       sx={{ display: "block", mt: 0.5 }}
                     >
-                      {new Date(n.created_at).toLocaleString()}
+                      {n.created_at
+                        ? dayjs.utc(n.created_at).local().fromNow()
+                        : ""}
                     </Typography>
                   </Box>
                 </Stack>

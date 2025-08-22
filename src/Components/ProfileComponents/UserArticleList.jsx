@@ -1,3 +1,4 @@
+// src/components/Article/UserArticleList.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -11,10 +12,11 @@ import { Edit, Delete, Visibility } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import API from "../../Config/API";
 
 const UserArticleList = ({ limit }) => {
   const { token, user } = useAuth();
-  const loggedInUser = user?.id; // ✅ ambil id dari object user
+  const loggedInUser = user?.id; // ambil id dari object user
   const navigate = useNavigate();
   const { user_id: paramUserId } = useParams();
   const location = useLocation();
@@ -37,8 +39,10 @@ const UserArticleList = ({ limit }) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.get(
-        `https://rutee.id/dapur/article/articles.php?user_id=${targetUserId}`,
-        { headers }
+        `${API.ARTICLE_LIST}?user_id=${targetUserId}`,
+        {
+          headers,
+        }
       );
       let data = res.data.articles || [];
       if (data.length > 0) setOwnerName(data[0].owner_name || "");
@@ -65,9 +69,9 @@ const UserArticleList = ({ limit }) => {
     if (!token || !id) return;
 
     try {
-      await axios.delete(`https://rutee.id/dapur/article/articles.php`, {
+      await axios.delete(API.ARTICLE_SAVE, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { id, user_id: loggedInUser }, // ✅ tetap kirim user_id dari loggedInUser
+        data: { id, user_id: loggedInUser }, // tetap kirim user_id dari loggedInUser
       });
       fetchArticles();
     } catch (err) {
@@ -79,7 +83,6 @@ const UserArticleList = ({ limit }) => {
     }
   };
 
-  // --- UI rendering ---
   if (loading) {
     return (
       <Box textAlign="center" mt={2}>
@@ -103,12 +106,10 @@ const UserArticleList = ({ limit }) => {
 
   return (
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-      {/* Judul utama */}
       <Typography variant="h6" fontWeight="bold" mb={2}>
         {isOwner ? "My Article" : `Article ${ownerName || "List"}`}
       </Typography>
 
-      {/* Tombol buat artikel hanya untuk owner */}
       {isOwner && (
         <Box mb={2} textAlign="right">
           <Button
