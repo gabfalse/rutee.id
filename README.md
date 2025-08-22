@@ -42,22 +42,21 @@ Notes:
 ⚙️ Installation & Setup
 
 1. Clone the repository:
-   git clone https://github.com/gabfalse/rutee.id.git
-   cd rutee
+   - git clone https://github.com/gabfalse/rutee.id.git
+   - cd rutee
 
 2. Install dependencies:
    pnpm install
 
 3. Create .env file (for base URL & JWT, etc.):
-   VITE_GOOGLE_CLIENT_ID=Your_Google_CLient_Id
-   VITE_API_URL=Your_Vite_URL
+   - VITE_GOOGLE_CLIENT_ID=Your_Google_CLient_Id
+   - VITE_API_URL=YOUR_API
 
 4. Run development server:
-   npm run dev
-   Open in browser: http://localhost:5173
+   - pnpm run dev
+   - Open in browser: http://localhost:5173
 
 📌 Usage Notes
-
 1. All API requests require Authorization Bearer token (not shared publicly).
 2. Components folder is structured by functionality (Article, Chat, Profile, Quiz, etc.).
 3. Context handles authentication (AuthContext) and Notification Context (NotificationContext) to handles real-time notifications.
