@@ -2,6 +2,7 @@ Rutee — Self-Discovery Platform
 
 Rutee is a self-discovery platform that helps users explore themselves, share articles, chat with others, and take personality tests. It also supports real-time notifications.
 
+📂 File Structure
 src/
 ├─ Components/  
 │ ├─ ArticleComponents/  
@@ -29,13 +30,13 @@ src/
 └─ main.jsx
 
 Notes:
-Components → All UI components, organized by feature.
-Config → API endpoint configuration (not included for public).
-Context → Context API for authentication and notifications.
-InfoWeb → Website info pages (About, Privacy, Terms).
-Pages → Main pages of the platform.
-Router → React routing.
-Theme → MUI theme and styling.
+1. Components → All UI components, organized by feature.
+2. Config → API endpoint configuration (not included for public).
+3. Context → Context API for authentication and notifications.
+4. InfoWeb → Website info pages (About, Privacy, Terms).
+5. Pages → Main pages of the platform.
+6. Router → React routing.
+8. Theme → MUI theme and styling.
 
 ⚙️ Installation & Setup
 
@@ -63,24 +64,24 @@ Theme → MUI theme and styling.
    All main pages are in the Pages folder.
 
 🔧 Tools & Libraries
-Frontend Framework & UI
-React 19
-Material-UI (MUI) — @mui/material, @mui/icons-material, @mui/x-date-pickers
-Emotion — @emotion/react, @emotion/styled
-Framer Motion — animations
-React Slick + Slick Carousel — carousels/sliders
-Editors & Text Tools
-Data Handling & Utilities
-Axios — HTTP requests
-JWT Decode — jwt-decode
-Browser Image Compression — browser-image-compression
-Date & Time — date-fns, dayjs
-PDF & Screenshot — jspdf, html2canvas
-Routing & Navigation
-React Router DOM v7
-Development & Linting Tools
-Vite — dev server and build
-ESLint — with eslint-plugin-react-hooks, eslint-plugin-react-refresh
+1. Frontend Framework & UI
+2. React 19
+3. Material-UI (MUI) — @mui/material, @mui/icons-material, @mui/x-date-pickers
+4. Emotion — @emotion/react, @emotion/styled
+5. Framer Motion — animations
+6. React Slick + Slick Carousel — carousels/sliders
+7. Editors & Text Tools
+8. Data Handling & Utilities
+9. Axios — HTTP requests
+10. JWT Decode — jwt-decode
+11. Browser Image Compression — browser-image-compression
+12. Date & Time — date-fns, dayjs
+13. PDF & Screenshot — jspdf, html2canvas
+14. Routing & Navigation
+15. React Router DOM v7
+16. Development & Linting Tools
+17. Vite — dev server and build
+18. ESLint — with eslint-plugin-react-hooks, eslint-plugin-react-refresh
 
 📌 Closing
 Thank you for visiting the Rutee frontend repository. This project is actively maintained and open for collaboration.
