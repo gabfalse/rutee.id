@@ -1,6 +1,6 @@
 Rutee — Self-Discovery Platform
 
-Rutee is a self-discovery platform that helps users explore themselves, share articles, chat with others, and take personality tests. It also supports real-time notifications.
+Rutee is a self-discovery platform that helps users explore themselves, share articles, chat with others, job listing, and take personality tests along with the recommendations matches with your personality. It also supports real-time notifications.
 
 📂 File Structure.
 
