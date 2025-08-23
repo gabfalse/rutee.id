@@ -13,6 +13,7 @@ const API = {
     `${API_BASE}/article/articles.php?user_id=${userId}&page=${page}&limit=${limit}`, // artikel user lain (hanya publish)
 
   ARTICLE_LIST: `${API_BASE}/article/get-article.php`, // GET list artikel
+  RUTEE_ARTICLE: `${API_BASE}/article/rutee-article.php`, // GET list artikel
   ARTICLE_DETAIL: (id) => `${API_BASE}/article/get-article-detail.php?id=${id}`, // GET detail artikel
   ARTICLE_SAVE: `${API_BASE}/article/articles.php`, // POST create / PUT update artikel
   ARTICLE_COMMENTS: `${API_BASE}/article/comments.php`,

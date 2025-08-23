@@ -108,14 +108,22 @@ export default function JobListPage() {
               <Box
                 sx={{ display: "flex", alignItems: "center", flex: 1, gap: 2 }}
               >
-                {job.company_logo || job.logo ? (
+                {job.company_image || job.logo || job.company_logo ? (
                   <Avatar
-                    src={job.company_logo || job.logo}
+                    src={job.company_image || job.logo || job.company_logo}
                     alt={job.company}
                     variant="rounded"
                     sx={{ width: 64, height: 64 }}
                   />
-                ) : null}
+                ) : (
+                  <Avatar
+                    alt={job.company}
+                    variant="rounded"
+                    sx={{ width: 64, height: 64, bgcolor: "primary.light" }}
+                  >
+                    {job.company?.charAt(0)}
+                  </Avatar>
+                )}
                 <Box>
                   <Typography variant="h6" fontWeight="bold">
                     {job.title}
@@ -128,7 +136,7 @@ export default function JobListPage() {
                       Posted {job.posted_time} • Source: {job.source}
                     </Typography>
                   )}
-                  {job.skills && job.skills.length > 0 && (
+                  {job.skills?.length > 0 && (
                     <Box
                       sx={{
                         mt: 0.5,

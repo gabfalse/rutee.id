@@ -47,6 +47,7 @@ import NewChatPage from "../Components/ChatComponents/NewChatPage";
 import Notifications from "../Pages/Notifications";
 import JobListPage from "../Pages/JobListPage";
 import CareerRecommendations from "../Pages/CareerRecommendations";
+import RuteeArticlePage from "../Pages/RuteeArticlePage";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -88,6 +89,7 @@ export default function AppRouter() {
         {/* ==================== ARTICLE ROUTES ==================== */}
         {/* Public Article Routes */}
         <Route path="/articles/list" element={<ArticleListPage />} />
+        <Route path="/articles/rutee/list" element={<RuteeArticlePage />} />
         <Route
           path="/articles/list/:article_id"
           element={<ArticleDetailPage />}
