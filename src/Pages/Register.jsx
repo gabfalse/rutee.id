@@ -412,7 +412,7 @@ export default function RegisterWithOtp() {
     <Box maxWidth={400} mx="auto" mt={6} px={2}>
       <Paper elevation={4} sx={{ p: 4, borderRadius: 2 }}>
         <Typography variant="h5" mb={3} fontWeight={700} align="center">
-          {step === 1 ? "Register" : "Verify OTP"}
+          {step === 1 ? "Sign Up" : "Verify OTP"}
         </Typography>
 
         {step === 1 && (
@@ -422,9 +422,9 @@ export default function RegisterWithOtp() {
             sx={{ mb: 2 }}
             textAlign="center"
           >
-            Dengan membuat akun, Anda menyetujui{" "}
+            By signing up you accept the{" "}
             <Link component={RouterLink} to="/webinfo" underline="hover">
-              Syarat dan Ketentuan
+              Term and Services
             </Link>
             .
           </Typography>
@@ -489,7 +489,7 @@ export default function RegisterWithOtp() {
                 sx={{ mt: 2 }}
                 disabled={loading}
               >
-                {loading ? "Mengirim OTP..." : "Register & Get OTP"}
+                {loading ? "Sending OTP..." : "Sign up & Get OTP"}
               </Button>
             </form>
 
@@ -498,14 +498,14 @@ export default function RegisterWithOtp() {
             </Box>
 
             <Stack mt={1} direction="row" justifyContent="center" spacing={1}>
-              <Typography variant="body2">Sudah punya akun?</Typography>
+              <Typography variant="body2">Already have an account?</Typography>
               <Link
                 component={RouterLink}
                 to="/login"
                 underline="hover"
                 variant="body2"
               >
-                Masuk di sini
+                Sign in here
               </Link>
             </Stack>
           </>

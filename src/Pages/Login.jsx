@@ -76,7 +76,7 @@ export default function Login() {
           align="center"
           color="primary"
         >
-          Login ke Akun Anda
+          Login
         </Typography>
 
         <Collapse in={!!error}>
@@ -97,7 +97,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Username atau Email"
+            label="Username or Email"
             name="usernameOrEmail"
             value={form.usernameOrEmail}
             onChange={handleChange}
@@ -142,7 +142,7 @@ export default function Login() {
               loading && <CircularProgress size={20} color="inherit" />
             }
           >
-            {loading ? "Memproses..." : "Login"}
+            {loading ? "Logging In..." : "Login"}
           </Button>
         </form>
 
@@ -152,7 +152,7 @@ export default function Login() {
           color="text.secondary"
           sx={{ mt: 1, mb: 1 }}
         >
-          Atau masuk dengan
+          Or Log In with
         </Typography>
 
         <Box display="flex" justifyContent="center" mb={1}>
@@ -160,7 +160,7 @@ export default function Login() {
         </Box>
 
         <Stack direction="row" justifyContent="center" spacing={1}>
-          <Typography variant="body2">Belum punya akun?</Typography>
+          <Typography variant="body2">Don't have an account?</Typography>
           <Link
             component={RouterLink}
             to="/register"
@@ -169,7 +169,7 @@ export default function Login() {
             color="primary"
             fontWeight={500}
           >
-            Daftar di sini
+            Sign Up here
           </Link>
         </Stack>
       </Paper>

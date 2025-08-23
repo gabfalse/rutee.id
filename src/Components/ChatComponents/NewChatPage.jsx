@@ -137,7 +137,7 @@ export default function NewChatPage() {
     >
       <Paper elevation={6} sx={{ p: 3, borderRadius: 3 }}>
         <Typography variant="h5" fontWeight={700} mb={3} align="center">
-          Mulai Chat Baru
+          Start new chat
         </Typography>
 
         <Autocomplete
@@ -192,7 +192,7 @@ export default function NewChatPage() {
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Cari username atau nama"
+              label="Cari nama"
               fullWidth
               onKeyDown={handleKeyDown}
               InputProps={{

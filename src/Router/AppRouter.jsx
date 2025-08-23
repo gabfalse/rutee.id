@@ -45,6 +45,8 @@ import Connections from "../Pages/Connections";
 import ChatsPage from "../Pages/ChatPage";
 import NewChatPage from "../Components/ChatComponents/NewChatPage";
 import Notifications from "../Pages/Notifications";
+import JobListPage from "../Pages/JobListPage";
+import CareerRecommendations from "../Pages/CareerRecommendations";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -177,6 +179,7 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
+        <Route path="/jobs" element={<JobListPage />} />
         <Route
           path="/result"
           element={
@@ -255,6 +258,16 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/careers"
+          element={
+            <PrivateRoute>
+              <CareerRecommendations />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/contacts/:user_id"
           element={

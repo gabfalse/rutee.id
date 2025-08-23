@@ -11,14 +11,14 @@ export default function GoogleLoginButton() {
   const navigate = useNavigate();
 
   if (!clientId) {
-    console.error("VITE_GOOGLE_CLIENT_ID belum di-set di .env");
+    console.error("Failed to sign in");
     return null;
   }
 
   const handleLogin = async (credentialResponse) => {
     const id_token = credentialResponse?.credential;
     if (!id_token) {
-      console.error("Tidak ada credential dari Google");
+      console.error("Failed to sign in");
       return;
     }
 
@@ -29,7 +29,7 @@ export default function GoogleLoginButton() {
       if (success) {
         navigate("/"); // redirect ke home
       } else {
-        console.error("Login Google gagal melalui AuthContext");
+        console.error("Failed to Sign in");
       }
     } catch (err) {
       console.error("Login Google error:", err);
@@ -40,7 +40,7 @@ export default function GoogleLoginButton() {
     <GoogleOAuthProvider clientId={clientId}>
       <GoogleLogin
         onSuccess={handleLogin}
-        onError={() => console.error("Login Google gagal")}
+        onError={() => console.error("Failed to sign")}
       />
     </GoogleOAuthProvider>
   );

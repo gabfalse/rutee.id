@@ -64,7 +64,7 @@ const PersonalityCarousel = () => {
       }}
     >
       <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-        Periksa Kepribadianmu Sekarang!
+        Check Your Personality Type Now!
       </Typography>
 
       <Slider {...settings}>
@@ -91,7 +91,7 @@ const PersonalityCarousel = () => {
                 variant="subtitle2"
                 sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
               >
-                Apakah Jenis Kepribadianmu {type} ?
+                ARE YOU {type}?
               </Typography>
 
               <Typography

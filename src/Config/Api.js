@@ -6,6 +6,12 @@ const API = {
   ADMIN_SEND_TELEGRAM: `${API_BASE}/admin/send-telegram.php`,
 
   // ARTICLE
+  OWN_ARTICLE_LIST: (page = 1, limit = 20) =>
+    `${API_BASE}/article/articles.php?page=${page}&limit=${limit}`, // artikel milik sendiri (publish + draft)
+
+  USER_ARTICLE_LIST: (userId, page = 1, limit = 20) =>
+    `${API_BASE}/article/articles.php?user_id=${userId}&page=${page}&limit=${limit}`, // artikel user lain (hanya publish)
+
   ARTICLE_LIST: `${API_BASE}/article/get-article.php`, // GET list artikel
   ARTICLE_DETAIL: (id) => `${API_BASE}/article/get-article-detail.php?id=${id}`, // GET detail artikel
   ARTICLE_SAVE: `${API_BASE}/article/articles.php`, // POST create / PUT update artikel
@@ -14,6 +20,7 @@ const API = {
   ARTICLE_REACTIONS: `${API_BASE}/article/reaction-counts.php`,
   ARTICLE_TOGGLE_LIKE: `${API_BASE}/article/toggle-like.php`,
   ARTICLE_UPLOAD_IMAGE: `${API_BASE}/article/upload-article-image.php`,
+  REPORT_ARTICLE: `${API_BASE}/article/report-article.php`,
 
   // AUTH-USER
   AUTH_GOOGLE: `${API_BASE}/auth-user/auth-google.php`,
@@ -41,6 +48,7 @@ const API = {
   PERSONALITY_QUESTIONS: `${API_BASE}/personality/personality-questions.php`,
   PERSONALITY_RESULTS: `${API_BASE}/personality/personality-results.php`,
   PERSONALITY_TYPE: `${API_BASE}/personality/personality-type.php`,
+  CAREERS: `${API_BASE}/personality/career-recommendations.php`,
 
   // PROFILE
   PROFILE_DELETE: `${API_BASE}/profile/delete-profile.php`,
@@ -62,6 +70,9 @@ const API = {
   USER_SEARCH: `${API_BASE}/user/search-user.php`,
   USER_TOGGLE_BLOCK: `${API_BASE}/user/toggle-block.php`,
   USER_TOGGLE_FOLLOW: `${API_BASE}/user/toggle-follow.php`,
+
+  // JOB
+  JOB_LIST: `${API_BASE}/api/jobs.php`,
 };
 
 export default API;

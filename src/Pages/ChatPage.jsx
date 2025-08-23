@@ -207,7 +207,7 @@ const ChatsPage = () => {
                     sx={{ width: 36, height: 36, mr: 1 }}
                   />
                   <Typography variant="subtitle1" fontWeight={600}>
-                    {otherUser.username || otherUser.name || "Unknown"}
+                    {otherUser.name || "Unknown"}
                   </Typography>
                 </Box>
               )}

@@ -27,6 +27,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import axios from "axios";
+import { Business } from "@mui/icons-material";
 
 export default function NavigationButton({ mode, setMode }) {
   const { user, logout } = useAuth();
@@ -77,23 +78,23 @@ export default function NavigationButton({ mode, setMode }) {
     },
     {
       label: "Career Recommendations",
-      path: "/career-recommendations",
+      path: "/careers",
       icon: <WorkIcon />,
-      active: false,
+      active: true,
     },
     {
-      label: "Company",
-      path: "/companies",
-      icon: <BusinessIcon />,
-      active: false,
+      label: "Jobs",
+      path: "/jobs",
+      icon: <Business />,
+      active: true,
     },
-    { label: "Group", path: "/groups", icon: <GroupIcon />, active: false },
-    {
-      label: "Leaderboard",
-      path: "/leaderboard",
-      icon: <LeaderboardIcon />,
-      active: false,
-    },
+    // { label: "Group", path: "/groups", icon: <GroupIcon />, active: false },
+    // {
+    //   label: "Leaderboard",
+    //   path: "/leaderboard",
+    //   icon: <LeaderboardIcon />,
+    //   active: false,
+    // },
     { label: "Sign Out", path: "/logout", icon: <LogoutIcon />, active: true },
   ];
 

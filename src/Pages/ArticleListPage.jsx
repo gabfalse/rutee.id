@@ -7,17 +7,38 @@ import {
   Button,
   Avatar,
   Stack,
+  IconButton,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import axios from "axios";
-import ReactionCount from "../Components/ArticleComponents/ReactionCount";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import API from "../Config/API";
+import ReactionCount from "../Components/ArticleComponents/ReactionCount";
+import ReportButton from "../Components/ButtonComponents/ReportButton";
+import HideButton from "../Components/ButtonComponents/HideButton";
+import ShareButton from "../Components/ButtonComponents/ShareButton";
 
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 20;
+
   const navigate = useNavigate();
 
   const fetchArticles = async () => {
@@ -25,11 +46,14 @@ export default function ArticleListPage() {
     setError(null);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(API.ARTICLE_LIST, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
+      const res = await axios.get(
+        `${API.ARTICLE_LIST}?page=${page}&limit=${limit}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
       setArticles(res.data.articles || []);
+      setTotal(res.data.total || 0);
     } catch (err) {
       console.error("❌ Error fetching articles:", err);
       setError(err.message || "Terjadi kesalahan saat memuat artikel.");
@@ -40,7 +64,27 @@ export default function ArticleListPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [page]);
+
+  const handleMenuOpen = (event, article) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedArticle(article);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedArticle(null);
+  };
+
+  const handleArticleHidden = (articleId) => {
+    setArticles((prev) => prev.filter((a) => a.id !== articleId));
+    setSnackbar({
+      open: true,
+      message: "Artikel disembunyikan",
+      severity: "info",
+    });
+    handleMenuClose();
+  };
 
   if (loading)
     return (
@@ -76,6 +120,7 @@ export default function ArticleListPage() {
         </Typography>
       </Box>
 
+      {/* Daftar Artikel */}
       <Box
         sx={{
           display: "flex",
@@ -88,8 +133,8 @@ export default function ArticleListPage() {
           <Paper
             key={art.id}
             sx={{
-              flex: "1 1 calc(33.333% - 16px)", // default desktop 3 kolom
-              maxWidth: 360, // batasi lebar maksimal
+              flex: "1 1 calc(33.333% - 16px)",
+              maxWidth: 360,
               display: "flex",
               flexDirection: "column",
               flexGrow: 0,
@@ -110,38 +155,60 @@ export default function ArticleListPage() {
               },
             }}
           >
-            {/* Gambar */}
-            {art.image_url ? (
-              <Box
-                component="img"
-                src={art.image_url}
-                alt={art.title}
+            {/* Gambar + tombol titik 3 */}
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                height: 180,
+                borderTopLeftRadius: 12,
+                borderTopRightRadius: 12,
+                overflow: "hidden",
+              }}
+            >
+              {art.image_url ? (
+                <Box
+                  component="img"
+                  src={art.image_url}
+                  alt={art.title}
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "grey.200",
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No Image
+                  </Typography>
+                </Box>
+              )}
+
+              <IconButton
+                size="small"
+                onClick={(e) => handleMenuOpen(e, art)}
                 sx={{
-                  width: "100%",
-                  height: 180,
-                  objectFit: "cover",
-                  borderTopLeftRadius: 12,
-                  borderTopRightRadius: 12,
-                }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 180,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: "grey.200",
-                  borderTopLeftRadius: 12,
-                  borderTopRightRadius: 12,
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  bgcolor: "rgba(0,0,0,0.5)",
+                  color: "white",
+                  "&:hover": { bgcolor: "rgba(0,0,0,0.7)" },
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
-                  No Image
-                </Typography>
-              </Box>
-            )}
+                <MoreVertIcon />
+              </IconButton>
+            </Box>
 
             {/* Konten */}
             <Box
@@ -189,7 +256,6 @@ export default function ArticleListPage() {
                 </Typography>
               )}
 
-              {/* Reaction Count */}
               <ReactionCount
                 contentId={art.id}
                 token={localStorage.getItem("token") || null}
@@ -215,6 +281,57 @@ export default function ArticleListPage() {
           </Paper>
         ))}
       </Box>
+
+      {/* Pagination */}
+      <Box display="flex" justifyContent="center" gap={2} mt={4}>
+        <Button
+          variant="outlined"
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+        >
+          Sebelumnya
+        </Button>
+        <Typography>
+          Halaman {page} dari {Math.ceil(total / limit) || 1}
+        </Typography>
+        <Button
+          variant="outlined"
+          disabled={page >= Math.ceil(total / limit)}
+          onClick={() => setPage(page + 1)}
+        >
+          Selanjutnya
+        </Button>
+      </Box>
+
+      {/* Menu titik 3 */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        {selectedArticle && [
+          <MenuItem key="share">
+            <ShareButton articleId={selectedArticle.id} />
+          </MenuItem>,
+          <MenuItem key="report">
+            <ReportButton articleId={selectedArticle.id} />
+          </MenuItem>,
+          <MenuItem key="hide">
+            <HideButton
+              articleId={selectedArticle.id}
+              onHidden={handleArticleHidden}
+            />
+          </MenuItem>,
+        ]}
+      </Menu>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
     </Box>
   );
 }
