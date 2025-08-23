@@ -22,6 +22,8 @@ const API = {
   ARTICLE_UPLOAD_IMAGE: `${API_BASE}/article/upload-article-image.php`,
   REPORT_ARTICLE: `${API_BASE}/article/report-article.php`,
 
+  //POST
+  POST_LIST: `${API_BASE}/post/get-posts.php`,
   // AUTH-USER
   AUTH_GOOGLE: `${API_BASE}/auth-user/auth-google.php`,
   AUTH_LOGIN: `${API_BASE}/auth-user/login.php`,
