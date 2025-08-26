@@ -1,62 +1,92 @@
-// src/Pages/ResultPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
   CircularProgress,
   Paper,
   Divider,
+  Button,
+  Stack,
 } from "@mui/material";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import API from "../../Config/API";
 import Navbar from "../Navbar";
+import html2canvas from "html2canvas";
 
 const ResultPage = () => {
   const { token, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState(null);
   const [typeDetail, setTypeDetail] = useState(null);
+  const [lang, setLang] = useState("en"); // 'en' atau 'id'
+
+  const paperRef = useRef(null); // untuk screenshot
+
+  const fetchTypeDetail = async (type, language = "en") => {
+    try {
+      const resType = await axios.get(
+        `${API.PERSONALITY_TYPE}?type=${encodeURIComponent(
+          type
+        )}&lang=${language}`
+      );
+      if (resType.data?.success && resType.data?.data) {
+        setTypeDetail(resType.data.data);
+      } else {
+        setTypeDetail(null);
+      }
+    } catch (err) {
+      console.error("❌ Error fetching personality type:", err);
+      setTypeDetail(null);
+    }
+  };
+
+  const fetchResult = async (language = "en") => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const resResult = await axios.get(API.PERSONALITY_RESULTS, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const userResult = resResult.data?.data;
+      if (!resResult.data?.success || !userResult) {
+        setResult(null);
+        setTypeDetail(null);
+        return;
+      }
+
+      setResult(userResult);
+      await fetchTypeDetail(userResult.type, language);
+    } catch (err) {
+      console.error("❌ Error fetching personality result:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchResult = async () => {
-      if (!token) return;
+    fetchResult(lang);
+  }, [token, lang]);
 
-      setLoading(true);
-      try {
-        // ===== Fetch user personality result =====
-        const resResult = await axios.get(API.PERSONALITY_RESULTS, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const handleDownloadPNG = async () => {
+    if (!paperRef.current) return;
 
-        const userResult = resResult.data?.data;
-        if (!resResult.data?.success || !userResult) {
-          setResult(null);
-          setTypeDetail(null);
-          return;
-        }
+    try {
+      const canvas = await html2canvas(paperRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      });
 
-        setResult(userResult);
-
-        // ===== Fetch personality type details =====
-        const resType = await axios.get(
-          `${API.PERSONALITY_TYPE}?type=${encodeURIComponent(userResult.type)}`
-        );
-
-        if (resType.data?.success && resType.data?.data) {
-          setTypeDetail(resType.data.data);
-        } else {
-          setTypeDetail(null);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching personality result:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResult();
-  }, [token]);
+      const link = document.createElement("a");
+      link.download = `${user?.display_name || "personality"}_result.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("❌ Error generating PNG:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -94,7 +124,29 @@ const ResultPage = () => {
           Your Personality Result
         </Typography>
 
+        {/* Tombol ganti bahasa */}
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="center"
+          sx={{ mb: 3 }}
+        >
+          <Button
+            variant={lang === "en" ? "contained" : "outlined"}
+            onClick={() => setLang("en")}
+          >
+            English
+          </Button>
+          <Button
+            variant={lang === "id" ? "contained" : "outlined"}
+            onClick={() => setLang("id")}
+          >
+            Bahasa Indonesia
+          </Button>
+        </Stack>
+
         <Paper
+          ref={paperRef}
           elevation={6}
           sx={{
             p: 4,
@@ -106,10 +158,8 @@ const ResultPage = () => {
           <Box
             display="flex"
             flexDirection={{ xs: "column", md: "row" }}
-            alignItems={{ xs: "center", md: "flex-start" }}
             gap={4}
           >
-            {/* Gambar personality */}
             {result.image_url && (
               <Box
                 flexShrink={0}
@@ -144,7 +194,6 @@ const ResultPage = () => {
               </Box>
             )}
 
-            {/* Detail personality */}
             <Box flex={1}>
               {typeDetail.description && (
                 <Typography variant="body1" gutterBottom sx={{ mt: 1 }}>
@@ -198,6 +247,13 @@ const ResultPage = () => {
                 </Typography>
               </Box>
             </Box>
+          </Box>
+
+          {/* Tombol download PNG */}
+          <Box mt={4} display="flex" justifyContent="center">
+            <Button variant="contained" onClick={handleDownloadPNG}>
+              Download as PNG
+            </Button>
           </Box>
         </Paper>
       </Box>

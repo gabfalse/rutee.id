@@ -1,4 +1,3 @@
-// src/Pages/HomePage.jsx
 import React from "react";
 import { Box, CircularProgress, Typography, Container } from "@mui/material";
 import Navbar from "../Components/Navbar";
@@ -30,9 +29,11 @@ function HomePage() {
     <Box sx={{ backgroundColor: "secondary.main", minHeight: "100vh" }}>
       <Navbar />
       <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
-        {user && hasPersonality ? (
-          <ArticleListPage userId={user.id} />
-        ) : (
+        {/* Tampilkan semua artikel untuk semua orang */}
+        <ArticleListPage userId={user?.id} />
+
+        {/* Kalau user sudah login tapi belum ada personality, tampilkan carousel */}
+        {user && !hasPersonality && (
           <Box sx={{ mt: 4 }}>
             <PersonalityCarousel />
           </Box>

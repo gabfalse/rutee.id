@@ -23,6 +23,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import GroupIcon from "@mui/icons-material/Group";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PsychologyIcon from "@mui/icons-material/Psychology"; // tambahkan icon
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
@@ -71,6 +72,12 @@ export default function NavigationButton({ mode, setMode }) {
       active: true,
     },
     {
+      label: "Personality",
+      path: "/quiz",
+      icon: <PsychologyIcon />,
+      active: true,
+    },
+    {
       label: "Contact Admin",
       path: "/contact-admin",
       icon: <ContactMailIcon />,
@@ -88,13 +95,6 @@ export default function NavigationButton({ mode, setMode }) {
       icon: <Business />,
       active: true,
     },
-    // { label: "Group", path: "/groups", icon: <GroupIcon />, active: false },
-    // {
-    //   label: "Leaderboard",
-    //   path: "/leaderboard",
-    //   icon: <LeaderboardIcon />,
-    //   active: false,
-    // },
     { label: "Sign Out", path: "/logout", icon: <LogoutIcon />, active: true },
   ];
 

@@ -42,7 +42,7 @@ const ContactAdmin = () => {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!currentMessage.trim() || !name.trim()) {
-      setError("Nama dan pesan wajib diisi.");
+      setError("Name and Message are required");
       return;
     }
 
@@ -65,20 +65,17 @@ const ContactAdmin = () => {
             ...prev,
             {
               sender: "admin",
-              text: "Pesan kamu sudah diterima! Kami akan menghubungi lewat email jika diperlukan. 🙏",
+              text: "Your Message are sent! The Admin will contact you through email if necessary. 🙏",
             },
           ]);
         }, 800);
         setSent(true);
       } else {
-        setError(res.data.error || "Gagal mengirim pesan.");
+        setError(res.data.error || "Failed to send message.");
       }
     } catch (err) {
-      console.error("Gagal mengirim pesan:", err);
-      setError(
-        err.response?.data?.error ||
-          "Terjadi kesalahan jaringan. Cek koneksi atau CORS."
-      );
+      console.error("Failed to send message:", err);
+      setError(err.response?.data?.error || "Error");
     }
 
     setCurrentMessage("");
@@ -116,7 +113,7 @@ const ContactAdmin = () => {
       >
         <ChatIcon />
         <Typography variant="h6" fontWeight="bold">
-          Hubungi Admin
+          Contact Admin
         </Typography>
       </Box>
 
@@ -201,7 +198,7 @@ const ContactAdmin = () => {
 
       {sent && (
         <Alert severity="success" sx={{ m: 1 }}>
-          Terima kasih! Pesan sudah terkirim.
+          Message are sent, Thank you!
         </Alert>
       )}
       {error && (

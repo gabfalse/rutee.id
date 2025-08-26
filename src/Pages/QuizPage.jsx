@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Questions from "../Components/QuizComponents/Question";
+import QuestionsEN from "../Components/QuizComponents/Question"; // English
+import QuestionsID from "../Components/QuizComponents/QuestionId"; // Indonesia
 import {
   Box,
   Typography,
@@ -29,6 +30,7 @@ const QuizPage = () => {
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [gender, setGender] = useState("");
+  const [language, setLanguage] = useState("en"); // default English
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [current, setCurrent] = useState(0);
@@ -41,6 +43,8 @@ const QuizPage = () => {
   }, [personalityResult, loading, navigate]);
 
   const startQuiz = () => {
+    const Questions = language === "id" ? QuestionsID : QuestionsEN;
+
     const qShuffled = shuffleArray(
       Questions.map((q) => ({
         ...q,
@@ -62,7 +66,7 @@ const QuizPage = () => {
       setCurrent((c) => c + 1);
     } else {
       navigate("/calculate", {
-        state: { answers: updated, gender, shuffledQuestions },
+        state: { answers: updated, gender, language, shuffledQuestions },
       });
     }
   };
@@ -86,6 +90,7 @@ const QuizPage = () => {
     );
   }
 
+  // ===== Tampilan sebelum quiz dimulai =====
   if (!quizStarted) {
     return (
       <Box
@@ -103,13 +108,37 @@ const QuizPage = () => {
         }}
       >
         <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Find Your True Self
+          {language === "id" ? "Temukan Dirimu" : "Find Your True Self"}
         </Typography>
         <Typography color="text.secondary" mb={3}>
-          Answer the question with honesty
+          {language === "id"
+            ? "Jawab pertanyaan dengan jujur"
+            : "Answer the question with honesty"}
         </Typography>
 
-        <Divider sx={{ my: 2, width: "100%" }}>Choose Your Gender</Divider>
+        <Divider sx={{ my: 2, width: "100%" }}>
+          {language === "id" ? "Pilih Bahasa" : "Choose Language"}
+        </Divider>
+        <Stack direction="row" spacing={2} mb={2}>
+          <Button
+            variant={language === "id" ? "contained" : "outlined"}
+            onClick={() => setLanguage("id")}
+            color="primary"
+          >
+            Indonesia
+          </Button>
+          <Button
+            variant={language === "en" ? "contained" : "outlined"}
+            onClick={() => setLanguage("en")}
+            color="primary"
+          >
+            English
+          </Button>
+        </Stack>
+
+        <Divider sx={{ my: 2, width: "100%" }}>
+          {language === "id" ? "Pilih Jenis Kelamin" : "Choose Your Gender"}
+        </Divider>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
             startIcon={<Male />}
@@ -117,7 +146,7 @@ const QuizPage = () => {
             onClick={() => setGender("male")}
             color="primary"
           >
-            Male
+            {language === "id" ? "Laki-laki" : "Male"}
           </Button>
           <Button
             startIcon={<Female />}
@@ -125,7 +154,7 @@ const QuizPage = () => {
             onClick={() => setGender("female")}
             color="primary"
           >
-            Female
+            {language === "id" ? "Perempuan" : "Female"}
           </Button>
         </Stack>
 
@@ -136,7 +165,7 @@ const QuizPage = () => {
           disabled={!gender}
           sx={{ mb: 2 }}
         >
-          Take the test
+          {language === "id" ? "Mulai Tes" : "Take the Test"}
         </Button>
 
         {personalityResult && (
@@ -145,7 +174,7 @@ const QuizPage = () => {
             onClick={() => navigate("/result")}
             sx={{ mt: 1 }}
           >
-            View Result
+            {language === "id" ? "Lihat Hasil" : "View Result"}
           </Button>
         )}
       </Box>
@@ -200,12 +229,14 @@ const QuizPage = () => {
             size="small"
             disabled={current === 0}
           >
-            Pertanyaan Sebelumnya
+            {language === "id" ? "Pertanyaan Sebelumnya" : "Previous Question"}
           </Button>
         </Box>
 
         <Typography variant="h6" color="primary" gutterBottom>
-          Pertanyaan {current + 1} dari {shuffledQuestions.length}
+          {language === "id"
+            ? `Pertanyaan ${current + 1} dari ${shuffledQuestions.length}`
+            : `Question ${current + 1} of ${shuffledQuestions.length}`}
         </Typography>
         <Typography fontWeight={600} fontSize="1.15rem" mb={3}>
           {q.question}

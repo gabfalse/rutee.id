@@ -1,4 +1,3 @@
-// src/Pages/ArticleDetailPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -12,27 +11,26 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import ArticleReactions from "./ArticleReactions";
-import API from "../../Config/API"; // ✅ konsisten pakai Config/Api.js
+import API from "../../Config/API";
 
 export default function ArticleDetailPage() {
   const { article_id } = useParams();
-  const { token, user } = useAuth();
+  const { user, token } = useAuth(); // token opsional
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!article_id || !token) return;
+    if (!article_id) return;
 
     const fetchArticle = async () => {
       setLoading(true);
       setError(null);
       try {
-        // ✅ gunakan config API
         const url = API.ARTICLE_DETAIL(article_id);
-        const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const res = await axios.get(url, { headers });
 
         if (res.data?.article) {
           setArticle(res.data.article);
@@ -74,7 +72,7 @@ export default function ArticleDetailPage() {
     return (
       <Box textAlign="center" mt={5}>
         <Typography variant="h6" color="text.secondary">
-          Article not found
+          Artikel tidak ditemukan
         </Typography>
       </Box>
     );
@@ -98,7 +96,7 @@ export default function ArticleDetailPage() {
           color="text.secondary"
           sx={{ textAlign: "center", mb: 2 }}
         >
-          Author : {article.author_name || "Anonim"} •{" "}
+          Author: {article.author_name || "Anonim"} •{" "}
           {article.created_at
             ? new Date(article.created_at).toLocaleDateString("id-ID", {
                 day: "numeric",
@@ -127,27 +125,24 @@ export default function ArticleDetailPage() {
         <Divider sx={{ mb: 3 }} />
 
         {/* Konten */}
-        {article.content && (
-          <Box>
-            {article.content
-              .split("\n")
-              .filter((p) => p.trim() !== "")
-              .map((p, idx) => (
-                <Typography
-                  key={idx}
-                  variant="body1"
-                  sx={{
-                    lineHeight: 1.8,
-                    whiteSpace: "pre-line",
-                    textAlign: "justify",
-                    mb: 2,
-                  }}
-                >
-                  {p}
-                </Typography>
-              ))}
-          </Box>
-        )}
+        {article.content &&
+          article.content
+            .split("\n")
+            .filter((p) => p.trim() !== "")
+            .map((p, idx) => (
+              <Typography
+                key={idx}
+                variant="body1"
+                sx={{
+                  lineHeight: 1.8,
+                  whiteSpace: "pre-line",
+                  textAlign: "justify",
+                  mb: 2,
+                }}
+              >
+                {p}
+              </Typography>
+            ))}
 
         {/* Tags */}
         {article.tags && (
@@ -158,11 +153,11 @@ export default function ArticleDetailPage() {
           </Box>
         )}
 
-        {/* 🔥 Reactions */}
+        {/* Reactions (opsional) */}
         <ArticleReactions
           articleId={article_id}
-          currentUserId={user?.id}
-          token={token}
+          currentUserId={user?.id} // bisa undefined
+          token={token} // bisa undefined
         />
       </Paper>
     </Box>

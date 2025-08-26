@@ -5,6 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { getAppTheme } from "./Theme/theme";
 import { AuthProvider } from "./Context/AuthContext";
 import App from "./App";
+import "./Context/i18n";
 import { NotificationProvider } from "./Context/NotificationContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

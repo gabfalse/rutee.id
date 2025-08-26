@@ -8,25 +8,31 @@ import {
   Avatar,
   Typography,
   CircularProgress,
+  Box,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import API from "../../Config/API";
+
 export default function CommentSection({ articleId, currentUserId, token }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(null); // id comment yg lagi di-edit
+  const [editMode, setEditMode] = useState(null);
   const [editMessage, setEditMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  // === Ambil komentar ===
+  // Ambil komentar
   const fetchComments = async () => {
     try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.get(
         `${API.ARTICLE_COMMENTS}?content_type=article&content_id=${articleId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
       if (res.data.success) {
         setComments(res.data.data);
@@ -42,9 +48,14 @@ export default function CommentSection({ articleId, currentUserId, token }) {
     fetchComments();
   }, [articleId, token]);
 
-  // === Tambah komentar baru ===
+  // Tambah komentar baru
   const handleAddComment = async () => {
+    if (!currentUserId) {
+      setSnackbarOpen(true); // tampilkan notifikasi
+      return;
+    }
     if (!newComment.trim()) return;
+
     try {
       const res = await axios.post(
         API.ARTICLE_COMMENTS,
@@ -70,7 +81,7 @@ export default function CommentSection({ articleId, currentUserId, token }) {
             },
           ]);
         } else {
-          await fetchComments(); // fallback supaya data konsisten
+          await fetchComments();
         }
         setNewComment("");
       }
@@ -79,15 +90,15 @@ export default function CommentSection({ articleId, currentUserId, token }) {
     }
   };
 
-  // === Update komentar ===
+  // Update komentar
   const handleUpdateComment = async (id) => {
+    if (!currentUserId) return;
     try {
       const res = await axios.put(
         API.ARTICLE_COMMENTS,
         { id, message: editMessage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (res.data.success) {
         setComments(
           comments.map((c) =>
@@ -102,17 +113,17 @@ export default function CommentSection({ articleId, currentUserId, token }) {
     }
   };
 
-  // === Hapus komentar ===
+  // Hapus komentar
   const handleDeleteComment = async (id) => {
+    if (!currentUserId) return;
     try {
       const res = await axios.delete(API.ARTICLE_COMMENTS, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        data: `id=${encodeURIComponent(id)}`, // penting: form-urlencoded
+        data: `id=${encodeURIComponent(id)}`,
       });
-
       if (res.data.success) {
         setComments(comments.filter((c) => c.id !== id));
       }
@@ -128,7 +139,7 @@ export default function CommentSection({ articleId, currentUserId, token }) {
       </Typography>
 
       {/* Input komentar baru */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+      <Box display="flex" gap={1} mb={2}>
         <TextField
           size="small"
           variant="outlined"
@@ -136,34 +147,38 @@ export default function CommentSection({ articleId, currentUserId, token }) {
           placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
+          disabled={!currentUserId}
         />
-        <Button variant="contained" onClick={handleAddComment}>
+        <Button
+          variant="contained"
+          onClick={handleAddComment}
+          disabled={!currentUserId}
+        >
           Send
         </Button>
-      </div>
+      </Box>
+
+      {!currentUserId && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Silakan login terlebih dahulu untuk menulis komentar.
+        </Alert>
+      )}
 
       {loading ? (
         <CircularProgress size={24} />
       ) : (
         comments.map((comment) => (
-          <div
-            key={comment.id}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              marginBottom: "12px",
-            }}
-          >
+          <Box key={comment.id} display="flex" alignItems="flex-start" mb={1.5}>
             <Avatar
               src={comment.profile_image_url || ""}
               alt={comment.user_name}
-              style={{ marginRight: "8px" }}
+              sx={{ mr: 1 }}
             />
-            <div style={{ flex: 1 }}>
+            <Box flex={1}>
               <Typography variant="subtitle2">{comment.user_name}</Typography>
 
               {editMode === comment.id ? (
-                <div style={{ display: "flex", gap: "6px" }}>
+                <Box display="flex" gap={1} mt={0.5}>
                   <TextField
                     size="small"
                     fullWidth
@@ -181,13 +196,15 @@ export default function CommentSection({ articleId, currentUserId, token }) {
                   >
                     <CancelIcon />
                   </IconButton>
-                </div>
+                </Box>
               ) : (
-                <Typography variant="body2">{comment.message}</Typography>
+                <Typography variant="body2" mt={0.5}>
+                  {comment.message}
+                </Typography>
               )}
 
               {comment.user_id === currentUserId && editMode !== comment.id && (
-                <div>
+                <Box>
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -203,12 +220,20 @@ export default function CommentSection({ articleId, currentUserId, token }) {
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
-                </div>
+                </Box>
               )}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ))
       )}
+
+      {/* Snackbar notifikasi */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Silakan login terlebih dahulu untuk menulis komentar."
+      />
     </div>
   );
 }
