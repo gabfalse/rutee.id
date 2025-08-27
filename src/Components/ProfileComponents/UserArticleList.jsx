@@ -22,16 +22,15 @@ const UserArticleList = ({ limit = 20 }) => {
   const loggedInUser = user?.id;
   const navigate = useNavigate();
   const location = useLocation();
-  const { userId: routeUserId } = useParams(); // ambil userId dari route
+  const { user_id: routeUserId } = useParams();
 
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
-  const [shareMsg, setShareMsg] = useState("");
+  const [shareMsg, setShareMsg] = useState({ message: "", severity: "info" });
 
-  // cek apakah halaman ini milik owner
   const isOwnedRoute = location.pathname.startsWith("/articles/owned");
   const isOwner = Boolean(isOwnedRoute && loggedInUser);
 
@@ -41,24 +40,20 @@ const UserArticleList = ({ limit = 20 }) => {
     setError(null);
     try {
       const headers = { Authorization: `Bearer ${token}` };
-
       let res;
+
       if (isOwner) {
-        // 🔹 ambil artikel milik sendiri (publish + draft)
         res = await axios.get(API.OWN_ARTICLE_LIST(page, limit), { headers });
       } else if (routeUserId) {
-        // 🔹 ambil artikel user lain (server bisa kasih semua, tapi kita filter publish saja)
         res = await axios.get(API.USER_ARTICLE_LIST(routeUserId, page, limit), {
           headers,
         });
       } else {
-        // fallback → kalau tidak ada userId dan bukan owner
         res = await axios.get(API.OWN_ARTICLE_LIST(page, limit), { headers });
       }
 
       let articlesData = res.data.articles || [];
 
-      // ⬅️ filter: kalau bukan owner → hanya artikel published
       if (!isOwner) {
         articlesData = articlesData.filter((a) => a.status === "published");
       }
@@ -66,10 +61,7 @@ const UserArticleList = ({ limit = 20 }) => {
       setArticles(articlesData);
       setPagination(res.data.pagination || null);
     } catch (err) {
-      console.error(
-        "❌ Error fetch articles:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error fetch articles:", err.response || err.message);
       setError(err.message || "Terjadi kesalahan saat memuat artikel.");
     } finally {
       setLoading(false);
@@ -91,16 +83,15 @@ const UserArticleList = ({ limit = 20 }) => {
       });
       fetchArticles();
     } catch (err) {
-      console.error(
-        "❌ Error delete article:",
-        err.response || err.message || err
-      );
+      console.error("❌ Error delete article:", err.response || err.message);
       setError(err.message || "Terjadi kesalahan saat menghapus artikel.");
     }
   };
 
   const handleShare = (article) => {
-    const url = `${window.location.origin}/articles/list/${article.id}`;
+    const slugOrId = article.slug || article.id;
+    const url = `${window.location.origin}/articles/list/${slugOrId}`;
+
     if (navigator.share) {
       navigator
         .share({
@@ -108,11 +99,18 @@ const UserArticleList = ({ limit = 20 }) => {
           text: article.tags ? `Tags: ${article.tags}` : article.title,
           url,
         })
-        .then(() => setShareMsg("Berhasil dibagikan!"))
-        .catch(() => setShareMsg("Gagal membagikan"));
+        .then(() =>
+          setShareMsg({ message: "Berhasil dibagikan!", severity: "success" })
+        )
+        .catch(() =>
+          setShareMsg({ message: "Gagal membagikan", severity: "error" })
+        );
     } else {
       navigator.clipboard.writeText(url);
-      setShareMsg("Link artikel disalin ke clipboard!");
+      setShareMsg({
+        message: "Link artikel disalin ke clipboard!",
+        severity: "success",
+      });
     }
   };
 
@@ -140,7 +138,7 @@ const UserArticleList = ({ limit = 20 }) => {
   return (
     <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
       <Typography variant="h6" fontWeight="bold" mb={2}>
-        {isOwner ? "My Article" : "User Article"}
+        {isOwner ? "My Articles" : "User Articles"}
       </Typography>
 
       {isOwner && (
@@ -162,108 +160,113 @@ const UserArticleList = ({ limit = 20 }) => {
       ) : (
         <>
           <Box display="flex" flexDirection="column" gap={1}>
-            {articles.map((art) => (
-              <Paper
-                key={art.id}
-                sx={{
-                  p: 3,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 3,
-                  flexWrap: "wrap",
-                  borderRadius: 2,
-                  boxShadow: "0px 10px 30px rgba(0,0,0,0.25)",
-                }}
-              >
-                <Box display="flex" alignItems="center" gap={3}>
-                  {art.image_url ? (
-                    <Box
-                      component="img"
-                      src={art.image_url}
-                      alt={art.title}
-                      sx={{
-                        width: 120,
-                        height: 120,
-                        objectFit: "cover",
-                        borderRadius: 2,
-                      }}
-                    />
-                  ) : (
-                    <Box
-                      sx={{
-                        width: 120,
-                        height: 120,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "grey.200",
-                        borderRadius: 2,
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        No image
-                      </Typography>
-                    </Box>
-                  )}
+            {articles.map((art) => {
+              const slugOrId = art.slug || art.id;
+              return (
+                <Paper
+                  key={art.id}
+                  sx={{
+                    p: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 3,
+                    flexWrap: "wrap",
+                    borderRadius: 2,
+                    boxShadow: "0px 10px 30px rgba(0,0,0,0.25)",
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={3}>
+                    {art.image_url ? (
+                      <Box
+                        component="img"
+                        src={art.image_url}
+                        alt={art.title}
+                        sx={{
+                          width: 120,
+                          height: 120,
+                          objectFit: "cover",
+                          borderRadius: 2,
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 120,
+                          height: 120,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: "grey.200",
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          No image
+                        </Typography>
+                      </Box>
+                    )}
 
-                  <Box>
-                    <Typography variant="h6" fontWeight="bold">
-                      {art.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontStyle: "italic",
-                        color:
-                          art.status === "published"
-                            ? "success.main"
-                            : "warning.main",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {art.status === "published" ? "Publish" : "Draft"}
-                    </Typography>
-                    {art.tags && (
-                      <Typography variant="body1" color="text.secondary">
-                        Tags: {art.tags}
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        {art.title}
                       </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontStyle: "italic",
+                          color:
+                            art.status === "published"
+                              ? "success.main"
+                              : "warning.main",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {art.status === "published" ? "Publish" : "Draft"}
+                      </Typography>
+                      {art.tags && (
+                        <Typography variant="body1" color="text.secondary">
+                          Tags: {art.tags}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box display="flex" gap={1}>
+                    <Tooltip title="View">
+                      <IconButton
+                        onClick={() => navigate(`/articles/list/${slugOrId}`)}
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Share">
+                      <IconButton onClick={() => handleShare(art)}>
+                        <Share />
+                      </IconButton>
+                    </Tooltip>
+                    {isOwner && (
+                      <>
+                        <Tooltip title="Edit">
+                          <IconButton
+                            onClick={() =>
+                              navigate(`/articles/edit/${slugOrId}`)
+                            }
+                          >
+                            <Edit />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton onClick={() => handleDelete(art.id)}>
+                            <Delete />
+                          </IconButton>
+                        </Tooltip>
+                      </>
                     )}
                   </Box>
-                </Box>
-
-                <Box display="flex" gap={1}>
-                  <Tooltip title="View">
-                    <IconButton
-                      onClick={() => navigate(`/articles/list/${art.id}`)}
-                    >
-                      <Visibility />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Share">
-                    <IconButton onClick={() => handleShare(art)}>
-                      <Share />
-                    </IconButton>
-                  </Tooltip>
-                  {isOwner && (
-                    <>
-                      <Tooltip title="Edit">
-                        <IconButton
-                          onClick={() => navigate(`/articles/edit/${art.id}`)}
-                        >
-                          <Edit />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton onClick={() => handleDelete(art.id)}>
-                          <Delete />
-                        </IconButton>
-                      </Tooltip>
-                    </>
-                  )}
-                </Box>
-              </Paper>
-            ))}
+                </Paper>
+              );
+            })}
           </Box>
 
           {pagination && (
@@ -291,11 +294,18 @@ const UserArticleList = ({ limit = 20 }) => {
       )}
 
       <Snackbar
-        open={!!shareMsg}
+        open={!!shareMsg.message}
         autoHideDuration={3000}
-        onClose={() => setShareMsg("")}
+        onClose={() => setShareMsg({ message: "", severity: "info" })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="info">{shareMsg}</Alert>
+        <Alert
+          severity={shareMsg.severity}
+          variant="filled"
+          onClose={() => setShareMsg({ message: "", severity: "info" })}
+        >
+          {shareMsg.message}
+        </Alert>
       </Snackbar>
     </Paper>
   );

@@ -8,6 +8,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
 import axios from "axios";
@@ -25,11 +26,25 @@ export default function ReportButton({ articleId }) {
     severity: "success",
   });
 
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setReason("");
+  };
+
   const handleReport = async () => {
+    if (!token) {
+      setSnackbar({
+        open: true,
+        message: "You must be logged in to report",
+        severity: "warning",
+      });
+      return;
+    }
+
     if (!reason.trim()) {
       setSnackbar({
         open: true,
-        message: "Reason can not be empty",
+        message: "Reason cannot be empty",
         severity: "warning",
       });
       return;
@@ -46,35 +61,31 @@ export default function ReportButton({ articleId }) {
 
     try {
       setLoading(true);
-      const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.post(
         API.REPORT_ARTICLE,
         { article_id: articleId, reason },
-        { headers }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
         setSnackbar({
           open: true,
-          message: res.data.message || "Report Success",
+          message: res.data.message || "Report submitted successfully",
           severity: "success",
         });
-        setOpen(false);
-        setReason("");
+        handleCloseDialog();
       } else {
         setSnackbar({
           open: true,
-          message: res.data.error || "Failed to report",
+          message: res.data.error || "Failed to submit report",
           severity: "error",
         });
       }
     } catch (err) {
       console.error("❌ Error report:", err);
-      const errorMsg =
-        err.response?.data?.error || "Terjadi kesalahan, coba lagi";
       setSnackbar({
         open: true,
-        message: errorMsg,
+        message: err.response?.data?.error || "Something went wrong, try again",
         severity: "error",
       });
     } finally {
@@ -84,7 +95,7 @@ export default function ReportButton({ articleId }) {
 
   return (
     <>
-      {/* Tombol Report (sama bentuk & ukuran dengan HideButton) */}
+      {/* Tombol Report */}
       <Button
         onClick={() => setOpen(true)}
         startIcon={<FlagIcon fontSize="small" />}
@@ -95,7 +106,7 @@ export default function ReportButton({ articleId }) {
       </Button>
 
       {/* Dialog Input Report */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={handleCloseDialog}>
         <DialogTitle>Report Article</DialogTitle>
         <DialogContent>
           <TextField
@@ -110,12 +121,15 @@ export default function ReportButton({ articleId }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button
             onClick={handleReport}
             disabled={loading}
             variant="contained"
             color="error"
+            startIcon={
+              loading ? <CircularProgress size={16} color="inherit" /> : null
+            }
           >
             {loading ? "Sending..." : "Send Report"}
           </Button>
@@ -125,10 +139,16 @@ export default function ReportButton({ articleId }) {
       {/* Snackbar Feedback */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={snackbar.severity} variant="filled">
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

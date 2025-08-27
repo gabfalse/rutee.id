@@ -14,20 +14,21 @@ import ArticleReactions from "./ArticleReactions";
 import API from "../../Config/API";
 
 export default function ArticleDetailPage() {
-  const { article_id } = useParams();
-  const { user, token } = useAuth(); // token opsional
+  const { slug } = useParams(); // 🔄 ganti article_id → slug
+  const { user, token } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!article_id) return;
+    if (!slug) return;
 
     const fetchArticle = async () => {
       setLoading(true);
       setError(null);
       try {
-        const url = API.ARTICLE_DETAIL(article_id);
+        // 🔄 pastikan API.ARTICLE_DETAIL menerima slug
+        const url = API.ARTICLE_DETAIL(slug);
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await axios.get(url, { headers });
@@ -50,7 +51,7 @@ export default function ArticleDetailPage() {
     };
 
     fetchArticle();
-  }, [article_id, token]);
+  }, [slug, token]);
 
   if (loading)
     return (
@@ -153,11 +154,11 @@ export default function ArticleDetailPage() {
           </Box>
         )}
 
-        {/* Reactions (opsional) */}
+        {/* Reactions */}
         <ArticleReactions
-          articleId={article_id}
-          currentUserId={user?.id} // bisa undefined
-          token={token} // bisa undefined
+          articleId={article.id} // ⚠️ tetap pakai ID internal untuk like/comment
+          currentUserId={user?.id}
+          token={token}
         />
       </Paper>
     </Box>

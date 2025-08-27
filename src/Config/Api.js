@@ -1,4 +1,3 @@
-// src/Config/Api.js
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const API = {
@@ -14,7 +13,13 @@ const API = {
 
   ARTICLE_LIST: `${API_BASE}/article/get-article.php`, // GET list artikel
   RUTEE_ARTICLE: `${API_BASE}/article/rutee-article.php`, // GET list artikel
-  ARTICLE_DETAIL: (id) => `${API_BASE}/article/get-article-detail.php?id=${id}`, // GET detail artikel
+
+  // DETAIL ARTICLE sekarang bisa pakai slug atau id
+  ARTICLE_DETAIL: (identifier) =>
+    `${API_BASE}/article/get-article-detail.php?${
+      isNaN(identifier) ? `slug=${identifier}` : `id=${identifier}`
+    }`, // GET detail artikel
+
   ARTICLE_SAVE: `${API_BASE}/article/articles.php`, // POST create / PUT update artikel
   ARTICLE_COMMENTS: `${API_BASE}/article/comments.php`,
   ARTICLE_LIKE_COUNT: `${API_BASE}/article/get-like-counts.php`,
@@ -23,7 +28,7 @@ const API = {
   ARTICLE_UPLOAD_IMAGE: `${API_BASE}/article/upload-article-image.php`,
   REPORT_ARTICLE: `${API_BASE}/article/report-article.php`,
 
-  //POST
+  // POST
   POST_LIST: `${API_BASE}/post/get-posts.php`,
   // AUTH-USER
   AUTH_GOOGLE: `${API_BASE}/auth-user/auth-google.php`,

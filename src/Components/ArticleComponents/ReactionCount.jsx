@@ -13,8 +13,10 @@ export default function ReactionCount({
   initialLikesCount = 0,
   initialCommentsCount = 0,
 }) {
-  const [likeCount, setLikeCount] = useState(initialLikesCount);
-  const [commentCount, setCommentCount] = useState(initialCommentsCount);
+  const [counts, setCounts] = useState({
+    likes: initialLikesCount,
+    comments: initialCommentsCount,
+  });
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(
     initialLikesCount === 0 && initialCommentsCount === 0
@@ -26,18 +28,24 @@ export default function ReactionCount({
     const fetchCounts = async () => {
       setLoading(true);
       try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await axios.get(
           `${API.ARTICLE_REACTIONS}?content_id=${contentId}`,
-          token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+          { headers }
         );
 
-        if (res.data.success) {
-          setLikeCount(res.data.likes_count || 0);
-          setCommentCount(res.data.comments_count || 0);
-          setLiked(res.data.is_liked || false);
+        if (res.data?.success) {
+          setCounts({
+            likes: res.data.likes_count ?? 0,
+            comments: res.data.comments_count ?? 0,
+          });
+          setLiked(!!res.data.is_liked);
         }
       } catch (err) {
-        console.error("[DEBUG] Error fetching reaction counts:", err);
+        console.error(
+          "❌ Error fetching reaction counts:",
+          err.response || err
+        );
       } finally {
         setLoading(false);
       }
@@ -46,22 +54,37 @@ export default function ReactionCount({
     fetchCounts();
   }, [contentId, token]);
 
-  if (loading) return <CircularProgress size={20} />;
+  if (loading) {
+    return (
+      <Stack direction="row" spacing={2} mt={1} alignItems="center">
+        <CircularProgress size={18} />
+        <Typography variant="body2" color="text.secondary">
+          Loading...
+        </Typography>
+      </Stack>
+    );
+  }
 
   return (
     <Stack direction="row" spacing={2} mt={1} alignItems="center">
+      {/* Likes */}
       <Stack direction="row" alignItems="center" spacing={0.5}>
         {liked ? (
           <FavoriteIcon fontSize="small" sx={{ color: "red" }} />
         ) : (
           <FavoriteBorderIcon fontSize="small" color="action" />
         )}
-        <Typography variant="body2">{likeCount}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {counts.likes > 0 ? counts.likes : "0"}
+        </Typography>
       </Stack>
 
+      {/* Comments */}
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <ChatBubbleOutlineIcon fontSize="small" color="action" />
-        <Typography variant="body2">{commentCount}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {counts.comments > 0 ? counts.comments : "0"}
+        </Typography>
       </Stack>
     </Stack>
   );

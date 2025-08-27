@@ -18,7 +18,7 @@ import { PhotoCamera } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
-import API from "../../Config/API"; // ✅ pakai config
+import API from "../../Config/API";
 
 export default function ArticleFormPage() {
   const [alert, setAlert] = useState({
@@ -26,9 +26,9 @@ export default function ArticleFormPage() {
     message: "",
     severity: "success",
   });
-  const [articleIdCreated, setArticleIdCreated] = useState(null);
+  const [articleSlugCreated, setArticleSlugCreated] = useState(null);
 
-  const { id } = useParams();
+  const { slug } = useParams(); // 🔄 pakai slug, bukan id
   const navigate = useNavigate();
   const { token, user } = useAuth();
   const loggedInUserId = user?.id;
@@ -44,14 +44,16 @@ export default function ArticleFormPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const isOwner = id ? form.user_id === loggedInUserId : true;
+  const isOwner = slug ? form.user_id === loggedInUserId : true;
 
+  // 🔄 Fetch artikel untuk edit
   useEffect(() => {
-    if (!id || !token) return;
+    if (!slug || !token) return;
+
     const fetchArticle = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(API.ARTICLE_DETAIL(id), {
+        const res = await axios.get(API.ARTICLE_DETAIL(slug), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const article = res.data.article;
@@ -79,13 +81,15 @@ export default function ArticleFormPage() {
         setLoading(false);
       }
     };
+
     fetchArticle();
-  }, [id, token, loggedInUserId, navigate]);
+  }, [slug, token, loggedInUserId, navigate]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
   const handleFileChange = (e) => setFile(e.target.files[0]);
 
+  // 🔄 Submit: create/update
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!token || !isOwner) return;
@@ -109,13 +113,13 @@ export default function ArticleFormPage() {
       }
 
       // Payload create / update
-      const payload = id
-        ? { ...form, id, image_url: imageUrl }
+      const payload = slug
+        ? { ...form, slug, image_url: imageUrl } // update by slug
         : { ...form, user_id: loggedInUserId, image_url: imageUrl };
 
       const res = await axios({
-        method: id ? "put" : "post",
-        url: API.ARTICLE_SAVE, // ✅ pakai API SAVE
+        method: slug ? "put" : "post",
+        url: API.ARTICLE_SAVE,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -123,12 +127,18 @@ export default function ArticleFormPage() {
         data: payload,
       });
 
-      setArticleIdCreated(id || res.data.id);
+      // ✅ selalu pakai slug dari backend (baik create maupun update)
+      const newSlug = res.data.slug;
+      setArticleSlugCreated(newSlug);
+
       setAlert({
         open: true,
-        message: id ? "Update success" : "Article created",
+        message: slug ? "Update success" : "Article created",
         severity: "success",
       });
+
+      // 🔄 opsional redirect langsung ke edit halaman slug baru
+      // navigate(`/articles/edit/${newSlug}`);
     } catch (err) {
       console.error("❌ Submit error:", err.response || err);
       setAlert({
@@ -149,11 +159,11 @@ export default function ArticleFormPage() {
         </Button>
         <Box sx={{ textAlign: "center" }}>
           <Typography variant="h5" fontWeight="bold" mb={2}>
-            {id ? "Edit Article" : "Create New Article"}
+            {slug ? "Edit Article" : "Create New Article"}
           </Typography>
         </Box>
 
-        {!isOwner && id ? (
+        {!isOwner && slug ? (
           <Typography color="error">Unauthorized</Typography>
         ) : (
           <Box
@@ -261,16 +271,19 @@ export default function ArticleFormPage() {
               >
                 {loading ? (
                   <CircularProgress size={24} color="inherit" />
-                ) : id ? (
-                  "Update"
+                ) : slug ? (
+                  "Update Article"
                 ) : (
-                  "Create"
+                  "Create New Article"
                 )}
               </Button>
-              {articleIdCreated && (
+
+              {articleSlugCreated && (
                 <Button
                   variant="outlined"
-                  onClick={() => navigate(`/article/${articleIdCreated}`)}
+                  onClick={() =>
+                    navigate(`/articles/list/${articleSlugCreated}`)
+                  }
                 >
                   View Artikel
                 </Button>

@@ -87,13 +87,10 @@ export default function AppRouter() {
         />
 
         {/* ==================== ARTICLE ROUTES ==================== */}
-        {/* Public Article Routes */}
         <Route path="/articles/list" element={<ArticleListPage />} />
         <Route path="/articles/rutee/list" element={<RuteeArticlePage />} />
-        <Route
-          path="/articles/list/:article_id"
-          element={<ArticleDetailPage />}
-        />
+        {/* ✅ Ubah :article_id → :slug */}
+        <Route path="/articles/list/:slug" element={<ArticleDetailPage />} />
 
         {/* Private Article Routes */}
         <Route
@@ -113,7 +110,7 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="/articles/edit/:id"
+          path="/articles/edit/:slug"
           element={
             <PrivateRoute>
               <ArticleFormPage />
@@ -129,7 +126,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/articles/user/:user_id"
           element={
@@ -156,7 +152,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/quiz"
           element={
@@ -214,8 +209,8 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-        {/* ==================== CHAT ROUTES ==================== */}
 
+        {/* ==================== CHAT ROUTES ==================== */}
         <Route
           path="/chats"
           element={
@@ -224,7 +219,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/chats/new"
           element={
@@ -243,7 +237,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/experiences/:user_id"
           element={
@@ -260,7 +253,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/careers"
           element={
@@ -269,7 +261,6 @@ export default function AppRouter() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/contacts/:user_id"
           element={
